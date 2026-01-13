@@ -1,7 +1,40 @@
-.env
-.env.local
+# Node
 node_modules/
-.DS_Store
+.pnpm-store/
+
+# Builds
 dist/
 build/
+out/
+
+# Next.js
+.next/
+.nextcache/
+
+# Vite
+vite-cache/
+*.tsbuildinfo
+
+# NestJS
+coverage/
+
+# Logs
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 *.log
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Mac / OS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+
+apps/*/pnpm-lock.yaml

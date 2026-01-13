@@ -1,8 +1,17 @@
+import Navbar from '@/app/components/Navbar';
+import Hero from '@/app/components/Hero';
+import Features from '@/app/components/Features';
+import Pricing from '@/app/components/Pricing';
+import Footer from '@/app/components/Footer';
+
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24">
-      <h1 className="text-4xl font-bold">IPF Web Application</h1>
-      <p className="mt-4 text-lg">Main application dashboard</p>
-    </main>
-  )
+    <div className="min-h-screen bg-gradient-dark overflow-x-hidden font-nunito text-white">
+      <Navbar />
+      <Hero />
+      <Features />
+      <Pricing />
+      <Footer />
+    </div>
+  );
 }
