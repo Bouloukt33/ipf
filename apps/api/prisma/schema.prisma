@@ -1,10 +1,3 @@
-// ============================================================================
-// 🎮 IPF "5 Secondes Chrono" - Schéma Prisma Complet
-// ============================================================================
-// Dernière mise à jour: 2026-01-13
-// Tables: 18 (Users, Questions, Quiz, IA, Gamification, Abonnements)
-// ============================================================================
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,221 +6,159 @@ datasource db {
   provider = "postgresql"
 }
 
-// ============================================================================
-// 👤 UTILISATEUR & AUTHENTIFICATION
-// ============================================================================
-
 model User {
-  id            String    @id @default(cuid())
-  auth0Id       String    @unique @map("auth0_id")
-  email         String    @unique
-  password      String?   @map("password")
-  confirmPassword String? @map("confirm_password")
-  role          UserRole  @default(USER)
-  isActive      Boolean   @default(true) @map("is_active")
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
-
-  // Relations
-  profile          UserProfile?
-  ranking          UserRanking?
-  userBadges       UserBadge[]
-  quizSessions     QuizSession[]
-  userMasteries    UserMastery[]
-  aiRecommendations AiRecommendation[]
-  subscription     Subscription?
+  id                 String             @id @default(cuid())
+  auth0Id            String             @unique @map("auth0_id")
+  email              String             @unique
+  role               UserRole           @default(USER)
+  isActive           Boolean            @default(true) @map("is_active")
+  createdAt          DateTime           @default(now()) @map("created_at")
+  updatedAt          DateTime           @updatedAt @map("updated_at")
+  confirmPassword    String?            @map("confirm_password")
+  password           String?            @map("password")
+  aiRecommendations  AiRecommendation[]
   leaderboardEntries LeaderboardEntry[]
+  quizSessions       QuizSession[]
+  subscription       Subscription?
+  userBadges         UserBadge[]
+  userMasteries      UserMastery[]
+  profile            UserProfile?
+  ranking            UserRanking?
 
   @@map("users")
 }
 
-enum UserRole {
-  USER
-  ADMIN
-  MODERATOR
-}
-
-// ============================================================================
-// 🎮 GAMIFICATION - PROFIL & PROGRESSION
-// ============================================================================
-
 model UserProfile {
-  id            String    @id @default(cuid())
-  userId        String    @unique @map("user_id")
-  displayName   String?   @map("display_name")
-  avatarUrl     String?   @map("avatar_url")
-  xpTotal       Int       @default(0) @map("xp_total")
-  level         Int       @default(1)
-  streakDays    Int       @default(0) @map("streak_days")
-  bestStreak    Int       @default(0) @map("best_streak")
-  lastPlayedAt  DateTime? @map("last_played_at")
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
-
-  // Relations
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           String    @id @default(cuid())
+  userId       String    @unique @map("user_id")
+  displayName  String?   @map("display_name")
+  avatarUrl    String?   @map("avatar_url")
+  xpTotal      Int       @default(0) @map("xp_total")
+  level        Int       @default(1)
+  streakDays   Int       @default(0) @map("streak_days")
+  bestStreak   Int       @default(0) @map("best_streak")
+  lastPlayedAt DateTime? @map("last_played_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_profiles")
 }
 
 model UserRanking {
-  id            String    @id @default(cuid())
-  userId        String    @unique @map("user_id")
-  eloScore      Int       @default(1200) @map("elo_score")
-  globalRank    Int?      @map("global_rank")
-  weeklyRank    Int?      @map("weekly_rank")
-  monthlyRank   Int?      @map("monthly_rank")
-  totalGames    Int       @default(0) @map("total_games")
-  totalWins     Int       @default(0) @map("total_wins")
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
-
-  // Relations
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          String   @id @default(cuid())
+  userId      String   @unique @map("user_id")
+  eloScore    Int      @default(1200) @map("elo_score")
+  globalRank  Int?     @map("global_rank")
+  weeklyRank  Int?     @map("weekly_rank")
+  monthlyRank Int?     @map("monthly_rank")
+  totalGames  Int      @default(0) @map("total_games")
+  totalWins   Int      @default(0) @map("total_wins")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_rankings")
 }
 
-// ============================================================================
-// 🏆 BADGES & ACHIEVEMENTS
-// ============================================================================
-
 model Badge {
-  id              String    @id @default(cuid())
-  name            String    @unique
-  slug            String    @unique
-  description     String
-  iconUrl         String?   @map("icon_url")
-  conditionType   BadgeConditionType @map("condition_type")
-  conditionValue  Int       @map("condition_value")
-  xpReward        Int       @default(50) @map("xp_reward")
-  isSecret        Boolean   @default(false) @map("is_secret")
-  order           Int       @default(0)
-  createdAt       DateTime  @default(now()) @map("created_at")
-
-  // Relations
-  userBadges UserBadge[]
+  id             String             @id @default(cuid())
+  name           String             @unique
+  slug           String             @unique
+  description    String
+  iconUrl        String?            @map("icon_url")
+  conditionType  BadgeConditionType @map("condition_type")
+  conditionValue Int                @map("condition_value")
+  xpReward       Int                @default(50) @map("xp_reward")
+  isSecret       Boolean            @default(false) @map("is_secret")
+  order          Int                @default(0)
+  createdAt      DateTime           @default(now()) @map("created_at")
+  userBadges     UserBadge[]
 
   @@map("badges")
 }
 
-enum BadgeConditionType {
-  FIRST_SESSION       // Premier quiz terminé
-  STREAK_DAYS         // X jours consécutifs
-  CORRECT_STREAK      // X bonnes réponses consécutives
-  CATEGORY_MASTERY    // 80% maîtrise catégorie
-  FAST_ANSWER         // Réponse en moins de X secondes
-  TOP_RANK            // Top X classement
-  WEEKLY_CHAMPION     // 1ère place semaine
-  TOTAL_XP            // X XP total
-  TOTAL_QUESTIONS     // X questions répondues
-  PERFECT_SESSION     // Session 100% correcte
-}
-
 model UserBadge {
-  id          String    @id @default(cuid())
-  userId      String    @map("user_id")
-  badgeId     String    @map("badge_id")
-  unlockedAt  DateTime  @default(now()) @map("unlocked_at")
-
-  // Relations
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  badge Badge @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+  id         String   @id @default(cuid())
+  userId     String   @map("user_id")
+  badgeId    String   @map("badge_id")
+  unlockedAt DateTime @default(now()) @map("unlocked_at")
+  badge      Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, badgeId])
   @@map("user_badges")
 }
 
-// ============================================================================
-// 📚 CATÉGORIES & THÈMES (6 Types de Baux)
-// ============================================================================
-
 model Category {
-  id          String    @id @default(cuid())
-  name        String    @unique
-  slug        String    @unique
-  description String?
-  iconUrl     String?   @map("icon_url")
-  color       String?   // Couleur HEX pour l'UI
-  order       Int       @default(0)
-  isActive    Boolean   @default(true) @map("is_active")
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-
-  // Relations
-  themes        Theme[]
-  questions     Question[]
-  packs         Pack[]
-  videos        Video[]
-  userMasteries UserMastery[]
-  leaderboards  Leaderboard[]
+  id                String             @id @default(cuid())
+  name              String             @unique
+  slug              String             @unique
+  description       String?
+  iconUrl           String?            @map("icon_url")
+  color             String?
+  order             Int                @default(0)
+  isActive          Boolean            @default(true) @map("is_active")
+  createdAt         DateTime           @default(now()) @map("created_at")
+  updatedAt         DateTime           @updatedAt @map("updated_at")
   aiRecommendations AiRecommendation[]
+  leaderboards      Leaderboard[]
+  packs             Pack[]
+  questions         Question[]
+  themes            Theme[]
+  userMasteries     UserMastery[]
+  videos            Video[]
 
   @@map("categories")
 }
 
 model Theme {
-  id          String    @id @default(cuid())
-  categoryId  String    @map("category_id")
-  name        String
-  slug        String
-  description String?
-  order       Int       @default(0)
-  isActive    Boolean   @default(true) @map("is_active")
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-
-  // Relations
-  category      Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  questions     Question[]
-  userMasteries UserMastery[]
+  id                String             @id @default(cuid())
+  categoryId        String             @map("category_id")
+  name              String
+  slug              String
+  description       String?
+  order             Int                @default(0)
+  isActive          Boolean            @default(true) @map("is_active")
+  createdAt         DateTime           @default(now()) @map("created_at")
+  updatedAt         DateTime           @updatedAt @map("updated_at")
   aiRecommendations AiRecommendation[]
+  questions         Question[]
+  category          Category           @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  userMasteries     UserMastery[]
 
   @@unique([categoryId, slug])
   @@map("themes")
 }
 
-// ============================================================================
-// ❓ QUESTIONS & CONTENU PÉDAGOGIQUE
-// ============================================================================
-
 model Question {
-  id              String    @id @default(cuid())
-  categoryId      String    @map("category_id")
-  themeId         String?   @map("theme_id")
-  packId          String?   @map("pack_id")
-  
-  // Contenu de la question
-  text            String
-  optionA         String    @map("option_a")
-  optionB         String    @map("option_b")
-  optionC         String    @map("option_c")
-  optionD         String    @map("option_d")
-  correctAnswer   String    @map("correct_answer") // A, B, C ou D
-  
-  // Métadonnées
-  level           Int       @default(1) // 1, 2, 3 (difficulté)
-  timeToRead      Int?      @map("time_to_read") // Temps de lecture en secondes
-  isPremium       Boolean   @default(false) @map("is_premium")
-  isActive        Boolean   @default(true) @map("is_active")
-  
-  // Source (pour traçabilité de l'import)
-  sourceFile      String?   @map("source_file")
-  sourceId        String?   @map("source_id")
-  
-  createdAt       DateTime  @default(now()) @map("created_at")
-  updatedAt       DateTime  @updatedAt @map("updated_at")
-
-  // Relations
-  category          Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  theme             Theme?   @relation(fields: [themeId], references: [id], onDelete: SetNull)
-  pack              Pack?    @relation(fields: [packId], references: [id], onDelete: SetNull)
+  id                 String              @id @default(cuid())
+  categoryId         String              @map("category_id")
+  themeId            String?             @map("theme_id")
+  packId             String?             @map("pack_id")
+  text               String
+  optionA            String              @map("option_a")
+  optionB            String              @map("option_b")
+  optionC            String              @map("option_c")
+  optionD            String              @map("option_d")
+  correctAnswer      String              @map("correct_answer")
+  level              Int                 @default(1)
+  timeToRead         Int?                @map("time_to_read")
+  isPremium          Boolean             @default(false) @map("is_premium")
+  isActive           Boolean             @default(true) @map("is_active")
+  sourceFile         String?             @map("source_file")
+  sourceId           String?             @map("source_id")
+  createdAt          DateTime            @default(now()) @map("created_at")
+  updatedAt          DateTime            @updatedAt @map("updated_at")
+  videoId            String?             @map("video_id")
+  aiQuestionLogs     AiQuestionLog[]
   pedagogicalContent PedagogicalContent?
-  questionStats     QuestionStats?
-  quizAnswers       QuizAnswer[]
-  aiQuestionLogs    AiQuestionLog[]
-  video             Video?   @relation(fields: [videoId], references: [id])
-  videoId           String?  @map("video_id")
+  questionStats      QuestionStats?
+  category           Category            @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  pack               Pack?               @relation(fields: [packId], references: [id])
+  theme              Theme?              @relation(fields: [themeId], references: [id])
+  video              Video?              @relation(fields: [videoId], references: [id])
+  quizAnswers        QuizAnswer[]
 
   @@index([categoryId])
   @@index([themeId])
@@ -237,103 +168,256 @@ model Question {
 }
 
 model PedagogicalContent {
-  id              String    @id @default(cuid())
-  questionId      String    @unique @map("question_id")
-  
-  // Contenu pédagogique (extrait des DOCX)
-  subject         String?   // Sujet/thème
-  keyMessage      String?   @map("key_message") // Message clé mémorable
-  essentialPoints Json?     @map("essential_points") // Points essentiels (array)
-  examples        Json?     // Exemples concrets (array)
-  trapToAvoid     String?   @map("trap_to_avoid") // Piège à éviter
-  practicalAdvice String?   @map("practical_advice") // Conseil pratique
-  synthesis       String?   // Synthèse
-  
-  createdAt       DateTime  @default(now()) @map("created_at")
-  updatedAt       DateTime  @updatedAt @map("updated_at")
-
-  // Relations
-  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  id              String   @id @default(cuid())
+  questionId      String   @unique @map("question_id")
+  subject         String?
+  keyMessage      String?  @map("key_message")
+  essentialPoints Json?    @map("essential_points")
+  examples        Json?
+  trapToAvoid     String?  @map("trap_to_avoid")
+  practicalAdvice String?  @map("practical_advice")
+  synthesis       String?
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  question        Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
   @@map("pedagogical_contents")
 }
 
 model Pack {
-  id          String    @id @default(cuid())
-  categoryId  String    @map("category_id")
+  id          String     @id @default(cuid())
+  categoryId  String     @map("category_id")
   name        String
   slug        String
   description String?
-  price       Decimal?  @db.Decimal(10, 2)
-  isActive    Boolean   @default(true) @map("is_active")
-  order       Int       @default(0)
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-
-  // Relations
-  category  Category   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  questions Question[]
+  price       Decimal?   @db.Decimal(10, 2)
+  isActive    Boolean    @default(true) @map("is_active")
+  order       Int        @default(0)
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+  category    Category   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  questions   Question[]
 
   @@unique([categoryId, slug])
   @@map("packs")
 }
 
 model Video {
-  id              String    @id @default(cuid())
-  categoryId      String?   @map("category_id")
+  id              String     @id @default(cuid())
+  categoryId      String?    @map("category_id")
   title           String
   description     String?
   url             String
-  durationSeconds Int?      @map("duration_seconds")
-  thumbnailUrl    String?   @map("thumbnail_url")
-  isActive        Boolean   @default(true) @map("is_active")
-  createdAt       DateTime  @default(now()) @map("created_at")
-  updatedAt       DateTime  @updatedAt @map("updated_at")
-
-  // Relations
-  category  Category?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  questions Question[]
+  durationSeconds Int?       @map("duration_seconds")
+  thumbnailUrl    String?    @map("thumbnail_url")
+  isActive        Boolean    @default(true) @map("is_active")
+  createdAt       DateTime   @default(now()) @map("created_at")
+  updatedAt       DateTime   @updatedAt @map("updated_at")
+  questions       Question[]
+  category        Category?  @relation(fields: [categoryId], references: [id])
 
   @@map("videos")
 }
 
-// ============================================================================
-// 🎯 QUIZ & SESSIONS DE JEU
-// ============================================================================
-
 model QuizSession {
-  id              String      @id @default(cuid())
-  userId          String      @map("user_id")
-  categoryId      String?     @map("category_id")
-  mode            QuizMode    @default(PRACTICE)
-  
-  // Résultats
-  score           Int         @default(0)
-  totalQuestions  Int         @map("total_questions")
-  correctAnswers  Int         @default(0) @map("correct_answers")
-  xpEarned        Int         @default(0) @map("xp_earned")
-  durationMs      Int?        @map("duration_ms")
-  
-  // Statut
-  status          SessionStatus @default(IN_PROGRESS)
-  startedAt       DateTime    @default(now()) @map("started_at")
-  completedAt     DateTime?   @map("completed_at")
-
-  // Relations
-  user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  answers QuizAnswer[]
+  id             String          @id @default(cuid())
+  userId         String          @map("user_id")
+  categoryId     String?         @map("category_id")
+  mode           QuizMode        @default(PRACTICE)
+  score          Int             @default(0)
+  totalQuestions Int             @map("total_questions")
+  correctAnswers Int             @default(0) @map("correct_answers")
+  xpEarned       Int             @default(0) @map("xp_earned")
+  durationMs     Int?            @map("duration_ms")
+  status         SessionStatus   @default(IN_PROGRESS)
+  startedAt      DateTime        @default(now()) @map("started_at")
+  completedAt    DateTime?       @map("completed_at")
   aiQuestionLogs AiQuestionLog[]
+  answers        QuizAnswer[]
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([status])
   @@map("quiz_sessions")
 }
 
+model QuizAnswer {
+  id             String      @id @default(cuid())
+  sessionId      String      @map("session_id")
+  questionId     String      @map("question_id")
+  userAnswer     String      @map("user_answer")
+  isCorrect      Boolean     @map("is_correct")
+  responseTimeMs Int         @map("response_time_ms")
+  xpEarned       Int         @default(0) @map("xp_earned")
+  answeredAt     DateTime    @default(now()) @map("answered_at")
+  question       Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  session        QuizSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([questionId])
+  @@map("quiz_answers")
+}
+
+model UserMastery {
+  id              String    @id @default(cuid())
+  userId          String    @map("user_id")
+  categoryId      String    @map("category_id")
+  themeId         String?   @map("theme_id")
+  masteryLevel    Float     @default(0) @map("mastery_level")
+  questionsSeen   Int       @default(0) @map("questions_seen")
+  correctCount    Int       @default(0) @map("correct_count")
+  lastPracticedAt DateTime? @map("last_practiced_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  category        Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  theme           Theme?    @relation(fields: [themeId], references: [id])
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, categoryId, themeId])
+  @@index([userId])
+  @@map("user_masteries")
+}
+
+model QuestionStats {
+  id                 String   @id @default(cuid())
+  questionId         String   @unique @map("question_id")
+  totalAttempts      Int      @default(0) @map("total_attempts")
+  correctAttempts    Int      @default(0) @map("correct_attempts")
+  avgResponseTimeMs  Float?   @map("avg_response_time_ms")
+  difficultyComputed Float?   @map("difficulty_computed")
+  lastUpdatedAt      DateTime @default(now()) @map("last_updated_at")
+  question           Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@map("question_stats")
+}
+
+model AiQuestionLog {
+  id                String      @id @default(cuid())
+  sessionId         String      @map("session_id")
+  questionId        String      @map("question_id")
+  selectionReason   String      @map("selection_reason")
+  userMasteryAtTime Float?      @map("user_mastery_at_time")
+  difficultyAtTime  Float?      @map("difficulty_at_time")
+  createdAt         DateTime    @default(now()) @map("created_at")
+  question          Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  session           QuizSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@map("ai_question_logs")
+}
+
+model AiRecommendation {
+  id         String             @id @default(cuid())
+  userId     String             @map("user_id")
+  type       RecommendationType
+  categoryId String?            @map("category_id")
+  themeId    String?            @map("theme_id")
+  priority   Int                @default(0)
+  message    String?
+  isRead     Boolean            @default(false) @map("is_read")
+  createdAt  DateTime           @default(now()) @map("created_at")
+  expiresAt  DateTime?          @map("expires_at")
+  category   Category?          @relation(fields: [categoryId], references: [id])
+  theme      Theme?             @relation(fields: [themeId], references: [id])
+  user       User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("ai_recommendations")
+}
+
+model Leaderboard {
+  id          String             @id @default(cuid())
+  type        LeaderboardType
+  categoryId  String?            @map("category_id")
+  periodStart DateTime?          @map("period_start")
+  periodEnd   DateTime?          @map("period_end")
+  isActive    Boolean            @default(true) @map("is_active")
+  createdAt   DateTime           @default(now()) @map("created_at")
+  entries     LeaderboardEntry[]
+  category    Category?          @relation(fields: [categoryId], references: [id])
+
+  @@index([type, isActive])
+  @@map("leaderboards")
+}
+
+model LeaderboardEntry {
+  id            String      @id @default(cuid())
+  leaderboardId String      @map("leaderboard_id")
+  userId        String      @map("user_id")
+  score         Int
+  rank          Int
+  updatedAt     DateTime    @default(now()) @map("updated_at")
+  leaderboard   Leaderboard @relation(fields: [leaderboardId], references: [id], onDelete: Cascade)
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([leaderboardId, userId])
+  @@index([leaderboardId, rank])
+  @@map("leaderboard_entries")
+}
+
+model Plan {
+  id             String         @id @default(cuid())
+  name           String         @unique
+  slug           String         @unique
+  description    String?
+  price          Decimal        @db.Decimal(10, 2)
+  currency       String         @default("EUR")
+  intervalMonths Int            @default(1) @map("interval_months")
+  features       Json?
+  stripePriceId  String?        @unique @map("stripe_price_id")
+  isActive       Boolean        @default(true) @map("is_active")
+  order          Int            @default(0)
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+  subscriptions  Subscription[]
+
+  @@map("plans")
+}
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  userId               String             @unique @map("user_id")
+  planId               String             @map("plan_id")
+  status               SubscriptionStatus @default(ACTIVE)
+  stripeSubscriptionId String?            @unique @map("stripe_subscription_id")
+  stripeCustomerId     String?            @map("stripe_customer_id")
+  currentPeriodStart   DateTime           @map("current_period_start")
+  currentPeriodEnd     DateTime           @map("current_period_end")
+  cancelAtPeriodEnd    Boolean            @default(false) @map("cancel_at_period_end")
+  canceledAt           DateTime?          @map("canceled_at")
+  createdAt            DateTime           @default(now()) @map("created_at")
+  updatedAt            DateTime           @updatedAt @map("updated_at")
+  plan                 Plan               @relation(fields: [planId], references: [id])
+  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@map("subscriptions")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  MODERATOR
+}
+
+enum BadgeConditionType {
+  FIRST_SESSION
+  STREAK_DAYS
+  CORRECT_STREAK
+  CATEGORY_MASTERY
+  FAST_ANSWER
+  TOP_RANK
+  WEEKLY_CHAMPION
+  TOTAL_XP
+  TOTAL_QUESTIONS
+  PERFECT_SESSION
+}
+
 enum QuizMode {
-  PRACTICE    // Entraînement libre
-  RANKED      // Classé (affecte ELO)
-  CHALLENGE   // Défi contre autre joueur
-  DAILY       // Quiz du jour
+  PRACTICE
+  RANKED
+  CHALLENGE
+  DAILY
 }
 
 enum SessionStatus {
@@ -342,133 +426,12 @@ enum SessionStatus {
   ABANDONED
 }
 
-model QuizAnswer {
-  id              String    @id @default(cuid())
-  sessionId       String    @map("session_id")
-  questionId      String    @map("question_id")
-  userAnswer      String    @map("user_answer") // A, B, C, D ou null (timeout)
-  isCorrect       Boolean   @map("is_correct")
-  responseTimeMs  Int       @map("response_time_ms")
-  xpEarned        Int       @default(0) @map("xp_earned")
-  answeredAt      DateTime  @default(now()) @map("answered_at")
-
-  // Relations
-  session  QuizSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  question Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
-
-  @@index([sessionId])
-  @@index([questionId])
-  @@map("quiz_answers")
-}
-
-// ============================================================================
-// 🤖 IA ADAPTATIVE
-// ============================================================================
-
-model UserMastery {
-  id              String    @id @default(cuid())
-  userId          String    @map("user_id")
-  categoryId      String    @map("category_id")
-  themeId         String?   @map("theme_id")
-  
-  masteryLevel    Float     @default(0) @map("mastery_level") // 0-100
-  questionsSeen   Int       @default(0) @map("questions_seen")
-  correctCount    Int       @default(0) @map("correct_count")
-  lastPracticedAt DateTime? @map("last_practiced_at")
-  
-  createdAt       DateTime  @default(now()) @map("created_at")
-  updatedAt       DateTime  @updatedAt @map("updated_at")
-
-  // Relations
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  theme    Theme?   @relation(fields: [themeId], references: [id], onDelete: SetNull)
-
-  @@unique([userId, categoryId, themeId])
-  @@index([userId])
-  @@map("user_masteries")
-}
-
-model QuestionStats {
-  id                  String    @id @default(cuid())
-  questionId          String    @unique @map("question_id")
-  totalAttempts       Int       @default(0) @map("total_attempts")
-  correctAttempts     Int       @default(0) @map("correct_attempts")
-  avgResponseTimeMs   Float?    @map("avg_response_time_ms")
-  difficultyComputed  Float?    @map("difficulty_computed") // Calculée dynamiquement
-  lastUpdatedAt       DateTime  @default(now()) @map("last_updated_at")
-
-  // Relations
-  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
-
-  @@map("question_stats")
-}
-
-model AiQuestionLog {
-  id                String    @id @default(cuid())
-  sessionId         String    @map("session_id")
-  questionId        String    @map("question_id")
-  selectionReason   String    @map("selection_reason") // Raison du choix IA
-  userMasteryAtTime Float?    @map("user_mastery_at_time")
-  difficultyAtTime  Float?    @map("difficulty_at_time")
-  createdAt         DateTime  @default(now()) @map("created_at")
-
-  // Relations
-  session  QuizSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  question Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
-
-  @@index([sessionId])
-  @@map("ai_question_logs")
-}
-
-model AiRecommendation {
-  id          String              @id @default(cuid())
-  userId      String              @map("user_id")
-  type        RecommendationType
-  categoryId  String?             @map("category_id")
-  themeId     String?             @map("theme_id")
-  priority    Int                 @default(0)
-  message     String?
-  isRead      Boolean             @default(false) @map("is_read")
-  createdAt   DateTime            @default(now()) @map("created_at")
-  expiresAt   DateTime?           @map("expires_at")
-
-  // Relations
-  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  theme    Theme?    @relation(fields: [themeId], references: [id], onDelete: SetNull)
-
-  @@index([userId])
-  @@map("ai_recommendations")
-}
-
 enum RecommendationType {
-  WEAK_AREA     // Zone faible à travailler
-  REVIEW        // Révision espacée
-  CHALLENGE     // Défi de niveau supérieur
-  STREAK_RISK   // Risque de perdre le streak
-  NEW_CONTENT   // Nouveau contenu disponible
-}
-
-// ============================================================================
-// 🏆 CLASSEMENTS (LEADERBOARDS)
-// ============================================================================
-
-model Leaderboard {
-  id          String          @id @default(cuid())
-  type        LeaderboardType
-  categoryId  String?         @map("category_id")
-  periodStart DateTime?       @map("period_start")
-  periodEnd   DateTime?       @map("period_end")
-  isActive    Boolean         @default(true) @map("is_active")
-  createdAt   DateTime        @default(now()) @map("created_at")
-
-  // Relations
-  category Category?          @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  entries  LeaderboardEntry[]
-
-  @@index([type, isActive])
-  @@map("leaderboards")
+  WEAK_AREA
+  REVIEW
+  CHALLENGE
+  STREAK_RISK
+  NEW_CONTENT
 }
 
 enum LeaderboardType {
@@ -477,70 +440,6 @@ enum LeaderboardType {
   WEEKLY
   MONTHLY
   DAILY
-}
-
-model LeaderboardEntry {
-  id            String    @id @default(cuid())
-  leaderboardId String    @map("leaderboard_id")
-  userId        String    @map("user_id")
-  score         Int
-  rank          Int
-  updatedAt     DateTime  @default(now()) @map("updated_at")
-
-  // Relations
-  leaderboard Leaderboard @relation(fields: [leaderboardId], references: [id], onDelete: Cascade)
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([leaderboardId, userId])
-  @@index([leaderboardId, rank])
-  @@map("leaderboard_entries")
-}
-
-// ============================================================================
-// 💳 ABONNEMENTS & PAIEMENTS
-// ============================================================================
-
-model Plan {
-  id              String    @id @default(cuid())
-  name            String    @unique
-  slug            String    @unique
-  description     String?
-  price           Decimal   @db.Decimal(10, 2)
-  currency        String    @default("EUR")
-  intervalMonths  Int       @default(1) @map("interval_months")
-  features        Json?     // Liste des fonctionnalités
-  stripePriceId   String?   @unique @map("stripe_price_id")
-  isActive        Boolean   @default(true) @map("is_active")
-  order           Int       @default(0)
-  createdAt       DateTime  @default(now()) @map("created_at")
-  updatedAt       DateTime  @updatedAt @map("updated_at")
-
-  // Relations
-  subscriptions Subscription[]
-
-  @@map("plans")
-}
-
-model Subscription {
-  id                  String            @id @default(cuid())
-  userId              String            @unique @map("user_id")
-  planId              String            @map("plan_id")
-  status              SubscriptionStatus @default(ACTIVE)
-  stripeSubscriptionId String?          @unique @map("stripe_subscription_id")
-  stripeCustomerId    String?           @map("stripe_customer_id")
-  currentPeriodStart  DateTime          @map("current_period_start")
-  currentPeriodEnd    DateTime          @map("current_period_end")
-  cancelAtPeriodEnd   Boolean           @default(false) @map("cancel_at_period_end")
-  canceledAt          DateTime?         @map("canceled_at")
-  createdAt           DateTime          @default(now()) @map("created_at")
-  updatedAt           DateTime          @updatedAt @map("updated_at")
-
-  // Relations
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  plan Plan @relation(fields: [planId], references: [id])
-
-  @@index([status])
-  @@map("subscriptions")
 }
 
 enum SubscriptionStatus {
