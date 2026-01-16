@@ -21,6 +21,8 @@ model User {
   id            String    @id @default(cuid())
   auth0Id       String    @unique @map("auth0_id")
   email         String    @unique
+  password      String?   @map("password")
+  confirmPassword String? @map("confirm_password")
   role          UserRole  @default(USER)
   isActive      Boolean   @default(true) @map("is_active")
   createdAt     DateTime  @default(now()) @map("created_at")
