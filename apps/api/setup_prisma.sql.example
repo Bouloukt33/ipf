@@ -1,0 +1,38 @@
+-- Script pour configurer les droits Prisma
+-- À exécuter avec : psql -U postgres -d ipf_db -f setup_prisma.sql
+-- 
+-- INSTRUCTIONS:
+-- 1. Copiez ce fichier vers setup_prisma.sql
+-- 2. Remplacez 'YOUR_SECURE_PASSWORD' par un mot de passe sécurisé
+-- 3. Exécutez le script
+
+-- Créer l'utilisateur admin s'il n'existe pas
+DO $$
+BEGIN
+   IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'ipf_admin') THEN
+      CREATE USER ipf_admin WITH PASSWORD 'YOUR_SECURE_PASSWORD';
+   END IF;
+END
+$$;
+
+-- Donner les droits de création de base
+ALTER USER ipf_admin CREATEDB;
+
+-- Donner tous les droits sur le schéma public
+GRANT ALL ON SCHEMA public TO ipf_admin;
+
+-- Donner tous les droits sur toutes les tables existantes
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ipf_admin;
+
+-- Donner tous les droits sur toutes les séquences existantes
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO ipf_admin;
+
+-- Configurer les droits par défaut pour les futures tables
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO ipf_admin;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO ipf_admin;
+
+-- Changer le propriétaire du schéma (optionnel mais recommandé)
+ALTER SCHEMA public OWNER TO ipf_admin;
+
+-- Vérification
+SELECT 'Configuration terminée - Utilisateur ipf_admin prêt pour Prisma' as status;
