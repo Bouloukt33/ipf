@@ -92,4 +92,52 @@ export class AuthController {
       email: user.email,
     };
   }
+
+    /**
+   * GET /api/auth/dev-token
+   * Récupère un token Auth0 pour les tests (DEV ONLY)
+   * ⚠️ NE PAS UTILISER EN PRODUCTION
+   */
+  // Remplace la méthode getDevToken() par celle-ci :
+
+  @Get('dev-token')
+  async getDevToken() {
+    if (process.env.NODE_ENV === 'production') {
+      return { error: 'Non disponible en production' };
+    }
+
+    try {
+      const response = await fetch('https://ipf-5secondes-dev.eu.auth0.com/oauth/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          grant_type: 'password',
+          client_id: 'mxSZ7AuUF1ahhsvaRPjgzdJx3kz4E5ik',
+          client_secret: 'LEFsaGdKKT-lvvisLS4ROTNDQBhbfulzk7QMmk3cA5IM0S9KlmOKMVvWc4DbuCIA',
+          audience: 'https://api.ipf.local',
+          username: 'test@ipf.local',
+          password: 'TestPassword123!',
+          scope: 'openid profile email',
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.error) {
+        return {
+          error: data.error,
+          error_description: data.error_description,
+        };
+      }
+
+      return {
+        message: '🔐 Token utilisateur pour tests',
+        access_token: data.access_token,
+        token_type: data.token_type,
+        expires_in: data.expires_in,
+      };
+    } catch (error) {
+      return { error: 'Erreur', details: error.message };
+    }
+  }
 }
