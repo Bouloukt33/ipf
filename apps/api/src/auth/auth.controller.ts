@@ -32,7 +32,7 @@ export class AuthController {
     @CurrentUser() user: any,
     @Body() body: { displayName?: string },
   ) {
-    return this.authService.registerOrSync(user, body.displayName);
+    return this.authService.register(user, body.displayName);
   }
 
   /**
@@ -101,10 +101,13 @@ export class AuthController {
   // Remplace la méthode getDevToken() par celle-ci :
 
   @Get('dev-token')
-  async getDevToken() {
+  async getDevToken(@Body() body: { email?: string; password?: string }) {
     if (process.env.NODE_ENV === 'production') {
       return { error: 'Non disponible en production' };
     }
+
+    const email = body.email || 'test@ipf.local';
+    const password = body.password || 'TestPassword123!';
 
     try {
       const response = await fetch('https://ipf-5secondes-dev.eu.auth0.com/oauth/token', {
@@ -115,8 +118,8 @@ export class AuthController {
           client_id: 'mxSZ7AuUF1ahhsvaRPjgzdJx3kz4E5ik',
           client_secret: 'LEFsaGdKKT-lvvisLS4ROTNDQBhbfulzk7QMmk3cA5IM0S9KlmOKMVvWc4DbuCIA',
           audience: 'https://api.ipf.local',
-          username: 'test@ipf.local',
-          password: 'TestPassword123!',
+          username: email,
+          password: password,
           scope: 'openid profile email',
         }),
       });

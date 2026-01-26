@@ -13,26 +13,38 @@ export class AuthService {
   constructor(private prisma: PrismaService) {}
 
   /**
-   * Enregistre un nouvel utilisateur ou synchronise un existant
+   * Enregistre un NOUVEL utilisateur uniquement
+   * Si l'utilisateur existe déjà, retourne une erreur 409
    */
-  async registerOrSync(auth0User: Auth0User, displayName?: string) {
+  async register(auth0User: Auth0User, displayName?: string) {
+    // Vérifie si l'utilisateur existe déjà par auth0Id
     const existingUser = await this.prisma.user.findUnique({
       where: { auth0Id: auth0User.userId },
       include: { profile: true },
     });
 
     if (existingUser) {
-      // Utilisateur existe déjà, on synchronise
-      return this.syncUser(auth0User);
+      throw new ConflictException({
+        statusCode: 409,
+        message: 'Ce compte existe déjà',
+        error: 'Conflict',
+        user: this.formatUser(existingUser),
+        hint: 'Utilisez POST /api/auth/login pour vous connecter',
+      });
     }
 
-    // Vérifie si l'email existe déjà
+    // Vérifie si l'email existe déjà (autre compte Auth0 avec même email)
     const emailExists = await this.prisma.user.findUnique({
       where: { email: auth0User.email },
     });
 
     if (emailExists) {
-      throw new ConflictException('Un compte avec cet email existe déjà');
+      throw new ConflictException({
+        statusCode: 409,
+        message: 'Un compte avec cet email existe déjà',
+        error: 'Conflict',
+        hint: 'Cet email est associé à un autre compte Auth0',
+      });
     }
 
     // Crée le nouvel utilisateur
@@ -64,6 +76,7 @@ export class AuthService {
 
   /**
    * Synchronise les informations utilisateur Auth0 avec notre base
+   * Crée le compte s'il n'existe pas (auto-provisioning)
    */
   async syncUser(auth0User: Auth0User) {
     let user = await this.prisma.user.findUnique({
@@ -72,7 +85,7 @@ export class AuthService {
     });
 
     if (!user) {
-      // L'utilisateur n'existe pas, on le crée
+      // L'utilisateur n'existe pas, on le crée (auto-provisioning)
       user = await this.prisma.user.create({
         data: {
           auth0Id: auth0User.userId,
