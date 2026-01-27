@@ -8,6 +8,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { AuthGuard } from './auth.guard';
 import { CurrentUser } from './current-user.decorator';
@@ -17,6 +18,7 @@ import { CurrentUser } from './current-user.decorator';
  * Note: Avec Auth0, la connexion/déconnexion se fait côté Auth0 (frontend).
  * Ces endpoints servent à synchroniser les utilisateurs avec notre base de données.
  */
+@ApiTags('Authentification')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
@@ -28,6 +30,12 @@ export class AuthController {
    */
   @Post('register')
   @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Inscription', description: 'Synchronise un nouvel utilisateur Auth0 avec la base de données. Appelé après la première connexion Auth0.' })
+  @ApiBody({ schema: { type: 'object', properties: { displayName: { type: 'string', example: 'John Doe', description: 'Nom d\'affichage de l\'utilisateur' } } } })
+  @ApiResponse({ status: 201, description: 'Utilisateur créé avec succès' })
+  @ApiResponse({ status: 401, description: 'Non autorisé - Token Auth0 invalide' })
+  @ApiResponse({ status: 409, description: 'Utilisateur déjà existant' })
   async register(
     @CurrentUser() user: any,
     @Body() body: { displayName?: string },
@@ -43,6 +51,10 @@ export class AuthController {
   @Post('login')
   @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Connexion', description: 'Synchronise l\'utilisateur Auth0 avec la base de données. Appelé à chaque connexion pour mettre à jour les informations.' })
+  @ApiResponse({ status: 200, description: 'Connexion réussie - Utilisateur synchronisé' })
+  @ApiResponse({ status: 401, description: 'Non autorisé - Token Auth0 invalide' })
   async login(@CurrentUser() user: any) {
     return this.authService.syncUser(user);
   }
@@ -53,6 +65,11 @@ export class AuthController {
    */
   @Get('me')
   @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Utilisateur courant', description: 'Récupère les informations complètes de l\'utilisateur connecté' })
+  @ApiResponse({ status: 200, description: 'Informations de l\'utilisateur retournées' })
+  @ApiResponse({ status: 401, description: 'Non autorisé' })
+  @ApiResponse({ status: 404, description: 'Utilisateur non trouvé' })
   async getMe(@CurrentUser() user: any) {
     return this.authService.getUser(user.userId);
   }
@@ -65,6 +82,10 @@ export class AuthController {
   @Post('logout')
   @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Déconnexion', description: 'Met à jour la dernière activité. Note: La vraie déconnexion se fait côté Auth0.' })
+  @ApiResponse({ status: 200, description: 'Déconnexion enregistrée' })
+  @ApiResponse({ status: 401, description: 'Non autorisé' })
   async logout(@CurrentUser() user: any) {
     return this.authService.logout(user.userId);
   }
@@ -75,6 +96,11 @@ export class AuthController {
    */
   @Delete('account')
   @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Supprimer le compte', description: 'Supprime définitivement le compte utilisateur et toutes ses données' })
+  @ApiResponse({ status: 200, description: 'Compte supprimé avec succès' })
+  @ApiResponse({ status: 401, description: 'Non autorisé' })
+  @ApiResponse({ status: 404, description: 'Utilisateur non trouvé' })
   async deleteAccount(@CurrentUser() user: any) {
     return this.authService.deleteAccount(user.userId);
   }
@@ -85,6 +111,10 @@ export class AuthController {
    */
   @Get('check')
   @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Vérifier l\'authentification', description: 'Vérifie si le token JWT est valide et retourne les informations basiques' })
+  @ApiResponse({ status: 200, description: 'Token valide', schema: { type: 'object', properties: { authenticated: { type: 'boolean' }, userId: { type: 'string' }, email: { type: 'string' } } } })
+  @ApiResponse({ status: 401, description: 'Token invalide ou expiré' })
   async checkAuth(@CurrentUser() user: any) {
     return {
       authenticated: true,
@@ -98,9 +128,11 @@ export class AuthController {
    * Récupère un token Auth0 pour les tests (DEV ONLY)
    * ⚠️ NE PAS UTILISER EN PRODUCTION
    */
-  // Remplace la méthode getDevToken() par celle-ci :
-
   @Get('dev-token')
+  @ApiOperation({ summary: '🔧 Token de développement', description: '⚠️ DEV ONLY - Récupère un token Auth0 pour les tests. Non disponible en production.' })
+  @ApiBody({ schema: { type: 'object', properties: { email: { type: 'string', example: 'test@ipf.local' }, password: { type: 'string', example: 'TestPassword123!' } } } })
+  @ApiResponse({ status: 200, description: 'Token généré avec succès' })
+  @ApiResponse({ status: 403, description: 'Non disponible en production' })
   async getDevToken(@Body() body: { email?: string; password?: string }) {
     if (process.env.NODE_ENV === 'production') {
       return { error: 'Non disponible en production' };

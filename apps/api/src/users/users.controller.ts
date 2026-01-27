@@ -8,10 +8,13 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiQuery, ApiBody } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { AuthGuard, PermissionsGuard, Permissions } from '../auth';
 import { UserRole } from '@prisma/client';
 
+@ApiTags('Utilisateurs (Admin)')
+@ApiBearerAuth()
 @Controller('users')
 @UseGuards(AuthGuard, PermissionsGuard)
 export class UsersController {
@@ -19,6 +22,15 @@ export class UsersController {
 
   @Get()
   @Permissions('manage:users')
+  @ApiOperation({ summary: 'Lister les utilisateurs', description: 'Récupère la liste des utilisateurs avec filtres et pagination (Admin uniquement)' })
+  @ApiQuery({ name: 'role', required: false, enum: ['USER', 'MODERATOR', 'ADMIN'], description: 'Filtrer par rôle' })
+  @ApiQuery({ name: 'isActive', required: false, type: Boolean, description: 'Filtrer par statut actif' })
+  @ApiQuery({ name: 'search', required: false, description: 'Recherche par nom ou email' })
+  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Numéro de page (défaut: 1)' })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Éléments par page (défaut: 20)' })
+  @ApiResponse({ status: 200, description: 'Liste des utilisateurs avec pagination' })
+  @ApiResponse({ status: 401, description: 'Non autorisé' })
+  @ApiResponse({ status: 403, description: 'Permission insuffisante' })
   async findAll(
     @Query('role') role?: UserRole,
     @Query('isActive') isActive?: string,
@@ -37,30 +49,59 @@ export class UsersController {
 
   @Get('stats')
   @Permissions('read:admin')
+  @ApiOperation({ summary: 'Statistiques utilisateurs', description: 'Récupère les statistiques globales des utilisateurs' })
+  @ApiResponse({ status: 200, description: 'Statistiques retournées' })
+  @ApiResponse({ status: 401, description: 'Non autorisé' })
+  @ApiResponse({ status: 403, description: 'Permission insuffisante' })
   async getStats() {
     return this.usersService.getStats();
   }
 
   @Get(':id')
   @Permissions('manage:users')
+  @ApiOperation({ summary: 'Obtenir un utilisateur', description: 'Récupère les détails d\'un utilisateur par son ID' })
+  @ApiParam({ name: 'id', description: 'ID de l\'utilisateur' })
+  @ApiResponse({ status: 200, description: 'Utilisateur trouvé' })
+  @ApiResponse({ status: 401, description: 'Non autorisé' })
+  @ApiResponse({ status: 403, description: 'Permission insuffisante' })
+  @ApiResponse({ status: 404, description: 'Utilisateur non trouvé' })
   async findOne(@Param('id') id: string) {
     return this.usersService.findOne(id);
   }
 
   @Put(':id/role')
   @Permissions('manage:users')
+  @ApiOperation({ summary: 'Modifier le rôle', description: 'Change le rôle d\'un utilisateur' })
+  @ApiParam({ name: 'id', description: 'ID de l\'utilisateur' })
+  @ApiBody({ schema: { type: 'object', properties: { role: { type: 'string', enum: ['USER', 'MODERATOR', 'ADMIN'] } } } })
+  @ApiResponse({ status: 200, description: 'Rôle modifié avec succès' })
+  @ApiResponse({ status: 401, description: 'Non autorisé' })
+  @ApiResponse({ status: 403, description: 'Permission insuffisante' })
+  @ApiResponse({ status: 404, description: 'Utilisateur non trouvé' })
   async updateRole(@Param('id') id: string, @Body('role') role: UserRole) {
     return this.usersService.updateRole(id, role);
   }
 
   @Post(':id/toggle-active')
   @Permissions('manage:users')
+  @ApiOperation({ summary: 'Activer/Désactiver un compte', description: 'Bascule le statut actif d\'un utilisateur' })
+  @ApiParam({ name: 'id', description: 'ID de l\'utilisateur' })
+  @ApiResponse({ status: 201, description: 'Statut modifié avec succès' })
+  @ApiResponse({ status: 401, description: 'Non autorisé' })
+  @ApiResponse({ status: 403, description: 'Permission insuffisante' })
+  @ApiResponse({ status: 404, description: 'Utilisateur non trouvé' })
   async toggleActive(@Param('id') id: string) {
     return this.usersService.toggleActive(id);
   }
 
   @Post(':id/ban')
   @Permissions('manage:users')
+  @ApiOperation({ summary: 'Bannir un utilisateur', description: 'Bannit un utilisateur de la plateforme' })
+  @ApiParam({ name: 'id', description: 'ID de l\'utilisateur' })
+  @ApiResponse({ status: 201, description: 'Utilisateur banni avec succès' })
+  @ApiResponse({ status: 401, description: 'Non autorisé' })
+  @ApiResponse({ status: 403, description: 'Permission insuffisante' })
+  @ApiResponse({ status: 404, description: 'Utilisateur non trouvé' })
   async ban(@Param('id') id: string) {
     return this.usersService.ban(id);
   }
