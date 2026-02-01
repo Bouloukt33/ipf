@@ -8,6 +8,7 @@ import { ProfileModule } from './profile';
 import { QuizModule } from './quiz';
 import { QuestionsModule } from './questions';
 import { CategoriesModule } from './categories';
+import { TypeBailsModule } from './type-bails';
 import { UsersModule } from './users';
 import { AdminModule } from './admin';
 
@@ -26,6 +27,7 @@ import { AdminModule } from './admin';
     QuizModule,
     QuestionsModule,
     CategoriesModule,
+    TypeBailsModule,
     UsersModule,
     AdminModule,
   ],

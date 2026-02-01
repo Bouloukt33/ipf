@@ -10,6 +10,13 @@ describe('QuizService', () => {
   const mockPrismaService = {
     user: {
       findUnique: jest.fn(),
+      create: jest.fn(),
+    },
+    typeBail: {
+      findUnique: jest.fn(),
+    },
+    category: {
+      findUnique: jest.fn(),
     },
     quizSession: {
       create: jest.fn(),
@@ -25,7 +32,7 @@ describe('QuizService', () => {
       create: jest.fn(),
     },
     userProfile: {
-      update: jest.fn(),
+      upsert: jest.fn(),
     },
   };
 
@@ -48,7 +55,7 @@ describe('QuizService', () => {
     jest.clearAllMocks();
   });
 
-  describe('startSession', () => {
+  describe('startQuizSession', () => {
     it('should create a new quiz session', async () => {
       const mockUser = { id: 'user-1', auth0Id: 'auth0|123' };
       const mockSession = {
@@ -56,36 +63,53 @@ describe('QuizService', () => {
         userId: 'user-1',
         mode: 'PRACTICE',
         totalQuestions: 10,
+        startedAt: new Date('2026-01-31T10:00:00Z'),
       };
       const mockQuestions = [
-        { id: 'q1', text: 'Question 1' },
-        { id: 'q2', text: 'Question 2' },
+        { id: 'q1', text: 'Question 1', optionA: 'A', optionB: 'B', optionC: 'C', optionD: 'D', level: 1 },
+        { id: 'q2', text: 'Question 2', optionA: 'A', optionB: 'B', optionC: 'C', optionD: 'D', level: 2 },
       ];
 
       mockPrismaService.user.findUnique.mockResolvedValue(mockUser);
+      mockPrismaService.typeBail.findUnique.mockResolvedValue({ id: 'typebail-1' });
+      mockPrismaService.category.findUnique.mockResolvedValue({ id: 'cat-1', typeBailId: 'typebail-1' });
       mockPrismaService.quizSession.create.mockResolvedValue(mockSession);
       mockPrismaService.question.findMany.mockResolvedValue(mockQuestions);
 
-      const result = await service.startSession('auth0|123', undefined, 'PRACTICE');
+      const result = await service.startQuizSession('auth0|123', {
+        typeBailId: 'typebail-1',
+        categoryId: 'cat-1',
+        mode: 'PRACTICE',
+      });
 
-      expect(result).toEqual({ session: mockSession, questions: mockQuestions });
+      expect(result).toEqual(
+        expect.objectContaining({
+          sessionId: mockSession.id,
+          totalQuestions: mockQuestions.length,
+          status: 'ready',
+        }),
+      );
       expect(prisma.quizSession.create).toHaveBeenCalledWith({
         data: {
           userId: 'user-1',
-          categoryId: undefined,
+          categoryId: 'cat-1',
+          typeBailId: 'typebail-1',
           mode: 'PRACTICE',
-          totalQuestions: 10,
           status: 'IN_PROGRESS',
+          totalQuestions: mockQuestions.length,
+          score: 0,
+          correctAnswers: 0,
+          xpEarned: 0,
         },
       });
     });
 
-    it('should throw NotFoundException when user not found', async () => {
-      mockPrismaService.user.findUnique.mockResolvedValue(null);
+    it('should throw BadRequestException when type de bail not found', async () => {
+      mockPrismaService.typeBail.findUnique.mockResolvedValue(null);
 
-      await expect(service.startSession('auth0|999')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        service.startQuizSession('auth0|999', { typeBailId: 'typebail-x' }),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 
@@ -93,7 +117,12 @@ describe('QuizService', () => {
     it('should submit correct answer and award XP', async () => {
       const mockSession = {
         id: 'session-1',
+        userId: 'user-1',
         status: 'IN_PROGRESS',
+        correctAnswers: 0,
+        score: 0,
+        xpEarned: 0,
+        totalQuestions: 10,
       };
       const mockQuestion = {
         id: 'q1',
@@ -104,9 +133,19 @@ describe('QuizService', () => {
       mockPrismaService.quizSession.findUnique.mockResolvedValue(mockSession);
       mockPrismaService.question.findUnique.mockResolvedValue(mockQuestion);
       mockPrismaService.quizAnswer.create.mockResolvedValue({});
-      mockPrismaService.quizSession.update.mockResolvedValue({});
+      mockPrismaService.quizSession.update.mockResolvedValue({
+        ...mockSession,
+        correctAnswers: 1,
+        score: 1,
+        xpEarned: 10,
+      });
+      mockPrismaService.userProfile.upsert.mockResolvedValue({});
 
-      const result = await service.submitAnswer('session-1', 'q1', 'A', 2000);
+      const result = await service.submitAnswer('session-1', {
+        questionId: 'q1',
+        selectedOption: 'A',
+        responseTimeMs: 2000,
+      });
 
       expect(result.isCorrect).toBe(true);
       expect(result.xpEarned).toBeGreaterThan(0);
@@ -114,7 +153,15 @@ describe('QuizService', () => {
     });
 
     it('should submit wrong answer and award no XP', async () => {
-      const mockSession = { id: 'session-1', status: 'IN_PROGRESS' };
+      const mockSession = {
+        id: 'session-1',
+        userId: 'user-1',
+        status: 'IN_PROGRESS',
+        correctAnswers: 0,
+        score: 0,
+        xpEarned: 0,
+        totalQuestions: 10,
+      };
       const mockQuestion = {
         id: 'q1',
         correctAnswer: 'A',
@@ -124,9 +171,19 @@ describe('QuizService', () => {
       mockPrismaService.quizSession.findUnique.mockResolvedValue(mockSession);
       mockPrismaService.question.findUnique.mockResolvedValue(mockQuestion);
       mockPrismaService.quizAnswer.create.mockResolvedValue({});
-      mockPrismaService.quizSession.update.mockResolvedValue({});
+      mockPrismaService.quizSession.update.mockResolvedValue({
+        ...mockSession,
+        correctAnswers: 0,
+        score: 0,
+        xpEarned: 0,
+      });
+      mockPrismaService.userProfile.upsert.mockResolvedValue({});
 
-      const result = await service.submitAnswer('session-1', 'q1', 'B', 3000);
+      const result = await service.submitAnswer('session-1', {
+        questionId: 'q1',
+        selectedOption: 'B',
+        responseTimeMs: 3000,
+      });
 
       expect(result.isCorrect).toBe(false);
       expect(result.xpEarned).toBe(0);
@@ -138,7 +195,11 @@ describe('QuizService', () => {
       mockPrismaService.quizSession.findUnique.mockResolvedValue(mockSession);
 
       await expect(
-        service.submitAnswer('session-1', 'q1', 'A', 2000),
+        service.submitAnswer('session-1', {
+          questionId: 'q1',
+          selectedOption: 'A',
+          responseTimeMs: 2000,
+        }),
       ).rejects.toThrow(BadRequestException);
     });
   });
@@ -157,36 +218,40 @@ describe('QuizService', () => {
         answers: [],
       };
 
+      mockPrismaService.quizSession.findUnique.mockResolvedValue(mockSession);
       mockPrismaService.quizSession.update.mockResolvedValue(mockSession);
-      mockPrismaService.userProfile.update.mockResolvedValue({});
 
       const result = await service.completeSession('session-1');
 
-      expect(result.score).toBe(8);
-      expect(result.accuracy).toBe(80);
-      expect(prisma.userProfile.update).toHaveBeenCalled();
+      expect(result.score.correct).toBe(8);
+      expect(result.score.total).toBe(10);
     });
   });
 
   describe('calculateXP', () => {
     it('should award max XP for very fast answers (<2s)', () => {
-      const xp = service['calculateXP'](1500);
+      const xp = service['calculateXP'](true, 1500);
       expect(xp).toBe(15);
     });
 
     it('should award medium XP for medium speed (2-3.5s)', () => {
-      const xp = service['calculateXP'](3000);
+      const xp = service['calculateXP'](true, 3000);
       expect(xp).toBe(12);
     });
 
     it('should award low XP for slower answers (3.5-5s)', () => {
-      const xp = service['calculateXP'](4500);
+      const xp = service['calculateXP'](true, 4500);
       expect(xp).toBe(10);
     });
 
     it('should award minimum XP for very slow answers (>5s)', () => {
-      const xp = service['calculateXP'](6000);
+      const xp = service['calculateXP'](true, 6000);
       expect(xp).toBe(8);
+    });
+
+    it('should award 0 XP for incorrect answers', () => {
+      const xp = service['calculateXP'](false, 1500);
+      expect(xp).toBe(0);
     });
   });
 });

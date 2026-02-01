@@ -96,6 +96,16 @@ Thumbs.db
 # Keep migrations but ignore generated client
 prisma/migrations/*/migration.sql
 
+# Local import utility (personal)
+src/import-from-excel.ts
+
+# Local Excel data files
+*.xlsx
+
+# Local docs
+CHANGEMENT_THEME_FIRST.md
+SWAGGER_GUIDE.md
+
 # Redis dumps
 dump.rdb
 

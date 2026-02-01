@@ -3,7 +3,7 @@ import { PrismaService } from '../prisma';
 
 export interface CreateQuestionDto {
   categoryId: string;
-  themeId?: string;
+  typeBailId?: string;
   text: string;
   optionA: string;
   optionB: string;
@@ -24,7 +24,7 @@ export class QuestionsService {
 
   async findAll(filters?: {
     categoryId?: string;
-    themeId?: string;
+    typeBailId?: string;
     level?: number;
     isPremium?: boolean;
     isActive?: boolean;
@@ -37,7 +37,12 @@ export class QuestionsService {
 
     const where: any = {};
     if (filters?.categoryId) where.categoryId = filters.categoryId;
-    if (filters?.themeId) where.themeId = filters.themeId;
+    if (filters?.typeBailId) {
+      where.OR = [
+        { typeBailId: filters.typeBailId },
+        { category: { typeBailId: filters.typeBailId } },
+      ];
+    }
     if (filters?.level) where.level = filters.level;
     if (filters?.isPremium !== undefined) where.isPremium = filters.isPremium;
     if (filters?.isActive !== undefined) where.isActive = filters.isActive;
@@ -47,7 +52,7 @@ export class QuestionsService {
         where,
         skip,
         take: limit,
-        include: { category: true, theme: true, pedagogicalContent: true },
+        include: { category: true, typeBail: true, pedagogicalContent: true },
         orderBy: { createdAt: 'desc' },
       }),
       this.prisma.question.count({ where }),
@@ -69,7 +74,7 @@ export class QuestionsService {
       where: { id },
       include: {
         category: true,
-        theme: true,
+        typeBail: true,
         pedagogicalContent: true,
         questionStats: true,
       },
@@ -80,23 +85,63 @@ export class QuestionsService {
   }
 
   async create(data: CreateQuestionDto) {
+    const category = await this.prisma.category.findUnique({
+      where: { id: data.categoryId },
+      select: { id: true, typeBailId: true },
+    });
+
+    if (!category) throw new NotFoundException('Catégorie non trouvée');
+
+    if (data.typeBailId && data.typeBailId !== category.typeBailId) {
+      throw new NotFoundException(
+        'Le type de bail ne correspond pas à la catégorie sélectionnée',
+      );
+    }
+
+    const typeBailId = data.typeBailId || category.typeBailId;
+
     return this.prisma.question.create({
       data: {
         ...data,
+        typeBailId,
         level: data.level || 1,
         isPremium: data.isPremium || false,
       },
-      include: { category: true, theme: true },
+      include: { category: true, typeBail: true },
     });
   }
 
   async update(id: string, data: UpdateQuestionDto) {
     await this.findOne(id);
 
+    if (data.categoryId || data.typeBailId) {
+      const categoryId = data.categoryId;
+      const typeBailId = data.typeBailId;
+
+      if (categoryId) {
+        const category = await this.prisma.category.findUnique({
+          where: { id: categoryId },
+          select: { typeBailId: true },
+        });
+
+        if (!category) throw new NotFoundException('Catégorie non trouvée');
+
+        if (typeBailId && typeBailId !== category.typeBailId) {
+          throw new NotFoundException(
+            'Le type de bail ne correspond pas à la catégorie sélectionnée',
+          );
+        }
+
+        if (!typeBailId) {
+          data.typeBailId = category.typeBailId;
+        }
+      }
+    }
+
     return this.prisma.question.update({
       where: { id },
       data,
-      include: { category: true, theme: true },
+      include: { category: true, typeBail: true },
     });
   }
 

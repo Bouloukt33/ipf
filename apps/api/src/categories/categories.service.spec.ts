@@ -12,9 +12,6 @@ describe('CategoriesService', () => {
       findMany: jest.fn(),
       findUnique: jest.fn(),
     },
-    theme: {
-      findMany: jest.fn(),
-    },
   };
 
   beforeEach(async () => {
@@ -69,11 +66,11 @@ describe('CategoriesService', () => {
   });
 
   describe('findOne', () => {
-    it('should return category by ID with themes', async () => {
+    it('should return category by ID with typeBail', async () => {
       const mockCategory = {
         id: 'cat-1',
         name: 'Test Category',
-        themes: [{ id: 'theme-1', name: 'Theme 1' }],
+        typeBail: { id: 'typebail-1', name: 'TypeBail 1' },
       };
 
       mockPrismaService.category.findUnique.mockResolvedValue(mockCategory);
@@ -112,26 +109,24 @@ describe('CategoriesService', () => {
     });
   });
 
-  describe('getThemes', () => {
-    it('should return themes for a category', async () => {
-      const mockCategory = { id: 'cat-1' };
-      const mockThemes = [
-        { id: 'theme-1', name: 'Theme 1' },
-        { id: 'theme-2', name: 'Theme 2' },
-      ];
+  describe('getTypeBail', () => {
+    it('should return typeBail for a category', async () => {
+      const mockCategory = {
+        id: 'cat-1',
+        typeBail: { id: 'typebail-1', name: 'TypeBail 1' },
+      };
 
       mockPrismaService.category.findUnique.mockResolvedValue(mockCategory);
-      mockPrismaService.theme.findMany.mockResolvedValue(mockThemes);
 
-      const result = await service.getThemes('cat-1');
+      const result = await service.getTypeBail('cat-1');
 
-      expect(result).toEqual(mockThemes);
+      expect(result).toEqual(mockCategory.typeBail);
     });
 
     it('should throw NotFoundException when category not found', async () => {
       mockPrismaService.category.findUnique.mockResolvedValue(null);
 
-      await expect(service.getThemes('non-existent')).rejects.toThrow(
+      await expect(service.getTypeBail('non-existent')).rejects.toThrow(
         NotFoundException,
       );
     });

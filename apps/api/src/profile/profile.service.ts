@@ -54,7 +54,7 @@ export class ProfileService {
           take: 10,
         },
         userMasteries: {
-          include: { category: true, theme: true },
+          include: { category: true, typeBail: true },
         },
       },
     });

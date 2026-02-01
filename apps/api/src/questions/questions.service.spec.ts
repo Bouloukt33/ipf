@@ -16,6 +16,9 @@ describe('QuestionsService', () => {
       update: jest.fn(),
       delete: jest.fn(),
     },
+    category: {
+      findUnique: jest.fn(),
+    },
   };
 
   beforeEach(async () => {
@@ -138,6 +141,10 @@ describe('QuestionsService', () => {
         ...createDto,
       };
 
+      mockPrismaService.category.findUnique.mockResolvedValue({
+        id: 'cat-1',
+        typeBailId: 'typebail-1',
+      });
       mockPrismaService.question.create.mockResolvedValue(mockCreated);
 
       const result = await service.create(createDto);
@@ -146,10 +153,11 @@ describe('QuestionsService', () => {
       expect(prisma.question.create).toHaveBeenCalledWith({
         data: {
           ...createDto,
+          typeBailId: 'typebail-1',
           level: 1,
           isPremium: false,
         },
-        include: { category: true, theme: true },
+        include: { category: true, typeBail: true },
       });
     });
   });

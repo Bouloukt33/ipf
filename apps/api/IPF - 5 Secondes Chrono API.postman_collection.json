@@ -314,7 +314,7 @@
 			"name": "🎮 Quiz",
 			"item": [
 				{
-					"name": "Start Quiz Session",
+					"name": "Start Quiz Session (Phase 1)",
 					"event": [
 						{
 							"listen": "test",
@@ -322,8 +322,10 @@
 								"exec": [
 									"if (pm.response.code === 201) {",
 									"    const jsonData = pm.response.json();",
-									"    pm.collectionVariables.set('session_id', jsonData.session.id);",
-									"    pm.collectionVariables.set('question_id', jsonData.questions[0].id);",
+									"    pm.collectionVariables.set('session_id', jsonData.sessionId);",
+									"    if (jsonData.questions && jsonData.questions.length > 0) {",
+									"        pm.collectionVariables.set('question_id', jsonData.questions[0].id);",
+									"    }",
 									"}"
 								],
 								"type": "text/javascript"
@@ -340,16 +342,36 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"mode\": \"PRACTICE\"\n}"
+							"raw": "{\n  \"typeBailId\": \"{{type_bail_id}}\",\n  \"categoryId\": \"{{category_id}}\",\n  \"difficulty\": 1\n}"
 						},
 						"url": {
-							"raw": "{{base_url}}/quiz/start",
+							"raw": "{{base_url}}/quiz/start-session",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"quiz",
-								"start"
+								"start-session"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Current Question",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/quiz/sessions/{{session_id}}/current-question",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"quiz",
+								"sessions",
+								"{{session_id}}",
+								"current-question"
 							]
 						}
 					},
@@ -367,15 +389,17 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"sessionId\": \"{{session_id}}\",\n  \"questionId\": \"{{question_id}}\",\n  \"answer\": \"A\",\n  \"responseTimeMs\": 3500\n}"
+							"raw": "{\n  \"questionId\": \"{{question_id}}\",\n  \"selectedOption\": \"A\",\n  \"responseTimeMs\": 3500\n}"
 						},
 						"url": {
-							"raw": "{{base_url}}/quiz/answer",
+							"raw": "{{base_url}}/quiz/sessions/{{session_id}}/answer",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"quiz",
+								"sessions",
+								"{{session_id}}",
 								"answer"
 							]
 						}
@@ -388,14 +412,34 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/quiz/{{session_id}}/complete",
+							"raw": "{{base_url}}/quiz/sessions/{{session_id}}/complete",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"quiz",
+								"sessions",
 								"{{session_id}}",
 								"complete"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Session Stats",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/quiz/sessions/{{session_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"quiz",
+								"sessions",
+								"{{session_id}}"
 							]
 						}
 					},
@@ -407,7 +451,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/quiz/history?limit=10",
+							"raw": "{{base_url}}/quiz/history?page=1&limit=50",
 							"host": [
 								"{{base_url}}"
 							],
@@ -417,9 +461,163 @@
 							],
 							"query": [
 								{
+									"key": "page",
+									"value": "1"
+								},
+								{
 									"key": "limit",
-									"value": "10"
+									"value": "50"
 								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "🧩 Phase 1 - TypeBails",
+			"item": [
+				{
+					"name": "Get TypeBails",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/type-bails",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"type-bails"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get TypeBail by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData && jsonData.id) {",
+									"        pm.collectionVariables.set('type_bail_id', jsonData.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/type-bails/{{type_bail_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"type-bails",
+								"{{type_bail_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Categories by TypeBail",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/type-bails/{{type_bail_id}}/categories",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"type-bails",
+								"{{type_bail_id}}",
+								"categories"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "🧩 Phase 1 - Categories",
+			"item": [
+				{
+					"name": "Get Categories",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/categories",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"categories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Category by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData && jsonData.id) {",
+									"        pm.collectionVariables.set('category_id', jsonData.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/categories/{{category_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"categories",
+								"{{category_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Category TypeBail",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/categories/{{category_id}}/type-bail",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"categories",
+								"{{category_id}}",
+								"type-bail"
 							]
 						}
 					},

@@ -5,3 +5,10 @@ node_modules/
 dist/
 build/
 *.log
+*.xlsx
+.next/
+.nuxt/
+.turbo/
+.cache/
+.parcel-cache/
+coverage/

@@ -34,12 +34,12 @@ export class CategoriesController {
     return this.categoriesService.findBySlug(slug);
   }
 
-  @Get(':id/themes')
-  @ApiOperation({ summary: 'Thèmes d\'une catégorie', description: 'Récupère tous les thèmes associés à une catégorie' })
+  @Get(':id/type-bail')
+  @ApiOperation({ summary: 'Type de bail d\'une catégorie', description: 'Récupère le type de bail associé à une catégorie' })
   @ApiParam({ name: 'id', description: 'ID de la catégorie' })
-  @ApiResponse({ status: 200, description: 'Liste des thèmes de la catégorie' })
+  @ApiResponse({ status: 200, description: 'Type de bail de la catégorie' })
   @ApiResponse({ status: 404, description: 'Catégorie non trouvée' })
-  async getThemes(@Param('id') id: string) {
-    return this.categoriesService.getThemes(id);
+  async getTypeBail(@Param('id') id: string) {
+    return this.categoriesService.getTypeBail(id);
   }
 }

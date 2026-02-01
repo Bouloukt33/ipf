@@ -26,7 +26,7 @@ export class QuestionsController {
   @Permissions('read:quiz')
   @ApiOperation({ summary: 'Lister les questions', description: 'Récupère la liste des questions avec filtres et pagination' })
   @ApiQuery({ name: 'categoryId', required: false, description: 'Filtrer par catégorie' })
-  @ApiQuery({ name: 'themeId', required: false, description: 'Filtrer par thème' })
+  @ApiQuery({ name: 'typeBailId', required: false, description: 'Filtrer par type de bail' })
   @ApiQuery({ name: 'level', required: false, type: Number, description: 'Filtrer par niveau (1-5)' })
   @ApiQuery({ name: 'isPremium', required: false, type: Boolean, description: 'Filtrer par statut premium' })
   @ApiQuery({ name: 'isActive', required: false, type: Boolean, description: 'Filtrer par statut actif' })
@@ -36,7 +36,7 @@ export class QuestionsController {
   @ApiResponse({ status: 401, description: 'Non autorisé' })
   async findAll(
     @Query('categoryId') categoryId?: string,
-    @Query('themeId') themeId?: string,
+    @Query('typeBailId') typeBailId?: string,
     @Query('level') level?: string,
     @Query('isPremium') isPremium?: string,
     @Query('isActive') isActive?: string,
@@ -45,7 +45,7 @@ export class QuestionsController {
   ) {
     return this.questionsService.findAll({
       categoryId,
-      themeId,
+      typeBailId,
       level: level ? parseInt(level) : undefined,
       isPremium: isPremium ? isPremium === 'true' : undefined,
       isActive: isActive ? isActive === 'true' : undefined,

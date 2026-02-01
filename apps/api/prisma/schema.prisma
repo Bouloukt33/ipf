@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -93,6 +92,7 @@ model UserBadge {
 
 model Category {
   id                String             @id @default(cuid())
+  typeBailId        String             @map("type_bail_id")
   name              String             @unique
   slug              String             @unique
   description       String?
@@ -106,18 +106,18 @@ model Category {
   leaderboards      Leaderboard[]
   packs             Pack[]
   questions         Question[]
-  themes            Theme[]
+  typeBail          TypeBail           @relation(fields: [typeBailId], references: [id], onDelete: Cascade)
   userMasteries     UserMastery[]
   videos            Video[]
 
+  @@index([typeBailId])
   @@map("categories")
 }
 
-model Theme {
+model TypeBail {
   id                String             @id @default(cuid())
-  categoryId        String             @map("category_id")
   name              String
-  slug              String
+  slug              String             @unique
   description       String?
   order             Int                @default(0)
   isActive          Boolean            @default(true) @map("is_active")
@@ -125,17 +125,17 @@ model Theme {
   updatedAt         DateTime           @updatedAt @map("updated_at")
   aiRecommendations AiRecommendation[]
   questions         Question[]
-  category          Category           @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categories        Category[]
+  quizSessions      QuizSession[]
   userMasteries     UserMastery[]
 
-  @@unique([categoryId, slug])
-  @@map("themes")
+  @@map("type_bails")
 }
 
 model Question {
   id                 String              @id @default(cuid())
   categoryId         String              @map("category_id")
-  themeId            String?             @map("theme_id")
+  typeBailId         String?             @map("type_bail_id")
   packId             String?             @map("pack_id")
   text               String
   optionA            String              @map("option_a")
@@ -157,12 +157,12 @@ model Question {
   questionStats      QuestionStats?
   category           Category            @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   pack               Pack?               @relation(fields: [packId], references: [id])
-  theme              Theme?              @relation(fields: [themeId], references: [id])
+  typeBail           TypeBail?           @relation(fields: [typeBailId], references: [id])
   video              Video?              @relation(fields: [videoId], references: [id])
   quizAnswers        QuizAnswer[]
 
   @@index([categoryId])
-  @@index([themeId])
+  @@index([typeBailId])
   @@index([level])
   @@index([isPremium])
   @@map("questions")
@@ -224,6 +224,7 @@ model QuizSession {
   id             String          @id @default(cuid())
   userId         String          @map("user_id")
   categoryId     String?         @map("category_id")
+  typeBailId     String?         @map("type_bail_id")
   mode           QuizMode        @default(PRACTICE)
   score          Int             @default(0)
   totalQuestions Int             @map("total_questions")
@@ -236,9 +237,11 @@ model QuizSession {
   aiQuestionLogs AiQuestionLog[]
   answers        QuizAnswer[]
   user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  typeBail       TypeBail?        @relation(fields: [typeBailId], references: [id])
 
   @@index([userId])
   @@index([status])
+  @@index([typeBailId])
   @@map("quiz_sessions")
 }
 
@@ -263,7 +266,7 @@ model UserMastery {
   id              String    @id @default(cuid())
   userId          String    @map("user_id")
   categoryId      String    @map("category_id")
-  themeId         String?   @map("theme_id")
+  typeBailId      String?   @map("type_bail_id")
   masteryLevel    Float     @default(0) @map("mastery_level")
   questionsSeen   Int       @default(0) @map("questions_seen")
   correctCount    Int       @default(0) @map("correct_count")
@@ -271,10 +274,10 @@ model UserMastery {
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
   category        Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  theme           Theme?    @relation(fields: [themeId], references: [id])
+  typeBail        TypeBail? @relation(fields: [typeBailId], references: [id])
   user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, categoryId, themeId])
+  @@unique([userId, categoryId, typeBailId])
   @@index([userId])
   @@map("user_masteries")
 }
@@ -312,14 +315,14 @@ model AiRecommendation {
   userId     String             @map("user_id")
   type       RecommendationType
   categoryId String?            @map("category_id")
-  themeId    String?            @map("theme_id")
+  typeBailId String?            @map("type_bail_id")
   priority   Int                @default(0)
   message    String?
   isRead     Boolean            @default(false) @map("is_read")
   createdAt  DateTime           @default(now()) @map("created_at")
   expiresAt  DateTime?          @map("expires_at")
   category   Category?          @relation(fields: [categoryId], references: [id])
-  theme      Theme?             @relation(fields: [themeId], references: [id])
+  typeBail   TypeBail?          @relation(fields: [typeBailId], references: [id])
   user       User               @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])

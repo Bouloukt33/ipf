@@ -9,7 +9,7 @@ export class CategoriesService {
     return this.prisma.category.findMany({
       where: includeInactive ? {} : { isActive: true },
       include: {
-        themes: { where: { isActive: true }, orderBy: { order: 'asc' } },
+        typeBail: { select: { id: true, name: true, slug: true, isActive: true } },
         _count: { select: { questions: true } },
       },
       orderBy: { order: 'asc' },
@@ -20,7 +20,7 @@ export class CategoriesService {
     const category = await this.prisma.category.findUnique({
       where: { id },
       include: {
-        themes: { orderBy: { order: 'asc' } },
+        typeBail: true,
         packs: { where: { isActive: true } },
         _count: { select: { questions: true } },
       },
@@ -34,7 +34,7 @@ export class CategoriesService {
     const category = await this.prisma.category.findUnique({
       where: { slug },
       include: {
-        themes: { where: { isActive: true }, orderBy: { order: 'asc' } },
+        typeBail: true,
         _count: { select: { questions: true } },
       },
     });
@@ -43,17 +43,13 @@ export class CategoriesService {
     return category;
   }
 
-  async getThemes(categoryId: string) {
+  async getTypeBail(categoryId: string) {
     const category = await this.prisma.category.findUnique({
       where: { id: categoryId },
+      include: { typeBail: true },
     });
 
     if (!category) throw new NotFoundException('Catégorie non trouvée');
-
-    return this.prisma.theme.findMany({
-      where: { categoryId, isActive: true },
-      include: { _count: { select: { questions: true } } },
-      orderBy: { order: 'asc' },
-    });
+    return category.typeBail;
   }
 }

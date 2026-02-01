@@ -4,8 +4,8 @@ export class CreateQuestionDto {
   @ApiProperty({ description: 'ID de la catégorie', example: 'clxxx123...' })
   categoryId: string;
 
-  @ApiPropertyOptional({ description: 'ID du thème (optionnel)', example: 'clxxx456...' })
-  themeId?: string;
+  @ApiPropertyOptional({ description: 'ID du type de bail (optionnel)', example: 'clxxx456...' })
+  typeBailId?: string;
 
   @ApiProperty({ description: 'Texte de la question', example: 'Quelle est la capitale de la France ?' })
   text: string;
@@ -36,8 +36,8 @@ export class UpdateQuestionDto {
   @ApiPropertyOptional({ description: 'ID de la catégorie' })
   categoryId?: string;
 
-  @ApiPropertyOptional({ description: 'ID du thème' })
-  themeId?: string;
+  @ApiPropertyOptional({ description: 'ID du type de bail' })
+  typeBailId?: string;
 
   @ApiPropertyOptional({ description: 'Texte de la question' })
   text?: string;
