@@ -33,17 +33,11 @@ export class QuizService {
     if (dto.categoryId) {
       const category = await this.prisma.category.findUnique({
         where: { id: dto.categoryId },
-        select: { id: true, typeBailId: true },
+        select: { id: true },
       });
 
       if (!category) {
         throw new BadRequestException('Catégorie non trouvée');
-      }
-
-      if (category.typeBailId !== dto.typeBailId) {
-        throw new BadRequestException(
-          'La catégorie ne correspond pas au type de bail sélectionné',
-        );
       }
     }
 

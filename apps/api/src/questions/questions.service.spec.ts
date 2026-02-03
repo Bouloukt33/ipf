@@ -19,6 +19,9 @@ describe('QuestionsService', () => {
     category: {
       findUnique: jest.fn(),
     },
+    typeBail: {
+      findUnique: jest.fn(),
+    },
   };
 
   beforeEach(async () => {
@@ -143,7 +146,6 @@ describe('QuestionsService', () => {
 
       mockPrismaService.category.findUnique.mockResolvedValue({
         id: 'cat-1',
-        typeBailId: 'typebail-1',
       });
       mockPrismaService.question.create.mockResolvedValue(mockCreated);
 
@@ -153,7 +155,6 @@ describe('QuestionsService', () => {
       expect(prisma.question.create).toHaveBeenCalledWith({
         data: {
           ...createDto,
-          typeBailId: 'typebail-1',
           level: 1,
           isPremium: false,
         },

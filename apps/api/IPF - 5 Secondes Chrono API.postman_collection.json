@@ -312,6 +312,16 @@
 		},
 		{
 			"name": "🎮 Quiz",
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{access_token}}",
+						"type": "string"
+					}
+				]
+			},
 			"item": [
 				{
 					"name": "Start Quiz Session (Phase 1)",
@@ -627,6 +637,16 @@
 		},
 		{
 			"name": "❓ Questions",
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{access_token}}",
+						"type": "string"
+					}
+				]
+			},
 			"item": [
 				{
 					"name": "Get All Questions",
@@ -781,104 +801,17 @@
 			]
 		},
 		{
-			"name": "📚 Categories",
-			"item": [
-				{
-					"name": "Get All Categories (Public)",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImY4bV9sbUhFc0xVMEZoWlVpSi00USJ9.eyJodHRwczovL2lwZi5jb20vcm9sZXMiOltdLCJodHRwczovL2lwZi5jb20vZW1haWwiOiJ0ZXN0QGlwZi5sb2NhbCIsImlzcyI6Imh0dHBzOi8vaXBmLTVzZWNvbmRlcy1kZXYuZXUuYXV0aDAuY29tLyIsInN1YiI6ImF1dGgwfDY5NmZkNDYzMWRlMmI0ODVhYmRmNGFmMiIsImF1ZCI6WyJodHRwczovL2FwaS5pcGYubG9jYWwiLCJodHRwczovL2lwZi01c2Vjb25kZXMtZGV2LmV1LmF1dGgwLmNvbS91c2VyaW5mbyJdLCJpYXQiOjE3Njg5Mzc0MTAsImV4cCI6MTc2OTAyMzgxMCwic2NvcGUiOiJvcGVuaWQgcHJvZmlsZSBlbWFpbCIsImd0eSI6InBhc3N3b3JkIiwiYXpwIjoibXhTWjdBdVVGMWFoaHN2YVJQamd6ZEp4M2t6NEU1aWsiLCJwZXJtaXNzaW9ucyI6W119.Xr2S6qze1BrxHpQ-56uqOV2-srmT132fr1bjCQZ0WbT4DwnOd6ENig8cEs2YlhyFrWZ2ttpyKJBINahkCSViY4zD3I-eZERWYvIweUFmvO8vT-1ONk3wbHvXXfG5VFzgCkiK9HYSNEr1f5UXR2PmnfQC-yLtmlY0IOaA-1dkJSPISTv-F7eFl0eohgXTcdsDwRgADfJHNoD9K_EF7LYtm0lEUiKp-DSY919IS5UPPdKZ33lqCfXjQv1KH37j9q9LuhEXmfMkobiqUGgrNu1VPbChbAgrNpM0AQgafngYEatXVySFXQan4yYc90zYXX1jnbTh9TYJXinx8Emqr-yM9w",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/categories",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"categories"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Category by ID",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/categories/{{category_id}}",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"categories",
-								"{{category_id}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Category by Slug",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/categories/slug/baux-commerciaux",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"categories",
-								"slug",
-								"baux-commerciaux"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Category Themes",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/categories/{{category_id}}/themes",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"categories",
-								"{{category_id}}",
-								"themes"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
 			"name": "👥 Users (Admin)",
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{access_token}}",
+						"type": "string"
+					}
+				]
+			},
 			"item": [
 				{
 					"name": "Get All Users",
@@ -1028,6 +961,16 @@
 		},
 		{
 			"name": "📊 Admin Dashboard",
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{access_token}}",
+						"type": "string"
+					}
+				]
+			},
 			"item": [
 				{
 					"name": "Get Dashboard Stats",

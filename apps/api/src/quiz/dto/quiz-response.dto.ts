@@ -533,7 +533,6 @@ export class PackDto {
 
 export class CategoryDetailDto {
   id: string;
-  typeBailId: string;
   name: string;
   slug: string;
   description?: string;
@@ -541,13 +540,11 @@ export class CategoryDetailDto {
   color?: string;
   order: number;
   isActive: boolean;
-  typeBail?: TypeBailDto;
   packs: PackDto[];
 }
 
 export class CategoryListDto {
   id: string;
-  typeBailId: string;
   name: string;
   slug: string;
   description?: string;

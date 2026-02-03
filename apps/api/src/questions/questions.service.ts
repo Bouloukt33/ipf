@@ -37,12 +37,7 @@ export class QuestionsService {
 
     const where: any = {};
     if (filters?.categoryId) where.categoryId = filters.categoryId;
-    if (filters?.typeBailId) {
-      where.OR = [
-        { typeBailId: filters.typeBailId },
-        { category: { typeBailId: filters.typeBailId } },
-      ];
-    }
+    if (filters?.typeBailId) where.typeBailId = filters.typeBailId;
     if (filters?.level) where.level = filters.level;
     if (filters?.isPremium !== undefined) where.isPremium = filters.isPremium;
     if (filters?.isActive !== undefined) where.isActive = filters.isActive;
@@ -87,23 +82,23 @@ export class QuestionsService {
   async create(data: CreateQuestionDto) {
     const category = await this.prisma.category.findUnique({
       where: { id: data.categoryId },
-      select: { id: true, typeBailId: true },
+      select: { id: true },
     });
 
     if (!category) throw new NotFoundException('Catégorie non trouvée');
 
-    if (data.typeBailId && data.typeBailId !== category.typeBailId) {
-      throw new NotFoundException(
-        'Le type de bail ne correspond pas à la catégorie sélectionnée',
-      );
-    }
+    if (data.typeBailId) {
+      const typeBail = await this.prisma.typeBail.findUnique({
+        where: { id: data.typeBailId },
+        select: { id: true },
+      });
 
-    const typeBailId = data.typeBailId || category.typeBailId;
+      if (!typeBail) throw new NotFoundException('Type de bail non trouvé');
+    }
 
     return this.prisma.question.create({
       data: {
         ...data,
-        typeBailId,
         level: data.level || 1,
         isPremium: data.isPremium || false,
       },
@@ -121,20 +116,19 @@ export class QuestionsService {
       if (categoryId) {
         const category = await this.prisma.category.findUnique({
           where: { id: categoryId },
-          select: { typeBailId: true },
+          select: { id: true },
         });
 
         if (!category) throw new NotFoundException('Catégorie non trouvée');
+      }
 
-        if (typeBailId && typeBailId !== category.typeBailId) {
-          throw new NotFoundException(
-            'Le type de bail ne correspond pas à la catégorie sélectionnée',
-          );
-        }
+      if (typeBailId) {
+        const typeBail = await this.prisma.typeBail.findUnique({
+          where: { id: typeBailId },
+          select: { id: true },
+        });
 
-        if (!typeBailId) {
-          data.typeBailId = category.typeBailId;
-        }
+        if (!typeBail) throw new NotFoundException('Type de bail non trouvé');
       }
     }
 

@@ -12,6 +12,9 @@ describe('CategoriesService', () => {
       findMany: jest.fn(),
       findUnique: jest.fn(),
     },
+    typeBail: {
+      findMany: jest.fn(),
+    },
   };
 
   beforeEach(async () => {
@@ -66,11 +69,10 @@ describe('CategoriesService', () => {
   });
 
   describe('findOne', () => {
-    it('should return category by ID with typeBail', async () => {
+    it('should return category by ID', async () => {
       const mockCategory = {
         id: 'cat-1',
         name: 'Test Category',
-        typeBail: { id: 'typebail-1', name: 'TypeBail 1' },
       };
 
       mockPrismaService.category.findUnique.mockResolvedValue(mockCategory);
@@ -110,17 +112,20 @@ describe('CategoriesService', () => {
   });
 
   describe('getTypeBail', () => {
-    it('should return typeBail for a category', async () => {
+    it('should return typeBails for a category', async () => {
       const mockCategory = {
         id: 'cat-1',
-        typeBail: { id: 'typebail-1', name: 'TypeBail 1' },
       };
+      const mockTypeBails = [
+        { id: 'typebail-1', name: 'TypeBail 1' },
+      ];
 
       mockPrismaService.category.findUnique.mockResolvedValue(mockCategory);
+      mockPrismaService.typeBail.findMany.mockResolvedValue(mockTypeBails);
 
       const result = await service.getTypeBail('cat-1');
 
-      expect(result).toEqual(mockCategory.typeBail);
+      expect(result).toEqual(mockTypeBails);
     });
 
     it('should throw NotFoundException when category not found', async () => {

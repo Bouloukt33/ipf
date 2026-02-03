@@ -35,9 +35,9 @@ export class CategoriesController {
   }
 
   @Get(':id/type-bail')
-  @ApiOperation({ summary: 'Type de bail d\'une catégorie', description: 'Récupère le type de bail associé à une catégorie' })
+  @ApiOperation({ summary: 'Types de bail d\'une catégorie', description: 'Récupère les types de bail disponibles pour une catégorie (via les questions)' })
   @ApiParam({ name: 'id', description: 'ID de la catégorie' })
-  @ApiResponse({ status: 200, description: 'Type de bail de la catégorie' })
+  @ApiResponse({ status: 200, description: 'Liste des types de bail de la catégorie' })
   @ApiResponse({ status: 404, description: 'Catégorie non trouvée' })
   async getTypeBail(@Param('id') id: string) {
     return this.categoriesService.getTypeBail(id);

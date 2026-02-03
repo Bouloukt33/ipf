@@ -72,7 +72,7 @@ describe('QuizService', () => {
 
       mockPrismaService.user.findUnique.mockResolvedValue(mockUser);
       mockPrismaService.typeBail.findUnique.mockResolvedValue({ id: 'typebail-1' });
-      mockPrismaService.category.findUnique.mockResolvedValue({ id: 'cat-1', typeBailId: 'typebail-1' });
+      mockPrismaService.category.findUnique.mockResolvedValue({ id: 'cat-1' });
       mockPrismaService.quizSession.create.mockResolvedValue(mockSession);
       mockPrismaService.question.findMany.mockResolvedValue(mockQuestions);
 

@@ -34,7 +34,7 @@ export class TypeBailsController {
   }
 
   @Get(':id/categories')
-  @ApiOperation({ summary: 'Catégories d\'un type de bail', description: 'Récupère toutes les catégories associées à un type de bail' })
+  @ApiOperation({ summary: 'Catégories d\'un type de bail', description: 'Récupère les catégories associées à un type de bail via les questions' })
   @ApiParam({ name: 'id', description: 'ID du type de bail' })
   @ApiResponse({ status: 200, description: 'Liste des catégories du type de bail' })
   @ApiResponse({ status: 404, description: 'Type de bail non trouvé' })

@@ -92,7 +92,6 @@ model UserBadge {
 
 model Category {
   id                String             @id @default(cuid())
-  typeBailId        String             @map("type_bail_id")
   name              String             @unique
   slug              String             @unique
   description       String?
@@ -106,11 +105,8 @@ model Category {
   leaderboards      Leaderboard[]
   packs             Pack[]
   questions         Question[]
-  typeBail          TypeBail           @relation(fields: [typeBailId], references: [id], onDelete: Cascade)
   userMasteries     UserMastery[]
   videos            Video[]
-
-  @@index([typeBailId])
   @@map("categories")
 }
 
@@ -125,7 +121,6 @@ model TypeBail {
   updatedAt         DateTime           @updatedAt @map("updated_at")
   aiRecommendations AiRecommendation[]
   questions         Question[]
-  categories        Category[]
   quizSessions      QuizSession[]
   userMasteries     UserMastery[]
 
