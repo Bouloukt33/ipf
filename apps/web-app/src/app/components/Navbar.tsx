@@ -9,11 +9,11 @@ export default async function Navbar() {
     const user = session?.user;
     
     return (
-        <nav className="fixed w-full top-0 z-[1000] bg-dark-300/95 backdrop-blur-[20px] border-b-2 border-primary/20 shadow-[0_4px_20px_rgba(0,0,0,0.3)]">
+        <nav className="fixed w-full top-0 z-[1000] bg-white/95 backdrop-blur-[20px] border-b border-gray-200 shadow-soft">
             <div className="max-w-[1400px] mx-auto px-10 py-[18px] flex justify-between items-center">
-                <Link href="/" className="flex items-center gap-3 no-underline">
-                    <span className="text-xl font-extrabold text-white font-nunito">
-                        5 Secondes Chrono
+                <Link href="/" className="flex items-center gap-3 no-underline group">
+                    <span className="text-xl font-black text-navy font-nunito transition-all duration-300 group-hover:text-primary">
+                        ⚡ 5 Secondes Chrono
                     </span>
                 </Link>
 
@@ -21,7 +21,7 @@ export default async function Navbar() {
                     <li>
                         <Link
                             href="#accueil"
-                            className="no-underline text-white/90 font-bold text-[15px] transition-all duration-300 hover:text-primary hover:-translate-y-0.5"
+                            className="no-underline text-navy/80 font-bold text-[15px] transition-all duration-300 hover:text-primary hover:-translate-y-0.5 relative after:content-[''] after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[2px] after:bg-primary after:transition-all after:duration-300 hover:after:w-full"
                         >
                             Accueil
                         </Link>
@@ -29,7 +29,7 @@ export default async function Navbar() {
                     <li>
                         <Link
                             href="#fonctionnalites"
-                            className="no-underline text-white/90 font-bold text-[15px] transition-all duration-300 hover:text-primary hover:-translate-y-0.5"
+                            className="no-underline text-navy/80 font-bold text-[15px] transition-all duration-300 hover:text-primary hover:-translate-y-0.5 relative after:content-[''] after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[2px] after:bg-primary after:transition-all after:duration-300 hover:after:w-full"
                         >
                             Fonctionnalités
                         </Link>
@@ -37,7 +37,7 @@ export default async function Navbar() {
                     <li>
                         <Link
                             href="#tarifs"
-                            className="no-underline text-white/90 font-bold text-[15px] transition-all duration-300 hover:text-primary hover:-translate-y-0.5"
+                            className="no-underline text-navy/80 font-bold text-[15px] transition-all duration-300 hover:text-primary hover:-translate-y-0.5 relative after:content-[''] after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[2px] after:bg-primary after:transition-all after:duration-300 hover:after:w-full"
                         >
                             Tarifs
                         </Link>
@@ -45,7 +45,7 @@ export default async function Navbar() {
                     <li>
                         <Link
                             href="#contact"
-                            className="no-underline text-white/90 font-bold text-[15px] transition-all duration-300 hover:text-primary hover:-translate-y-0.5"
+                            className="no-underline text-navy/80 font-bold text-[15px] transition-all duration-300 hover:text-primary hover:-translate-y-0.5 relative after:content-[''] after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[2px] after:bg-primary after:transition-all after:duration-300 hover:after:w-full"
                         >
                             Contact
                         </Link>

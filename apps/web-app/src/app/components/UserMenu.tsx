@@ -16,10 +16,10 @@ function getInitials(name: string) {
 }
 
 function UserAvatar({ user }: { user: any }) {
-    const initials = getInitials(user.name);
+    const initials = getInitials(user.name || user.email || 'U');
 
     return (
-        <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm">
+        <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center text-white font-bold text-sm shadow-primary transition-all duration-300 hover:scale-110">
             {initials}
         </div>
     );
@@ -53,18 +53,19 @@ export function UserMenu({ user }: { user: any }) {
 
             {/* Dropdown */}
             {open && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden z-50">
-                    <div className="px-4 py-3 border-b text-sm text-gray-700">
+                <div className="absolute right-0 mt-2 w-56 bg-white backdrop-blur-lg rounded-xl shadow-card border border-gray-100 overflow-hidden z-50 animate-fade-in-down">
+                    <div className="px-4 py-4 border-b border-gray-100 text-sm text-charcoal/70">
                         Connecté en tant que
-                        <div className="font-semibold truncate">{user.name}</div>
+                        <div className="font-bold text-navy truncate mt-1">{user.name || user.email}</div>
                     </div>
 
-                    <div className="py-1">
-                        {/* Tu peux ajouter d'autres items ici */}
-                        {/* <button className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
-                            Profil
-                        </button> */}
-
+                    <div className="py-2">
+                        <a 
+                            href="/dashboard" 
+                            className="w-full text-left px-4 py-2 text-sm text-charcoal/80 hover:bg-gray-100 hover:text-primary transition-colors duration-200 flex items-center gap-2"
+                        >
+                            <span>📊</span> Dashboard
+                        </a>
                         <LogoutButton/>
                     </div>
                 </div>
