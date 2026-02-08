@@ -1,7 +1,19 @@
-# Docker Compose pour le développement local
-# Usage: docker-compose up -d
-
-version: '3.8'
+# =============================================================================
+# Docker Compose — Infrastructure de dev (API uniquement)
+# =============================================================================
+#
+# Ce fichier lance UNIQUEMENT l'infrastructure locale (Postgres + Redis).
+# Pour lancer tout le projet (API + Web App + Infra), utilisez le
+# docker-compose.yml à la racine du monorepo :
+#
+#   cd ../../ && docker compose --profile app up -d
+#
+# Usage local :
+#   docker compose up -d                          → Postgres + Redis
+#   docker compose --profile tools up -d           → + pgAdmin + Redis Commander
+#   docker compose down                            → Tout arrêter
+#   docker compose down -v                         → Tout supprimer (reset data)
+# =============================================================================
 
 services:
   # Base de données PostgreSQL
@@ -10,9 +22,9 @@ services:
     container_name: ipf-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ipf_admin
-      POSTGRES_PASSWORD: dev_password_123
-      POSTGRES_DB: ipf_db
+      POSTGRES_USER: ${POSTGRES_USER:-ipf_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dev_password_123}
+      POSTGRES_DB: ${POSTGRES_DB:-ipf_db}
     ports:
       - "5432:5432"
     volumes:
