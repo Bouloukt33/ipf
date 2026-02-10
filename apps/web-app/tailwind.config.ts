@@ -17,12 +17,12 @@ const config: Config = {
   				dark: '#b5681f',
   				foreground: 'hsl(var(--primary-foreground))'
   			},
-  			navy: '#172E42',
+  			navy: '#D27A2D',
   			charcoal: '#2A262A',
   			background: 'hsl(var(--background))',
   			surface: '#F8F9FA',
   			text: {
-  				primary: '#172E42',
+  				primary: '#D27A2D',
   				secondary: '#2A262A',
   				muted: '#6B7280'
   			},
@@ -70,7 +70,7 @@ const config: Config = {
   		},
   		backgroundImage: {
   			'gradient-primary': 'linear-gradient(135deg, #D27A2D 0%, #e8924a 100%)',
-  			'gradient-hero': 'linear-gradient(135deg, #172E42 0%, #2A262A 100%)',
+  			'gradient-hero': 'linear-gradient(135deg, D27A2D 0%, #2A262A 100%)',
   			'gradient-light': 'linear-gradient(180deg, #FFFFFF 0%, #F8F9FA 100%)'
   		},
   		boxShadow: {

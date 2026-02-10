@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AGE_OPTIONS, AgeFormValues, ageSchema } from "@/lib/profile-schema";
 import { cn } from "@/lib/utils";
+import { Check } from "lucide-react";
 
 interface StepAgeProps {
     defaultValues?: Partial<AgeFormValues>;
@@ -29,34 +30,33 @@ export function StepAge({ defaultValues, onNext }: StepAgeProps) {
 
     return (
         <form onSubmit={handleSubmit(onNext)} id="step-form">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {AGE_OPTIONS.map((option) => (  
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {AGE_OPTIONS.map((option) => (
                     <button
                         key={option.value}
                         type="button"
                         onClick={() => handleSelect(option.value)}
                         className={cn(
-                            "relative px-6 py-5 rounded-2xl border-3 border-navy font-bold text-navy font-nunito",
-                            "transition-all duration-300 cursor-pointer text-center",
-                            "hover:border-primary hover:-translate-y-1 hover:scale-[1.02] hover:shadow-primary",
-                            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                            "relative h-16 px-6 rounded-2xl border-[3px] font-bold text-base font-nunito",
+                            "transition-all duration-300 cursor-pointer",
+                            "hover:bg-orange-50 hover:text-navy",
                             selectedAge === option.value
-                                ? "border-primary bg-gradient-to-br from-primary to-primary-light text-white shadow-primary scale-[1.03]"
-                                : "bg-white hover:bg-orange-50"
+                                ? "border-navy bg-navy text-white"
+                                : "border-primary bg-white text-primary"
                         )}
                     >
                         {selectedAge === option.value && (
-                            <span className="absolute -top-3 -right-3 w-7 h-7 rounded-full bg-emerald-500 border-2 border-white flex items-center justify-center text-white text-sm font-black shadow-soft">
-                                ✓
+                            <span className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-emerald-500 border-2 border-white flex items-center justify-center">
+                                <Check className="w-4 h-4 text-white stroke-[3]" />
                             </span>
                         )}
-                        <span className="text-base">{option.label}</span>
+                        {option.label}
                     </button>
                 ))}
             </div>
 
             {errors.age && (
-                <p className="text-center mt-3 text-sm font-medium text-destructive">
+                <p className="text-center mt-4 text-sm font-semibold text-red-600 font-nunito">
                     {errors.age.message}
                 </p>
             )}

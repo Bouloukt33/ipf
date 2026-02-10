@@ -55,25 +55,25 @@ export function StepMetier({ defaultValues, onNext }: StepMetierProps) {
                 <FormField
                     control={form.control}
                     name="secteur"
-                    render={({ field } : { field: any }) => (
+                    render={({ field }) => (
                         <FormItem>
-                            <FormLabel className="text-xs font-bold uppercase tracking-wider text-text-muted font-nunito">
+                            <FormLabel className="text-xs font-bold uppercase tracking-wider text-gray-500 font-nunito">
                                 1. Choisis ton secteur
                             </FormLabel>
                             <Select onValueChange={field.onChange} value={field.value}>
                                 <FormControl>
                                     <SelectTrigger
                                         className={cn(
-                                            "w-full h-14 px-5 rounded-2xl border-[3px] border-navy font-bold font-nunito text-base",
-                                            "bg-white focus:border-primary focus:ring-4 focus:ring-primary/20",
-                                            "hover:border-primary hover:bg-orange-50 transition-all duration-300",
-                                            "data-[state=open]:border-primary data-[state=open]:ring-4 data-[state=open]:ring-primary/20"
+                                            "w-full h-14 px-5 rounded-2xl border-[3px] border-primary font-bold font-nunito text-base",
+                                            "bg-white hover:bg-orange-50 transition-all duration-300",
+                                            "focus:ring-0 focus:ring-offset-0",
+                                            "data-[state=open]:border-navy data-[state=open]:bg-white"
                                         )}
                                     >
                                         <SelectValue placeholder="— Sélectionne un secteur —" />
                                     </SelectTrigger>
                                 </FormControl>
-                                <SelectContent className="rounded-2xl border-[3px] border-navy shadow-card font-nunito">
+                                <SelectContent className="rounded-2xl border-[3px] border-primary font-nunito">
                                     {SECTEURS.map((s) => (
                                         <SelectItem
                                             key={s.value}
@@ -85,36 +85,39 @@ export function StepMetier({ defaultValues, onNext }: StepMetierProps) {
                                     ))}
                                 </SelectContent>
                             </Select>
-                            <FormMessage />
+                            <FormMessage className="font-nunito font-semibold" />
                         </FormItem>
                     )}
                 />
 
                 {/* Métier select — appears when secteur is selected */}
                 {selectedSecteur && (
-                    <div className="animate-slide-up">
+                    <div className="animate-in slide-in-from-top-4 duration-300">
                         <FormField
                             control={form.control}
                             name="metier"
-                            render={({ field } : { field: any }) => (
+                            render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-xs font-bold uppercase tracking-wider text-text-muted font-nunito">
+                                    <FormLabel className="text-xs font-bold uppercase tracking-wider text-gray-500 font-nunito">
                                         2. Précise ton métier
                                     </FormLabel>
                                     <Select onValueChange={field.onChange} value={field.value}>
                                         <FormControl>
                                             <SelectTrigger
                                                 className={cn(
-                                                    "w-full h-14 px-5 rounded-2xl border-[3px] border-navy font-bold font-nunito text-base",
-                                                    "bg-white focus:border-primary focus:ring-4 focus:ring-primary/20",
-                                                    "hover:border-primary hover:bg-orange-50 transition-all duration-300",
-                                                    "data-[state=open]:border-primary data-[state=open]:ring-4 data-[state=open]:ring-primary/20"
+                                                    "w-full h-14 px-5 rounded-2xl border-[3px] font-bold font-nunito text-base",
+                                                    "bg-white hover:bg-orange-50 transition-all duration-300",
+                                                    "focus:ring-0 focus:ring-offset-0",
+                                                    field.value 
+                                                        ? "border-navy text-primary"
+                                                        : "border-primary",
+                                                    "data-[state=open]:border-navy"
                                                 )}
                                             >
                                                 <SelectValue placeholder="— Sélectionne un métier —" />
                                             </SelectTrigger>
                                         </FormControl>
-                                        <SelectContent className="rounded-2xl border-[3px] border-navy shadow-card font-nunito">
+                                        <SelectContent className="rounded-2xl border-[3px] border-primary font-nunito">
                                             {metiers.map((m: any) => (
                                                 <SelectItem
                                                     key={m.value}
@@ -126,7 +129,7 @@ export function StepMetier({ defaultValues, onNext }: StepMetierProps) {
                                             ))}
                                         </SelectContent>
                                     </Select>
-                                    <FormMessage />
+                                    <FormMessage className="font-nunito font-semibold" />
                                 </FormItem>
                             )}
                         />

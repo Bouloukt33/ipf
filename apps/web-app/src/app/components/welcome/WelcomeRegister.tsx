@@ -26,7 +26,7 @@ export function WelcomeRegister({ onComplete }: WelcomeRegisterProps) {
                     setTypingDone(true);
                     setTimeout(() => {
                         onComplete();
-                    }, 1500);
+                    }, 1500); 
                 }
             }, 50);
             return () => clearInterval(interval);
@@ -51,10 +51,10 @@ export function WelcomeRegister({ onComplete }: WelcomeRegisterProps) {
                     <div className="w-full h-full flex items-center justify-center">
                         <div className="relative">
                             {/* Glow ring */}
-                            <div className="absolute inset-0 rounded-full bg-primary/20 blur-2xl scale-110 animate-pulse-ring" />
+                            <div className="absolute inset-0 blur-2xl scale-110 animate-pulse-ring" />
                             {/* Main circle with emoji */}
-                            <div className="relative w-48 h-48 rounded-full bg-gradient-to-br from-primary to-primary-light flex items-center justify-center shadow-primary-lg">
-                                <span className="text-7xl animate-bounce-icon">🎉</span>
+                            <div className="relative w-96 h-96 flex items-center justify-center animate-bounce-icon mb-12">
+                                <img src="/mascotte/no_bg/bienvenue.png" className="w-full h-full" alt="Mascot"/>
                             </div>
                         </div>
                     </div>
@@ -62,15 +62,15 @@ export function WelcomeRegister({ onComplete }: WelcomeRegisterProps) {
             </div>
 
             {/* Title */}
-            <h1 className="text-3xl md:text-4xl font-black text-primary mb-4 font-nunito">
+            <h1 className="text-3xl md:text-4xl font-black text-navy mb-4 font-nunito">
                 Inscription validée !
             </h1>
 
             {/* Typing text */}
-            <p className="text-lg md:text-xl font-semibold text-navy min-h-[3rem] font-nunito">
+            <p className="text-lg md:text-xl font-semibold text-primary min-h-[3rem] font-nunito">
                 {displayedText}
                 <span
-                    className={`inline-block w-0.5 h-5 bg-primary ml-1 align-middle transition-opacity duration-100 ${showCursor ? "opacity-100" : "opacity-0"
+                    className={`inline-block w-0.5 h-5 bg-navy ml-1 align-middle transition-opacity duration-100 ${showCursor ? "opacity-100" : "opacity-0"
                         }`}
                 />
             </p>
@@ -80,7 +80,7 @@ export function WelcomeRegister({ onComplete }: WelcomeRegisterProps) {
                 {[...Array(3)].map((_, i) => (
                     <div
                         key={i}
-                        className="w-2 h-2 rounded-full bg-primary/30 animate-bounce-soft"
+                        className="w-2 h-2 rounded-full bg-navy/30 animate-bounce-soft"
                         style={{ animationDelay: `${i * 0.15}s` }}
                     />
                 ))}

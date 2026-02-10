@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import LogoutButton from "./LogoutButton";
+import { LayoutDashboard } from "lucide-react";
 
 type User = {
     name: string;
@@ -64,7 +65,7 @@ export function UserMenu({ user }: { user: any }) {
                             href="/dashboard" 
                             className="w-full text-left px-4 py-2 text-sm text-charcoal/80 hover:bg-gray-100 hover:text-primary transition-colors duration-200 flex items-center gap-2"
                         >
-                            <span>📊</span> Dashboard
+                            <span><LayoutDashboard className="w-4 h-4" /></span> Dashboard
                         </a>
                         <LogoutButton/>
                     </div>

@@ -3,7 +3,12 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-export function WelcomeLogin() {
+interface WelcomeLoginProps {
+    /** Appelé juste avant la redirection (ex: pour setter un cookie) */
+    onDone?: () => Promise<void>;
+}
+
+export function WelcomeLogin({ onDone }: WelcomeLoginProps) {
     const router = useRouter();
     const [displayedText, setDisplayedText] = useState("");
     const [showCursor, setShowCursor] = useState(true);
@@ -21,7 +26,8 @@ export function WelcomeLogin() {
                 } else {
                     clearInterval(interval);
                     setPhase("done");
-                    setTimeout(() => {
+                    setTimeout(async () => {
+                        if (onDone) await onDone();
                         router.push("/dashboard");
                     }, 1800);
                 }
@@ -30,7 +36,7 @@ export function WelcomeLogin() {
         }, 800);
 
         return () => clearTimeout(timeout);
-    }, [router]);
+    }, [router, onDone]);
 
     useEffect(() => {
         const cursorInterval = setInterval(() => {
@@ -46,25 +52,25 @@ export function WelcomeLogin() {
                 <div className="relative w-64 h-64 mx-auto flex items-center justify-center">
                     <div className="relative">
                         {/* Glow ring */}
-                        <div className="absolute inset-0 rounded-full bg-primary/20 blur-2xl scale-110 animate-pulse-ring" />
+                        <div className="absolute inset-0 rounded-full bg-navy/20 blur-2xl scale-110 animate-pulse-ring" />
                         {/* Main circle */}
-                        <div className="relative w-48 h-48 rounded-full bg-gradient-to-br from-navy to-charcoal flex items-center justify-center shadow-card">
-                            <span className="text-7xl animate-wiggle">👋</span>
+                        <div className="relative w-96 h-96 flex items-center justify-center animate-bounce-icon mb-12">
+                            <img src="/mascotte/no_bg/revoila.png" alt="Mascot" className="w-full h-full" />
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Title */}
-            <h1 className="text-3xl md:text-4xl font-black text-primary mb-4 font-nunito">
+            <h1 className="text-3xl md:text-4xl font-black text-navy mb-4 font-nunito">
                 De retour parmi nous !
             </h1>
 
             {/* Typing text */}
-            <p className="text-lg md:text-xl font-semibold text-navy max-w-md min-h-[3rem] font-nunito">
+            <p className="text-lg md:text-xl font-semibold text-primary max-w-md min-h-[3rem] font-nunito">
                 {displayedText}
                 <span
-                    className={`inline-block w-0.5 h-5 bg-primary ml-1 align-middle transition-opacity duration-100 ${showCursor ? "opacity-100" : "opacity-0"
+                    className={`inline-block w-0.5 h-5 bg-navy ml-1 align-middle transition-opacity duration-100 ${showCursor ? "opacity-100" : "opacity-0"
                         }`}
                 />
             </p>
@@ -76,7 +82,7 @@ export function WelcomeLogin() {
                         {[...Array(3)].map((_, i) => (
                             <div
                                 key={i}
-                                className="w-2 h-2 rounded-full bg-primary animate-bounce"
+                                className="w-2 h-2 rounded-full bg-navy animate-bounce"
                                 style={{ animationDelay: `${i * 0.15}s` }}
                             />
                         ))}
