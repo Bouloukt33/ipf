@@ -7,3 +7,4 @@ export * from './permissions.guard';
 export * from './permissions.decorator';
 export * from './current-user.decorator';
 export * from './jwt.strategy';
+export * from './dto';
