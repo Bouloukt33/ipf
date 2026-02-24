@@ -12,6 +12,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nes
 import { AuthService } from './auth.service';
 import { AuthGuard } from './auth.guard';
 import { CurrentUser } from './current-user.decorator';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 
 /**
  * Contrôleur d'authentification
@@ -121,6 +122,23 @@ export class AuthController {
       userId: user.userId,
       email: user.email,
     };
+  }
+
+  /**
+   * POST /api/auth/forgot-password
+   * Demande de réinitialisation de mot de passe
+   * Endpoint public - pas d'AuthGuard
+   */
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Mot de passe oublié',
+    description: 'Envoie un email de réinitialisation de mot de passe via Auth0. Pour des raisons de sécurité, retourne toujours un succès.',
+  })
+  @ApiBody({ type: ForgotPasswordDto })
+  @ApiResponse({ status: 200, description: 'Demande de réinitialisation traitée' })
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(forgotPasswordDto.email);
   }
 
     /**

@@ -1,4 +1,5 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, BadRequestException, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma';
 
 interface Auth0User {
@@ -10,7 +11,12 @@ interface Auth0User {
 
 @Injectable()
 export class AuthService {
-  constructor(private prisma: PrismaService) {}
+  private readonly logger = new Logger(AuthService.name);
+
+  constructor(
+    private prisma: PrismaService,
+    private configService: ConfigService,
+  ) {}
 
   /**
    * Enregistre un NOUVEL utilisateur uniquement
@@ -197,6 +203,51 @@ export class AuthService {
       message: 'Compte supprimé avec succès',
       // Note: Il faudrait aussi supprimer le compte Auth0 via l'API Management
     };
+  }
+
+  /**
+   * Demande de réinitialisation de mot de passe via Auth0
+   */
+  async forgotPassword(email: string) {
+    const domain = this.configService.get<string>('AUTH0_DOMAIN');
+    const clientId = this.configService.get<string>('AUTH0_CLIENT_ID');
+    const connection = this.configService.get<string>('AUTH0_CONNECTION') || 'Username-Password-Authentication';
+
+    if (!domain || !clientId) {
+      this.logger.error('AUTH0_DOMAIN ou AUTH0_CLIENT_ID non configuré');
+      throw new BadRequestException('Configuration Auth0 manquante');
+    }
+
+    try {
+      const response = await fetch(`https://${domain}/dbconnections/change_password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          client_id: clientId,
+          email,
+          connection,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        this.logger.error(`Auth0 change_password error: ${response.status} - ${errorText}`);
+        // On ne révèle pas si l'email existe ou non (sécurité)
+      }
+
+      // Toujours retourner un succès pour ne pas révéler si l'email existe
+      return {
+        message: 'Si un compte est associé à cette adresse email, un lien de réinitialisation a été envoyé.',
+        statusCode: 200,
+      };
+    } catch (error) {
+      this.logger.error(`Erreur lors de la demande de réinitialisation: ${error.message}`);
+      // Même en cas d'erreur, on retourne un succès pour la sécurité
+      return {
+        message: 'Si un compte est associé à cette adresse email, un lien de réinitialisation a été envoyé.',
+        statusCode: 200,
+      };
+    }
   }
 
   /**
