@@ -68,7 +68,7 @@ services:
     ports:
       - "${API_PORT:-3000}:3000"
     environment:
-      NODE_ENV: production
+      NODE_ENV: development
       PORT: 3000
       DATABASE_URL: postgresql://${POSTGRES_USER:-ipf_admin}:${POSTGRES_PASSWORD:-dev_password_123}@postgres:5432/${POSTGRES_DB:-ipf_db}?schema=public
       REDIS_HOST: redis
@@ -97,7 +97,7 @@ services:
     ports:
       - "${WEB_APP_PORT:-3001}:3001"
     environment:
-      NODE_ENV: production
+      NODE_ENV: development
       AUTH0_DOMAIN: ${AUTH0_DOMAIN}
       AUTH0_CLIENT_ID: ${AUTH0_CLIENT_ID}
       AUTH0_CLIENT_SECRET: ${AUTH0_CLIENT_SECRET}
