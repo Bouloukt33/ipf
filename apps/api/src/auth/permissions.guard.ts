@@ -19,8 +19,12 @@ export class PermissionsGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
 
+    // DEBUG: log JWT payload to diagnose 403
+    console.log('[PermissionsGuard] user:', JSON.stringify(user, null, 2));
+    console.log('[PermissionsGuard] required:', requiredPermissions);
+
     if (!user || !user.permissions) {
-      throw new ForbiddenException('Permissions insuffisantes');
+      throw new ForbiddenException('Permissions insuffisantes — pas de user ou permissions dans le token');
     }
 
     const hasPermission = requiredPermissions.every((permission) =>
@@ -28,7 +32,9 @@ export class PermissionsGuard implements CanActivate {
     );
 
     if (!hasPermission) {
-      throw new ForbiddenException('Permissions insuffisantes');
+      throw new ForbiddenException(
+        `Permissions insuffisantes — requis: [${requiredPermissions}], reçu: [${user.permissions}]`,
+      );
     }
 
     return true;

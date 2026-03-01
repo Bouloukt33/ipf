@@ -40,7 +40,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     return {
       userId: payload.sub,
       email: payload.email || payload['https://ipf.com/email'],
-      permissions: payload.permissions || [],
+      permissions: (payload.permissions || []).map((p: string) => p.trim()),
       roles: payload['https://ipf.com/roles'] || [], 
     };
   }

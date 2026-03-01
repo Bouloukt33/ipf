@@ -2,31 +2,37 @@
 
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
-
-const TYPE_BAILS = [
-    { id: 1, name: 'Bail Commercial', description: "Pour les locaux utilisés pour une activité commerciale, industrielle ou artisanale" },
-    { id: 2, name: 'Bail Professionnel', description: "Pour l'exercice d'une profession libérale réglementée" },
-    { id: 3, name: 'Bail Dérogatoire', description: "Bail de courte durée sans statut des baux commerciaux" },
-    { id: 4, name: "Bail d'Habitation", description: "Pour la location d'un logement à usage d'habitation principale" },
-]
+import { useState, useEffect } from 'react'
+import { api, type CategoryData } from '@/lib/api'
 
 export default function SelectionPage() {
     const router = useRouter()
-    const [selected, setSelected] = useState<number | null>(null)
+    const [categories, setCategories] = useState<CategoryData[]>([])
+    const [selected, setSelected] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
+    const [loadingCategories, setLoadingCategories] = useState(true)
+
+    useEffect(() => {
+        api.categories
+            .list()
+            .then((cats) => {
+                // Free users: only show Bail Commercial (non-premium)
+                // TODO: check user subscription status for premium access
+                setCategories(cats.filter((c) => !c.isPremium))
+            })
+            .catch(() => {
+                // Fallback: show default
+                setCategories([
+                    { id: 'default', name: 'Bail Commercial', slug: 'bail-commercial', isPremium: false },
+                ])
+            })
+            .finally(() => setLoadingCategories(false))
+    }, [])
 
     function handleStart() {
         if (selected === null) return
         setLoading(true)
-        const bail = TYPE_BAILS.find(b => b.id === selected)!
-        const session = {
-            sessionId: 'session_' + Date.now(),
-            typeBail: bail,
-            startTime: new Date().toISOString(),
-        }
-        localStorage.setItem('currentSession', JSON.stringify(session))
-        router.push(`/quiz/play?sessionId=${session.sessionId}`)
+        router.push(`/quiz/play?categoryId=${selected}`)
     }
 
     return (
@@ -46,32 +52,49 @@ export default function SelectionPage() {
             </div>
 
             {/* Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-                {TYPE_BAILS.map((bail) => {
-                    const isSelected = selected === bail.id
-                    return (
-                        <button
-                            key={bail.id}
-                            onClick={() => setSelected(bail.id)}
-                            className={`
-                relative text-left bg-white border-[3px] rounded-2xl p-8
-                transition-all duration-300 ease-out
-                ${isSelected
-                                    ? 'border-primary bg-primary/10 -translate-y-1 shadow-primary'
-                                    : 'border-navy hover:border-primary hover:bg-primary/10 hover:-translate-y-1'
-                                }
-              `}
-                        >
-                            <span className={`
-                absolute top-6 right-6 w-7 h-7 rounded-full border-[3px] transition-all duration-300
-                ${isSelected ? 'border-primary bg-primary shadow-[inset_0_0_0_4px_white]' : 'border-navy'}
-              `} />
-                            <p className="text-xl font-extrabold text-navy mb-3 pr-10">{bail.name}</p>
-                            <p className="text-base text-charcoal/85 leading-relaxed">{bail.description}</p>
-                        </button>
-                    )
-                })}
-            </div>
+            {loadingCategories ? (
+                <div className="text-center py-12">
+                    <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                    <p className="text-navy/60 font-semibold">Chargement des catégories...</p>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+                    {categories.map((cat) => {
+                        const isSelected = selected === cat.id
+                        return (
+                            <button
+                                key={cat.id}
+                                onClick={() => setSelected(cat.id)}
+                                className={`
+                    relative text-left bg-white border-[3px] rounded-2xl p-8
+                    transition-all duration-300 ease-out
+                    ${isSelected
+                                        ? 'border-primary bg-primary/10 -translate-y-1 shadow-primary'
+                                        : 'border-navy hover:border-primary hover:bg-primary/10 hover:-translate-y-1'
+                                    }
+                  `}
+                            >
+                                <span className={`
+                    absolute top-6 right-6 w-7 h-7 rounded-full border-[3px] transition-all duration-300
+                    ${isSelected ? 'border-primary bg-primary shadow-[inset_0_0_0_4px_white]' : 'border-navy'}
+                  `} />
+                                <p className="text-xl font-extrabold text-navy mb-3 pr-10">{cat.name}</p>
+                            </button>
+                        )
+                    })}
+
+                    {/* Locked premium categories hint */}
+                    <div className="relative text-left bg-white/50 border-[3px] border-dashed border-navy/20 rounded-2xl p-8 opacity-50 cursor-not-allowed">
+                        <div className="absolute top-6 right-6">
+                            <svg className="w-6 h-6 text-navy/30" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                            </svg>
+                        </div>
+                        <p className="text-xl font-extrabold text-navy/40 mb-2">+5 catégories</p>
+                        <p className="text-sm text-navy/30">Disponible avec l&apos;abonnement Premium</p>
+                    </div>
+                </div>
+            )}
 
             {/* CTA */}
             <div className="border-t-2 border-navy/10 pt-8 flex justify-center">
