@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma';
+import { AgeRange, ProfessionalStatus } from '@prisma/client';
 
 @Injectable()
 export class ProfileService {
@@ -9,7 +10,11 @@ export class ProfileService {
     const user = await this.prisma.user.findUnique({
       where: { auth0Id },
       include: {
-        profile: true,
+        profile: {
+          include: {
+            jobProfile: { include: { sector: true } },
+          },
+        },
         ranking: true,
         subscription: { include: { plan: true } },
         userBadges: { include: { badge: true } },
@@ -23,7 +28,16 @@ export class ProfileService {
     return user;
   }
 
-  async updateProfile(auth0Id: string, data: { displayName?: string; avatarUrl?: string }) {
+  async updateProfile(
+    auth0Id: string,
+    data: {
+      displayName?: string;
+      avatarUrl?: string;
+      ageRange?: string;
+      professionalStatus?: string;
+      jobProfileId?: string;
+    },
+  ) {
     const user = await this.prisma.user.findUnique({
       where: { auth0Id },
     });
@@ -32,12 +46,45 @@ export class ProfileService {
       throw new NotFoundException('Utilisateur non trouvé');
     }
 
+    // Validate jobProfileId if provided
+    if (data.jobProfileId) {
+      const jobProfile = await this.prisma.jobProfile.findUnique({
+        where: { id: data.jobProfileId },
+      });
+      if (!jobProfile) {
+        throw new NotFoundException('Profil métier non trouvé');
+      }
+    }
+
+    const profileData = {
+      ...(data.displayName !== undefined && { displayName: data.displayName }),
+      ...(data.avatarUrl !== undefined && { avatarUrl: data.avatarUrl }),
+      ...(data.ageRange !== undefined && { ageRange: data.ageRange as AgeRange }),
+      ...(data.professionalStatus !== undefined && { professionalStatus: data.professionalStatus as ProfessionalStatus }),
+      ...(data.jobProfileId !== undefined && { jobProfileId: data.jobProfileId }),
+    };
+
     return this.prisma.userProfile.upsert({
       where: { userId: user.id },
-      update: data,
+      update: profileData,
       create: {
         userId: user.id,
-        ...data,
+        ...profileData,
+      },
+      include: {
+        jobProfile: { include: { sector: true } },
+      },
+    });
+  }
+
+  async getJobProfiles() {
+    return this.prisma.jobSector.findMany({
+      orderBy: { order: 'asc' },
+      include: {
+        jobProfiles: {
+          where: { isActive: true },
+          orderBy: { order: 'asc' },
+        },
       },
     });
   }

@@ -24,14 +24,31 @@ export class ProfileController {
   @Put()
   @UseGuards(PermissionsGuard)
   @Permissions('write:profile')
-  @ApiOperation({ summary: 'Mettre à jour le profil', description: 'Met à jour les informations du profil (nom d\'affichage, avatar)' })
-  @ApiBody({ schema: { type: 'object', properties: { displayName: { type: 'string', example: 'John Doe' }, avatarUrl: { type: 'string', example: 'https://example.com/avatar.jpg' } } } })
+  @ApiOperation({ summary: 'Mettre à jour le profil', description: 'Met à jour les informations du profil (nom, avatar, tranche d\'âge, statut pro, métier)' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        displayName: { type: 'string', example: 'John Doe' },
+        avatarUrl: { type: 'string', example: 'https://example.com/avatar.jpg' },
+        ageRange: { type: 'string', enum: ['AGE_18_25', 'AGE_26_35', 'AGE_36_45', 'AGE_46_55', 'AGE_56_PLUS'], example: 'AGE_26_35' },
+        professionalStatus: { type: 'string', enum: ['SALARIE', 'INDEPENDANT', 'MANDATAIRE'], example: 'INDEPENDANT' },
+        jobProfileId: { type: 'string', example: 'cuid...' },
+      },
+    },
+  })
   @ApiResponse({ status: 200, description: 'Profil mis à jour avec succès' })
   @ApiResponse({ status: 401, description: 'Non autorisé' })
   @ApiResponse({ status: 400, description: 'Données invalides' })
   async updateProfile(
     @CurrentUser('userId') userId: string,
-    @Body() data: { displayName?: string; avatarUrl?: string },
+    @Body() data: {
+      displayName?: string;
+      avatarUrl?: string;
+      ageRange?: string;
+      professionalStatus?: string;
+      jobProfileId?: string;
+    },
   ) {
     return this.profileService.updateProfile(userId, data);
   }

@@ -447,6 +447,99 @@ async function main() {
     );
   }
 
+  // 5. Seed Job Sectors & Profiles
+  console.log('\n👔 Seeding job sectors & profiles...');
+  const JOB_DATA: { sector: string; sectorSlug: string; order: number; profiles: { name: string; slug: string }[] }[] = [
+    {
+      sector: 'Immobilier — Transaction',
+      sectorSlug: 'immobilier-transaction',
+      order: 1,
+      profiles: [
+        { name: 'Agent immobilier transaction professionnel/commercial', slug: 'agent-immo-transaction-pro' },
+        { name: 'Agent immobilier transaction habitation', slug: 'agent-immo-transaction-habitation' },
+        { name: 'Assistant(e) commercial(e) agence immobilière', slug: 'assistant-commercial-agence' },
+      ],
+    },
+    {
+      sector: 'Immobilier — Gestion locative',
+      sectorSlug: 'immobilier-gestion-locative',
+      order: 2,
+      profiles: [
+        { name: 'Gestionnaire locatif professionnel/commercial', slug: 'gestionnaire-locatif-pro' },
+        { name: 'Gestionnaire locatif habitation', slug: 'gestionnaire-locatif-habitation' },
+      ],
+    },
+    {
+      sector: 'Immobilier — Expertise et conseil',
+      sectorSlug: 'immobilier-expertise-conseil',
+      order: 3,
+      profiles: [
+        { name: 'Expert immobilier', slug: 'expert-immobilier' },
+        { name: 'Consultant en immobilier d\'entreprise', slug: 'consultant-immo-entreprise' },
+      ],
+    },
+    {
+      sector: 'Finance et patrimoine',
+      sectorSlug: 'finance-patrimoine',
+      order: 4,
+      profiles: [
+        { name: 'Conseiller en gestion de patrimoine (CGP)', slug: 'cgp' },
+        { name: 'Conseiller bancaire professionnels', slug: 'conseiller-bancaire-pro' },
+      ],
+    },
+    {
+      sector: 'Comptabilité et gestion',
+      sectorSlug: 'comptabilite-gestion',
+      order: 5,
+      profiles: [
+        { name: 'Expert-comptable', slug: 'expert-comptable' },
+        { name: 'Collaborateur cabinet comptable', slug: 'collaborateur-cabinet-comptable' },
+        { name: 'Contrôleur de gestion', slug: 'controleur-gestion' },
+      ],
+    },
+    {
+      sector: 'Commerce et entrepreneuriat',
+      sectorSlug: 'commerce-entrepreneuriat',
+      order: 6,
+      profiles: [
+        { name: 'Commerçant indépendant', slug: 'commercant-independant' },
+        { name: 'Franchisé', slug: 'franchise' },
+        { name: 'Créateur/repreneur d\'entreprise', slug: 'createur-repreneur-entreprise' },
+        { name: 'Artisan avec local commercial', slug: 'artisan-local-commercial' },
+      ],
+    },
+    {
+      sector: 'Collectivités et aménagement',
+      sectorSlug: 'collectivites-amenagement',
+      order: 7,
+      profiles: [
+        { name: 'Chargé de développement économique territorial', slug: 'charge-dev-eco-territorial' },
+        { name: 'Gestionnaire foncier collectivité', slug: 'gestionnaire-foncier-collectivite' },
+      ],
+    },
+  ];
+
+  let totalProfiles = 0;
+  for (const s of JOB_DATA) {
+    const sector = await prisma.jobSector.upsert({
+      where: { slug: s.sectorSlug },
+      update: { name: s.sector, order: s.order },
+      create: { name: s.sector, slug: s.sectorSlug, order: s.order },
+    });
+
+    for (let i = 0; i < s.profiles.length; i++) {
+      const p = s.profiles[i];
+      await prisma.jobProfile.upsert({
+        where: { slug: p.slug },
+        update: { name: p.name, order: i + 1 },
+        create: { sectorId: sector.id, name: p.name, slug: p.slug, order: i + 1 },
+      });
+      totalProfiles++;
+    }
+    console.log(`  ✅ ${s.sector}: ${s.profiles.length} profils`);
+  }
+  console.log(`  📊 Total: ${JOB_DATA.length} secteurs, ${totalProfiles} profils métiers`);
+
   console.log('\n🎉 Seed completed successfully!\n');
 }
 
