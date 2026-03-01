@@ -219,8 +219,41 @@ function parseCsv(filePath: string, categorySlug: string): Array<{
   const cleanOption = (opt: string) =>
     opt.trim().replace(/^[A-D]\)\s*/, '');
 
+  // CSV-aware field splitter: handles quoted fields with embedded semicolons and ""
+  const splitCsvLine = (line: string, delimiter = ';'): string[] => {
+    const fields: string[] = [];
+    let current = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (inQuotes) {
+        if (ch === '"') {
+          if (i + 1 < line.length && line[i + 1] === '"') {
+            current += '"';
+            i++; // skip escaped quote
+          } else {
+            inQuotes = false;
+          }
+        } else {
+          current += ch;
+        }
+      } else {
+        if (ch === '"') {
+          inQuotes = true;
+        } else if (ch === delimiter) {
+          fields.push(current);
+          current = '';
+        } else {
+          current += ch;
+        }
+      }
+    }
+    fields.push(current);
+    return fields;
+  };
+
   for (const line of dataLines) {
-    const parts = line.split(';');
+    const parts = splitCsvLine(line);
 
     let text: string, optA: string, optB: string, optC: string, optD: string, answer: string;
     let level: number | undefined;

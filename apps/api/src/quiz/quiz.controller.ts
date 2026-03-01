@@ -97,6 +97,20 @@ export class QuizController {
     );
   }
 
+  @Post(':sessionId/ready')
+  @UseGuards(PermissionsGuard)
+  @Permissions('read:quiz')
+  @ApiOperation({
+    summary: 'Signal question prête',
+    description:
+      'Le frontend signale que la question est affichée. Démarre le timer serveur.',
+  })
+  @ApiParam({ name: 'sessionId', description: 'ID de la session' })
+  @ApiResponse({ status: 201, description: 'Timer démarré' })
+  async questionReady(@Param('sessionId') sessionId: string) {
+    return this.quizService.markQuestionReady(sessionId);
+  }
+
   @Post(':sessionId/complete')
   @UseGuards(PermissionsGuard)
   @Permissions('read:quiz')

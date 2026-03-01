@@ -268,7 +268,7 @@ export class QuizService {
         comboCount: newCombo,
         livesRemaining: newLives,
         currentQuestionIdx: nextIdx,
-        questionServedAt: isSessionComplete ? null : new Date(),
+        questionServedAt: isSessionComplete ? null : undefined,
         status: newStatus,
         ...(isSessionComplete ? { completedAt: new Date() } : {}),
       },
@@ -535,6 +535,27 @@ export class QuizService {
         totalQuestions: questionOrder.length,
       },
     };
+  }
+
+  /**
+   * Mark the current question as displayed — starts the server-side timer.
+   * Called by frontend when the question is actually rendered on screen.
+   */
+  async markQuestionReady(sessionId: string) {
+    const session = await this.prisma.quizSession.findUnique({
+      where: { id: sessionId },
+    });
+    if (!session) throw new NotFoundException('Session non trouvée');
+    if (session.status !== 'IN_PROGRESS') {
+      throw new BadRequestException('Session terminée');
+    }
+
+    await this.prisma.quizSession.update({
+      where: { id: sessionId },
+      data: { questionServedAt: new Date() },
+    });
+
+    return { ok: true };
   }
 
   // ── Private helpers ──

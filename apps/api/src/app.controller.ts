@@ -42,19 +42,4 @@ export class AppController {
       user: user,
     };
   }
-
-  @Get('profile')
-  @UseGuards(AuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Profil rapide', description: 'Récupère les informations basiques de l\'utilisateur connecté' })
-  @ApiResponse({ status: 200, description: 'Informations du profil retournées' })
-  @ApiResponse({ status: 401, description: 'Non autorisé' })
-  getProfile(@CurrentUser() user: any) {
-    return {
-      userId: user.userId,
-      email: user.email,
-      permissions: user.permissions,
-      roles: user.roles,
-    };
-  }
 }
