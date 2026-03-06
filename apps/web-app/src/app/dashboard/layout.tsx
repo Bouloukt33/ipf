@@ -1,6 +1,4 @@
-import { UserSidebar } from '@/components/user/Sidebar/Sidebar';
-import { useUser } from '@auth0/nextjs-auth0';
-import { redirect } from 'next/navigation';
+import { UserSidebar } from '@/components/user/sidebar/Sidebar';
 
 export default async function UserLayout({ children }: { children: React.ReactNode }) {
     return (
