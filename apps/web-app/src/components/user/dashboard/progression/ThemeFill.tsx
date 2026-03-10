@@ -1,6 +1,10 @@
 import { parseStyle } from "@/lib/parse.style";
-import { IThemeFillProps } from "@/lib/type";
 import { memo } from "react";
+
+interface IThemeFillProps {
+    pct: number;
+    barStyle?: string; 
+}
 
 export const ThemeFill = memo(function ThemeFill({ pct, barStyle }: IThemeFillProps) {
     return (

@@ -1,7 +1,12 @@
-import { IProfileHeaderProps } from "@/lib/type";
 import { memo } from "react";
 
-
+interface IProfileHeaderProps {
+    name: string;
+    level: number;
+    subscription: string;
+    memberSince: string;
+    initial: string;
+}
 
 export const ProfileHeader = memo(function ProfileHeader({
     name,

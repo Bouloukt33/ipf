@@ -1,8 +1,17 @@
-import { SidebarItemProps } from "@/lib/type";
 import Link from "next/link";
 import { useState } from "react";
 
-export function SidebarItem({ href, label, icon, iconBg, isActive, collapsed, tooltip }: SidebarItemProps) {
+interface ISidebarItemProps {
+    href: string;
+    label: string;
+    icon: React.ReactNode;
+    iconBg: string;
+    isActive: boolean;
+    collapsed: boolean;
+    tooltip: string;
+}
+
+export function SidebarItem({ href, label, icon, iconBg, isActive, collapsed, tooltip }: ISidebarItemProps) {
     const [hovered, setHovered] = useState(false);
 
     return (

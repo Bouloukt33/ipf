@@ -1,4 +1,4 @@
-import { IMiniLeaderboardProps } from "@/lib/type";
+import { ILeaderboardEntry } from "@/lib/type";
 import { memo, useCallback } from "react";
 
 const TriangleIcon = () => (
@@ -6,6 +6,11 @@ const TriangleIcon = () => (
         <path d="M7 2l10 10L7 22V2z" />
     </svg>
 );
+
+interface IMiniLeaderboardProps {
+    entries: ILeaderboardEntry[];
+    onViewAll: () => void;
+}
 
 export const MiniLeaderboard = memo(function MiniLeaderboard({
     entries,

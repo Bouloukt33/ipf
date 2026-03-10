@@ -1,4 +1,4 @@
-import { DayStatus, IStreakCardProps } from "@/lib/type";
+import { DayStatus, IWeekDay,  } from "@/lib/type";
 import { memo } from "react";
 
 const CheckIcon = () => (
@@ -6,6 +6,11 @@ const CheckIcon = () => (
         <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
     </svg>
 );
+
+interface IStreakCardProps {
+    streak: number;
+    weekDays: IWeekDay[];
+}
 
 const DAY_CLASSES: Record<DayStatus, string> = {
     done: "bg-orange border-orange",

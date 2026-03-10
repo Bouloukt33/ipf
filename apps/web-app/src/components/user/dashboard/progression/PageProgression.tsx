@@ -8,14 +8,18 @@ import { AchievementCard } from "./AchievementCard";
 import { StreakCard } from "./StreakCard";
 import { MiniLeaderboard } from "./MiniLeaderboard";
 
+
 import {
     STATS,
     ACHIEVEMENTS,
     LEADERBOARD_ENTRIES,
     WEEK_DAYS,
 } from "../../../../data/progressionData";
-import { IPageProgressionProps } from "@/lib/type";
 import { Divider } from "@/components/ui/divider";
+
+interface IPageProgressionProps {
+    onGoLeaderboard: () => void;
+}
 
 export function PageProgression({ onGoLeaderboard }: IPageProgressionProps) {
     // stable reference even if parent re-renders

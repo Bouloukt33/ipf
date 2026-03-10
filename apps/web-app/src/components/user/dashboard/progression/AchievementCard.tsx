@@ -1,5 +1,9 @@
-import { IAchievementCardProps } from "@/lib/type";
+import { IAchievement } from "@/lib/type";
 import { memo, type ReactNode } from "react";
+
+interface IAchievementCardProps {
+    achievement: IAchievement;
+}
 
 export const AchievementCard = memo(function AchievementCard({ achievement }: IAchievementCardProps) {
     const pct = achievement.progressMax > 0

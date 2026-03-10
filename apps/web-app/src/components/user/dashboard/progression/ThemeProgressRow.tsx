@@ -1,7 +1,11 @@
 import { memo, type ReactNode } from "react";
 import { ThemeFill } from "./ThemeFill";
 import { Stars } from "./Stars";
-import { IThemeProgressRowProps } from "@/lib/type";
+import { IThemeItem } from "@/lib/type";
+
+interface IThemeProgressRowProps {
+    theme: IThemeItem;
+}
 
 export const ThemeProgressRow = memo(function ThemeProgressRow({ theme }: IThemeProgressRowProps) {
     return (

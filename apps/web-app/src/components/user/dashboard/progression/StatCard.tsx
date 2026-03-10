@@ -1,6 +1,10 @@
 import { memo, type ReactNode } from "react";
 import { CountUp } from "./CountUp";
-import { IStatCardProps } from "@/lib/type";
+import { IStatItem } from "@/lib/type";
+
+interface IStatCardProps {
+    stat: IStatItem;
+}
 
 export const StatCard = memo(function StatCard({ stat }: IStatCardProps) {
     return (

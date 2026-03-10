@@ -1,7 +1,6 @@
 import { ReactNode } from "react";
 
 export type UserRole = 'USER' | 'ADMIN' | 'MODERATOR';
-
 export type SubscriptionPlan = "FREE" | "PRO";
 export type SubscriptionStatus = "ACTIVE" | "CANCELLED" | "EXPIRED";
 export type Zone = 'mobile' | 'tablet' | 'desktop';
@@ -42,16 +41,6 @@ export interface IAuthState {
     clearUser: () => void;
 }
 
-export interface SidebarItemProps {
-    href: string;
-    label: string;
-    icon: React.ReactNode;
-    iconBg: string;
-    isActive: boolean;
-    collapsed: boolean;
-    tooltip: string;
-}
-
 export interface ILeaderboardRow {
     rk: string
     hi: boolean
@@ -82,23 +71,6 @@ export interface ILeaderboardEntry {
     isMe?: boolean;
 }
 
-export interface IMiniLeaderboardProps {
-    entries: ILeaderboardEntry[];
-    onViewAll: () => void;
-}
-
-export interface IPageProgressionProps {
-    onGoLeaderboard: () => void;
-}
-
-export interface IProfileHeaderProps {
-    name: string;
-    level: number;
-    subscription: string;
-    memberSince: string;
-    initial: string;
-}
-
 export interface IStatItem {
     icon: ReactNode;
     target: number;
@@ -106,23 +78,9 @@ export interface IStatItem {
     label: string;
 }
 
-export interface IStatCardProps {
-    stat: IStatItem;
-}
-
 export interface IWeekDay {
     label: string;
     status: DayStatus;
-}
-
-export interface IStreakCardProps {
-    streak: number;
-    weekDays: IWeekDay[];
-}
-
-export interface IThemeFillProps {
-    pct: number;
-    barStyle?: string; 
 }
 
 export interface IThemeItem {
@@ -133,10 +91,6 @@ export interface IThemeItem {
     icBg: string;
     icSvg: ReactNode;
     barStyle?: string; // matches the type coming from @/data/themes
-}
-
-export interface IThemeProgressRowProps {
-    theme: IThemeItem;
 }
 
 export interface IAchievement {
@@ -151,6 +105,4 @@ export interface IAchievement {
     locked?: boolean;
 }
 
-export interface IAchievementCardProps {
-    achievement: IAchievement;
-}
+
