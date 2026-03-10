@@ -1,7 +1,7 @@
-import { AuthState } from '@/lib/type';
+import { IAuthState } from '@/lib/type';
 import { create } from 'zustand';
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<IAuthState>((set) => ({
     user: null,
     isLoading: true,
     setUser: (user) => set({ user, isLoading: false }),
