@@ -1,5 +1,4 @@
-import { Home, Zap, TrendingUp, User } from 'lucide-react';
-
+import { Home, Zap, TrendingUp, User, CircleGauge } from 'lucide-react';
 export const userNavItems = [
     {
         label: 'Accueil',
