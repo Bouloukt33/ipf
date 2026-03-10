@@ -2,6 +2,7 @@ export type UserRole = 'USER' | 'ADMIN' | 'MODERATOR';
 
 export type SubscriptionPlan = "FREE" | "PRO";
 export type SubscriptionStatus = "ACTIVE" | "CANCELLED" | "EXPIRED";
+export type Zone = 'mobile' | 'tablet' | 'desktop';
 
 export interface UserProfile {
     displayName: string;
@@ -35,4 +36,14 @@ export interface AuthState {
     isLoading: boolean;
     setUser: (user: AuthUser) => void;
     clearUser: () => void;
+}
+
+export interface SidebarItemProps {
+    href: string;
+    label: string;
+    icon: React.ReactNode;
+    iconBg: string;
+    isActive: boolean;
+    collapsed: boolean;
+    tooltip: string;
 }
