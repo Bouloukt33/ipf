@@ -1,9 +1,11 @@
-import { AuthUser } from "./type";
+import { API_ENDPOINTS } from "@/lib/api.config";
+import { apiFetch } from "@/lib/api.fetch";
+import { IAuthUser } from "@/lib/type";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
 // Utilisateur de test pour le développement frontend, à remplacer par la vraie réponse du backend
-const mockUser: AuthUser = {  
+const mockUser: IAuthUser = {  
     id: 1,
     auth0Id: "auth0|123456",
     email: "user@example.com",
@@ -27,19 +29,12 @@ const mockUser: AuthUser = {
 };
 
 export async function syncUserWithBackend(accessToken: string) {
-    /*const res = await fetch(`${API_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
-        },
-        cache: 'no-store',
-    });
+    /*const res = apiFetch<IAuthUser>(API_ENDPOINTS.auth.syncUser, {
+        method: 'POST'
+    }).catch(err => {
+        console.error('Sync failed:', err);
+        return null; 
+    }); */
 
-    //if (!res.ok) throw new Error(`Sync failed: ${res.status}`);
-
-    const data = await res.json();
-    return data.user || [];*/
-    
     return mockUser;
 }

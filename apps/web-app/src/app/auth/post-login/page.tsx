@@ -1,6 +1,6 @@
 import { auth0 } from '@/lib/auth0';
 import { redirect } from 'next/navigation';
-import { syncUserWithBackend } from '@/lib/auth.api';
+import { syncUserWithBackend } from '@/services/auth.service';
 
 export default async function CallbackPage() {
     const session = await auth0.getSession();

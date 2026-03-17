@@ -10,6 +10,7 @@ import { SidebarItem } from './SidebarItem';
 import { MobileNavItem } from './MobileNavItem';
 import { MobileLogoutItem } from './MobileLogoutItem';
 import { useSidebar } from '@/hooks/useSidebar';
+import Image from 'next/image';
 
 export function UserSidebar() {
     const pathname = usePathname();
@@ -92,20 +93,13 @@ export function UserSidebar() {
 
                 {/* Header */}
                 <div style={headerStyle}>
-                    <div style={logoWrapperStyle}>
-                        <a href="/" style={{
-                            display: 'block',
-                            fontSize: 24,
-                            fontWeight: 900,
-                            color: '#D27A2D',
-                            letterSpacing: '-0.5px',
-                            textDecoration: 'none',
-                            whiteSpace: 'nowrap',
-                            lineHeight: 1.2,
-                        }}>
-                            5secondes<br /><span style={{ color: 'white' }}>chrono</span>
-                        </a>
-                    </div>
+                    <Image
+                        src='/images/logo_dark.png'
+                        alt="5secondes chrono"
+                        width={collapsed ? 0 : 200}
+                        height={32}
+                        style={logoWrapperStyle}
+                    />
                     <CollapseButton collapsed={collapsed} onClick={toggle} />
                 </div>
 

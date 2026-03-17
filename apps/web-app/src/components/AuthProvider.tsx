@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useAuthStore } from '@/store/auth.store';
-import { syncUserWithBackend } from '@/lib/auth.api';
+import { syncUserWithBackend } from '@/services/auth.service';
 
 interface Props {
     accessToken: string | null;

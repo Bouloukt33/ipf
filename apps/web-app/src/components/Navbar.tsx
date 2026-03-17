@@ -3,6 +3,7 @@ import { auth0 } from "@/lib/auth0";
 import LogoutButton from './LogoutButton';
 import LoginButton from './LoginButton';
 import { UserMenu } from './UserMenu';
+import Image from 'next/image';
 
 export default async function Navbar() {
     const session = await auth0.getSession();    
@@ -10,11 +11,14 @@ export default async function Navbar() {
     
     return (
         <nav className="fixed w-full top-0 z-[1000] bg-white/95 backdrop-blur-[20px] border-b border-gray-200 shadow-soft">
-            <div className="max-w-[1400px] mx-auto px-10 py-[18px] flex justify-between items-center">
+            <div className="max-w-[1400px] mx-auto flex justify-between items-center">
                 <Link href="/" className="flex items-center gap-3 no-underline group">
-                    <span className="text-xl font-black text-navy font-nunito transition-all duration-300 group-hover:text-primary">
-                        ⚡ 5 Secondes Chrono
-                    </span>
+                    <Image
+                        src='/images/logo_light.png'
+                        alt="5secondes chrono"
+                        width={150}
+                        height={44}
+                    />
                 </Link>
 
                 <ul className="hidden md:flex gap-[35px] list-none items-center">
