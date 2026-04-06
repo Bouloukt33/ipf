@@ -150,11 +150,53 @@ export interface UserProfileData {
   jobProfile: (JobProfileData & { sector: { id: string; name: string } }) | null;
 }
 
-export interface UserData {
-  id: string;
-  auth0Id: string;
+export interface ProfileData {
+  displayName: string | null;
   email: string;
-  profile: UserProfileData | null;
+  avatarUrl: string | null;
+  ageRange: string | null;
+  professionalStatus: string | null;
+  jobProfileId: string | null;
+  level: number;
+  xpTotal: number;
+  streakDays: number;
+  subscription: {
+    plan: string;
+    status: string;
+    cancelAtPeriodEnd: boolean;
+    currentPeriodEnd: string;
+  } | null;
+}
+
+export interface ProfileUpdateResponse {
+  displayName: string | null;
+  avatarUrl: string | null;
+  ageRange: string | null;
+  professionalStatus: string | null;
+  jobProfileId: string | null;
+}
+
+export interface SubscriptionPlan {
+  id: string;
+  name: string;
+  slug: string;
+  price: number;
+  features: string[];
+}
+
+export interface SubscriptionStatus {
+  isPremium: boolean;
+  subscription: {
+    plan: string;
+    status: string;
+    endDate: string;
+  } | null;
+}
+
+export interface SubscribeResponse {
+  success: boolean;
+  plan: { name: string; slug: string };
+  subscription: { startDate: string; endDate: string; status: string };
 }
 
 export const api = {
@@ -192,17 +234,27 @@ export const api = {
   },
 
   profile: {
-    get: () => request<UserData>('/profile'),
+    get: () => request<ProfileData>('/profile/me'),
     update: (data: {
       displayName?: string;
       avatarUrl?: string;
       ageRange?: string;
       professionalStatus?: string;
       jobProfileId?: string;
-    }) => request<UserProfileData>('/profile', {
-      method: 'PUT',
+    }) => request<ProfileUpdateResponse>('/profile/me', {
+      method: 'PATCH',
       body: JSON.stringify(data),
     }),
+  },
+
+  subscription: {
+    getPlans: () => request<SubscriptionPlan[]>('/subscription/plans'),
+    getStatus: () => request<SubscriptionStatus>('/subscription/status'),
+    subscribe: (planSlug: string) =>
+      request<SubscribeResponse>('/subscription/subscribe', {
+        method: 'POST',
+        body: JSON.stringify({ planSlug }),
+      }),
   },
 
   reference: {
