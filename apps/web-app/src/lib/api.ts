@@ -1,4 +1,5 @@
 import { getAccessToken } from '@auth0/nextjs-auth0/client';
+import { apiLogger } from './logger';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 const API_PREFIX = '/api';
@@ -21,7 +22,7 @@ async function request<T>(
   try {
     token = await getAccessToken();
   } catch {
-    // Not logged in — continue without token
+    // User not authenticated — continue without token for public endpoints
   }
 
   const res = await fetch(`${API_BASE}${API_PREFIX}${path}`, {
@@ -35,6 +36,7 @@ async function request<T>(
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({ message: res.statusText }));
+    apiLogger.warn(`Request failed: ${path}`, { status: res.status });
     throw new ApiError(res.status, body.message || res.statusText);
   }
 
@@ -120,6 +122,41 @@ export interface CategoryData {
   isPremium: boolean;
 }
 
+export interface JobProfileData {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+export interface JobSectorData {
+  id: string;
+  name: string;
+  slug: string;
+  order: number;
+  jobProfiles: JobProfileData[];
+}
+
+export interface LabelValue {
+  value: string;
+  label: string;
+}
+
+export interface UserProfileData {
+  id: string;
+  displayName: string | null;
+  ageRange: string | null;
+  professionalStatus: string | null;
+  jobProfileId: string | null;
+  jobProfile: (JobProfileData & { sector: { id: string; name: string } }) | null;
+}
+
+export interface UserData {
+  id: string;
+  auth0Id: string;
+  email: string;
+  profile: UserProfileData | null;
+}
+
 export const api = {
   quiz: {
     start: (payload: StartSessionPayload) =>
@@ -147,6 +184,31 @@ export const api = {
 
     history: (limit = 10) =>
       request<any[]>(`/quiz/history?limit=${limit}`),
+
+    ready: (sessionId: string) =>
+      request<{ ok: boolean }>(`/quiz/${sessionId}/ready`, {
+        method: 'POST',
+      }),
+  },
+
+  profile: {
+    get: () => request<UserData>('/profile'),
+    update: (data: {
+      displayName?: string;
+      avatarUrl?: string;
+      ageRange?: string;
+      professionalStatus?: string;
+      jobProfileId?: string;
+    }) => request<UserProfileData>('/profile', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+  },
+
+  reference: {
+    jobProfiles: () => request<JobSectorData[]>('/reference/job-profiles'),
+    ageRanges: () => request<LabelValue[]>('/reference/age-ranges'),
+    professionalStatuses: () => request<LabelValue[]>('/reference/professional-statuses'),
   },
 
   categories: {

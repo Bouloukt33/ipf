@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 
 const API_BASE_URL = process.env.API_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+const isDev = process.env.NODE_ENV === 'development';
 
 async function syncUser(accessToken: string) {
     try {
@@ -15,7 +16,8 @@ async function syncUser(accessToken: string) {
             cache: 'no-store',
         });
     } catch (error) {
-        console.error('[Dashboard] Sync user error:', error);
+        // Server-side only log — safe in production
+        if (isDev) console.error('[Dashboard] Sync user error:', error);
     }
 }
 

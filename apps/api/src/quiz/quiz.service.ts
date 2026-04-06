@@ -140,7 +140,7 @@ export class QuizService {
         comboCount: 0,
         currentQuestionIdx: 0,
         questionOrder: questionIds,
-        questionServedAt: new Date(),
+        questionServedAt: null, // Timer starts when frontend signals ready
         status: 'IN_PROGRESS',
       },
     });
@@ -174,16 +174,26 @@ export class QuizService {
    * Validates server-side timer, updates lives/combo, returns feedback + next question.
    */
   async submitAnswer(
+    auth0Id: string,
     sessionId: string,
     questionId: string,
     userAnswer: string,
     responseTimeMs: number,
   ): Promise<AnswerResult> {
-    const session = await this.prisma.quizSession.findUnique({
-      where: { id: sessionId },
-    });
+    // Fetch user and session in parallel for efficiency
+    const [user, session] = await Promise.all([
+      this.prisma.user.findUnique({ where: { auth0Id }, select: { id: true } }),
+      this.prisma.quizSession.findUnique({ where: { id: sessionId } }),
+    ]);
 
+    if (!user) throw new NotFoundException('Utilisateur non trouvé');
     if (!session) throw new NotFoundException('Session non trouvée');
+    
+    // IDOR protection: verify session ownership
+    if (session.userId !== user.id) {
+      throw new ForbiddenException('Accès non autorisé à cette session');
+    }
+    
     if (session.status !== 'IN_PROGRESS') {
       throw new BadRequestException('Session terminée');
     }
@@ -268,7 +278,7 @@ export class QuizService {
         comboCount: newCombo,
         livesRemaining: newLives,
         currentQuestionIdx: nextIdx,
-        questionServedAt: isSessionComplete ? null : undefined,
+        questionServedAt: null, // Reset timer for next question
         status: newStatus,
         ...(isSessionComplete ? { completedAt: new Date() } : {}),
       },
@@ -321,7 +331,13 @@ export class QuizService {
   /**
    * Complete session and calculate final stats + XP/level updates.
    */
-  async completeSession(sessionId: string): Promise<CompletionResult> {
+  async completeSession(sessionId: string, auth0Id: string): Promise<CompletionResult> {
+    const user = await this.prisma.user.findUnique({ 
+      where: { auth0Id }, 
+      select: { id: true } 
+    });
+    if (!user) throw new NotFoundException('Utilisateur non trouvé');
+
     const session = await this.prisma.quizSession.findUnique({
       where: { id: sessionId },
       include: {
@@ -331,6 +347,11 @@ export class QuizService {
     });
 
     if (!session) throw new NotFoundException('Session non trouvée');
+    
+    // IDOR protection: verify session ownership
+    if (session.userId !== user.id) {
+      throw new ForbiddenException('Accès non autorisé à cette session');
+    }
 
     // If still in progress, mark completed
     if (session.status === 'IN_PROGRESS') {
@@ -541,11 +562,20 @@ export class QuizService {
    * Mark the current question as displayed — starts the server-side timer.
    * Called by frontend when the question is actually rendered on screen.
    */
-  async markQuestionReady(sessionId: string) {
-    const session = await this.prisma.quizSession.findUnique({
-      where: { id: sessionId },
-    });
+  async markQuestionReady(sessionId: string, auth0Id: string) {
+    const [user, session] = await Promise.all([
+      this.prisma.user.findUnique({ where: { auth0Id }, select: { id: true } }),
+      this.prisma.quizSession.findUnique({ where: { id: sessionId } }),
+    ]);
+    
+    if (!user) throw new NotFoundException('Utilisateur non trouvé');
     if (!session) throw new NotFoundException('Session non trouvée');
+    
+    // IDOR protection: verify session ownership
+    if (session.userId !== user.id) {
+      throw new ForbiddenException('Accès non autorisé à cette session');
+    }
+    
     if (session.status !== 'IN_PROGRESS') {
       throw new BadRequestException('Session terminée');
     }

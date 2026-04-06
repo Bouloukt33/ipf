@@ -3,14 +3,39 @@
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
+import { useUser } from '@auth0/nextjs-auth0/client'
 import { api, type CategoryData } from '@/lib/api'
+import { createLogger } from '@/lib/logger'
+import LoginRequired from '@/components/quiz/LoginRequired'
+
+const logger = createLogger({ prefix: 'Selection' })
 
 export default function SelectionPage() {
     const router = useRouter()
+    const { user, isLoading: authLoading } = useUser()
     const [categories, setCategories] = useState<CategoryData[]>([])
     const [selected, setSelected] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
     const [loadingCategories, setLoadingCategories] = useState(true)
+    const [checkingProfile, setCheckingProfile] = useState(true)
+
+    // Check if profile is complete, redirect to onboarding if not
+    useEffect(() => {
+        if (authLoading || !user) return;
+        api.profile.get()
+            .then((userData) => {
+                const p = userData.profile;
+                if (!p || !p.ageRange || !p.professionalStatus || !p.jobProfileId) {
+                    router.replace('/quiz/onboarding');
+                } else {
+                    setCheckingProfile(false);
+                }
+            })
+            .catch((err) => {
+                logger.warn('Profile fetch failed, redirecting to onboarding', err.message);
+                router.replace('/quiz/onboarding');
+            });
+    }, [authLoading, user, router]);
 
     useEffect(() => {
         api.categories
@@ -20,8 +45,8 @@ export default function SelectionPage() {
                 // TODO: check user subscription status for premium access
                 setCategories(cats.filter((c) => !c.isPremium))
             })
-            .catch(() => {
-                // Fallback: show default
+            .catch((err) => {
+                logger.warn('Échec chargement catégories, utilisation du fallback', err.message)
                 setCategories([
                     { id: 'default', name: 'Bail Commercial', slug: 'bail-commercial', isPremium: false },
                 ])
@@ -33,6 +58,26 @@ export default function SelectionPage() {
         if (selected === null) return
         setLoading(true)
         router.push(`/quiz/play?categoryId=${selected}`)
+    }
+
+    if (authLoading) {
+        return (
+            <main className="min-h-screen flex items-center justify-center">
+                <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+            </main>
+        )
+    }
+
+    if (!user) {
+        return <LoginRequired returnTo="/quiz/selection" />
+    }
+
+    if (checkingProfile) {
+        return (
+            <main className="min-h-screen flex items-center justify-center">
+                <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+            </main>
+        )
     }
 
     return (

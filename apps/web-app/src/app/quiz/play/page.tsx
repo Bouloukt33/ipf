@@ -11,6 +11,7 @@ import AnswerGrid from '@/components/quiz/AnswerGrid';
 import FeedbackInline from '@/components/quiz/FeedbackInline';
 import FeedbackOverlay from '@/components/quiz/FeedbackOverlay';
 import MascotDisplay from '@/components/quiz/MascotDisplay';
+import LoginRequired from '@/components/quiz/LoginRequired';
 
 function QuizPlayContent() {
   const searchParams = useSearchParams();
@@ -43,10 +44,8 @@ function QuizPlayContent() {
 
   // Redirect to login if not authenticated
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/auth/login?returnTo=/quiz/play' + (categoryId ? `?categoryId=${categoryId}` : ''));
-    }
-  }, [authLoading, user, router, categoryId]);
+    // Handled by LoginRequired component below
+  }, [authLoading, user]);
 
   // Start session on mount (only if authenticated)
   useEffect(() => {
@@ -65,8 +64,26 @@ function QuizPlayContent() {
     }
   }, [state.phase, state.sessionId, router]);
 
-  // Loading (auth or session)
-  if (authLoading || state.phase === 'loading') {
+  // Loading auth
+  if (authLoading) {
+    return (
+      <main className="min-h-screen flex items-center justify-center">
+        <div className="text-center animate-fade-in-up">
+          <MascotDisplay variant="go" size={180} className="mx-auto mb-6" />
+          <p className="text-xl font-bold text-navy">Préparation du quiz...</p>
+          <div className="mt-4 w-16 h-1 bg-primary rounded-full mx-auto animate-shimmer" />
+        </div>
+      </main>
+    );
+  }
+
+  // Not logged in
+  if (!user) {
+    return <LoginRequired returnTo={`/quiz/play${categoryId ? `?categoryId=${categoryId}` : ''}`} />;
+  }
+
+  // Loading session
+  if (state.phase === 'loading') {
     return (
       <main className="min-h-screen flex items-center justify-center">
         <div className="text-center animate-fade-in-up">
@@ -108,8 +125,7 @@ function QuizPlayContent() {
   if (!state.question) return null;
 
   const isTimerRunning = state.phase === 'playing';
-  const isAnswerDisabled =
-    state.phase !== 'playing' && state.phase !== 'answering';
+  const isAnswerDisabled = state.phase !== 'playing';
   const showFeedback = state.phase === 'feedback';
 
   const options = [
@@ -185,7 +201,7 @@ function QuizPlayContent() {
       {showFeedback && state.isCorrect !== null && (
         <FeedbackInline
           isCorrect={state.isCorrect}
-          correctAnswer={state.correctAnswer ?? ''}
+          correctAnswer={options.find(o => o.key === state.correctAnswer)?.text ?? state.correctAnswer ?? ''}
           feedback={state.feedback}
         />
       )}

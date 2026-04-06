@@ -81,6 +81,7 @@ export class QuizController {
   })
   @ApiResponse({ status: 201, description: 'Réponse validée avec feedback et prochaine question' })
   async submitAnswer(
+    @CurrentUser('userId') userId: string,
     @Body()
     body: {
       sessionId: string;
@@ -90,6 +91,7 @@ export class QuizController {
     },
   ) {
     return this.quizService.submitAnswer(
+      userId,
       body.sessionId,
       body.questionId,
       body.answer,
@@ -107,8 +109,11 @@ export class QuizController {
   })
   @ApiParam({ name: 'sessionId', description: 'ID de la session' })
   @ApiResponse({ status: 201, description: 'Timer démarré' })
-  async questionReady(@Param('sessionId') sessionId: string) {
-    return this.quizService.markQuestionReady(sessionId);
+  async questionReady(
+    @Param('sessionId') sessionId: string,
+    @CurrentUser('userId') userId: string,
+  ) {
+    return this.quizService.markQuestionReady(sessionId, userId);
   }
 
   @Post(':sessionId/complete')
@@ -121,8 +126,11 @@ export class QuizController {
   })
   @ApiParam({ name: 'sessionId', description: 'ID de la session' })
   @ApiResponse({ status: 201, description: 'Stats finales avec XP, level, mascot range' })
-  async completeSession(@Param('sessionId') sessionId: string) {
-    return this.quizService.completeSession(sessionId);
+  async completeSession(
+    @Param('sessionId') sessionId: string,
+    @CurrentUser('userId') userId: string,
+  ) {
+    return this.quizService.completeSession(sessionId, userId);
   }
 
   @Get(':sessionId/review')
