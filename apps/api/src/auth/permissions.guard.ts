@@ -20,7 +20,7 @@ export class PermissionsGuard implements CanActivate {
     const user = request.user;
 
     if (!user || !user.permissions) {
-      throw new ForbiddenException('Permissions insuffisantes');
+      throw new ForbiddenException('Permissions insuffisantes — pas de user ou permissions dans le token');
     }
 
     const hasPermission = requiredPermissions.every((permission) =>
@@ -28,7 +28,9 @@ export class PermissionsGuard implements CanActivate {
     );
 
     if (!hasPermission) {
-      throw new ForbiddenException('Permissions insuffisantes');
+      throw new ForbiddenException(
+        `Permissions insuffisantes — requis: [${requiredPermissions}], reçu: [${user.permissions}]`,
+      );
     }
 
     return true;

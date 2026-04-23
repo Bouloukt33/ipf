@@ -138,10 +138,6 @@ const config: Config = {
                     '0%, 100%': { transform: 'rotate(-3deg)' },
                     '50%': { transform: 'rotate(3deg)' },
                 },
-                'theme-fill': {
-                    '0%': { width: '0%' },
-                    '100%': { width: 'var(--fill-pct)' },
-                },
             },
         },
     },

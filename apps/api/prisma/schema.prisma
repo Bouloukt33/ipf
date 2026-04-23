@@ -28,18 +28,23 @@ model User {
 }
 
 model UserProfile {
-  id           String    @id @default(cuid())
-  userId       String    @unique @map("user_id")
-  displayName  String?   @map("display_name")
-  avatarUrl    String?   @map("avatar_url")
-  xpTotal      Int       @default(0) @map("xp_total")
-  level        Int       @default(1)
-  streakDays   Int       @default(0) @map("streak_days")
-  bestStreak   Int       @default(0) @map("best_streak")
-  lastPlayedAt DateTime? @map("last_played_at")
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
-  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                 String              @id @default(cuid())
+  userId             String              @unique @map("user_id")
+  displayName        String?             @map("display_name")
+  avatarUrl          String?             @map("avatar_url")
+  ageRange           AgeRange?           @map("age_range")
+  professionalStatus ProfessionalStatus? @map("professional_status")
+  jobProfileId       String?             @map("job_profile_id")
+  xpTotal            Int                 @default(0) @map("xp_total")
+  level              Int                 @default(1)
+  streakDays         Int                 @default(0) @map("streak_days")
+  bestStreak         Int                 @default(0) @map("best_streak")
+  lastPlayedAt       DateTime?           @map("last_played_at")
+  lastLevelUpAt      DateTime?           @map("last_level_up_at")
+  createdAt          DateTime            @default(now()) @map("created_at")
+  updatedAt          DateTime            @updatedAt @map("updated_at")
+  jobProfile         JobProfile?         @relation(fields: [jobProfileId], references: [id])
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_profiles")
 }
@@ -98,12 +103,14 @@ model Category {
   color             String?
   order             Int                @default(0)
   isActive          Boolean            @default(true) @map("is_active")
+  isPremium         Boolean            @default(false) @map("is_premium")
   createdAt         DateTime           @default(now()) @map("created_at")
   updatedAt         DateTime           @updatedAt @map("updated_at")
   aiRecommendations AiRecommendation[]
   leaderboards      Leaderboard[]
   packs             Pack[]
   questions         Question[]
+  quizSessions      QuizSession[]
   themes            Theme[]
   userMasteries     UserMastery[]
   videos            Video[]
@@ -219,21 +226,27 @@ model Video {
 }
 
 model QuizSession {
-  id             String          @id @default(cuid())
-  userId         String          @map("user_id")
-  categoryId     String?         @map("category_id")
-  mode           QuizMode        @default(PRACTICE)
-  score          Int             @default(0)
-  totalQuestions Int             @map("total_questions")
-  correctAnswers Int             @default(0) @map("correct_answers")
-  xpEarned       Int             @default(0) @map("xp_earned")
-  durationMs     Int?            @map("duration_ms")
-  status         SessionStatus   @default(IN_PROGRESS)
-  startedAt      DateTime        @default(now()) @map("started_at")
-  completedAt    DateTime?       @map("completed_at")
-  aiQuestionLogs AiQuestionLog[]
-  answers        QuizAnswer[]
-  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                  String          @id @default(cuid())
+  userId              String          @map("user_id")
+  categoryId          String?         @map("category_id")
+  mode                QuizMode        @default(PRACTICE)
+  score               Int             @default(0)
+  totalQuestions      Int             @map("total_questions")
+  correctAnswers      Int             @default(0) @map("correct_answers")
+  xpEarned            Int             @default(0) @map("xp_earned")
+  durationMs          Int?            @map("duration_ms")
+  livesRemaining      Int             @default(5) @map("lives_remaining")
+  comboCount          Int             @default(0) @map("combo_count")
+  currentQuestionIdx  Int             @default(0) @map("current_question_idx")
+  questionServedAt    DateTime?       @map("question_served_at")
+  status              SessionStatus   @default(IN_PROGRESS)
+  startedAt           DateTime        @default(now()) @map("started_at")
+  completedAt         DateTime?       @map("completed_at")
+  aiQuestionLogs      AiQuestionLog[]
+  answers             QuizAnswer[]
+  questionOrder       Json?           @map("question_order")
+  category            Category?       @relation(fields: [categoryId], references: [id])
+  user                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([status])
@@ -393,6 +406,32 @@ model Subscription {
   @@map("subscriptions")
 }
 
+model JobSector {
+  id          String       @id @default(cuid())
+  name        String       @unique
+  slug        String       @unique
+  order       Int          @default(0)
+  createdAt   DateTime     @default(now()) @map("created_at")
+  jobProfiles JobProfile[]
+
+  @@map("job_sectors")
+}
+
+model JobProfile {
+  id           String        @id @default(cuid())
+  sectorId     String        @map("sector_id")
+  name         String
+  slug         String        @unique
+  order        Int           @default(0)
+  isActive     Boolean       @default(true) @map("is_active")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  sector       JobSector     @relation(fields: [sectorId], references: [id], onDelete: Cascade)
+  userProfiles UserProfile[]
+
+  @@unique([sectorId, slug])
+  @@map("job_profiles")
+}
+
 enum UserRole {
   USER
   ADMIN
@@ -447,4 +486,18 @@ enum SubscriptionStatus {
   CANCELED
   UNPAID
   TRIALING
+}
+
+enum AgeRange {
+  AGE_18_25
+  AGE_26_35
+  AGE_36_45
+  AGE_46_55
+  AGE_56_PLUS
+}
+
+enum ProfessionalStatus {
+  SALARIE
+  INDEPENDANT
+  MANDATAIRE
 }
