@@ -10,6 +10,9 @@ import { QuestionsModule } from './questions';
 import { CategoriesModule } from './categories';
 import { UsersModule } from './users';
 import { AdminModule } from './admin';
+import { DashboardModule } from './dashboard';
+import { LeaderboardModule } from './leaderboard';
+import { ProgressionModule } from './progression';
 
 @Module({
   imports: [
@@ -17,17 +20,20 @@ import { AdminModule } from './admin';
       isGlobal: true,
       envFilePath: '.env',
     }),
-    
+
     AuthModule,
-    
+
     PrismaModule,
-    
+
     ProfileModule,
     QuizModule,
     QuestionsModule,
     CategoriesModule,
     UsersModule,
     AdminModule,
+    DashboardModule,
+    LeaderboardModule,
+    ProgressionModule,
   ],
   controllers: [AppController],
   providers: [AppService],

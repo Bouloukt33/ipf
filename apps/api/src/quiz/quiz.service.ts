@@ -353,6 +353,8 @@ export class QuizService {
       throw new ForbiddenException('Accès non autorisé à cette session');
     }
 
+    const wasInProgress = session.status === 'IN_PROGRESS';
+
     // If still in progress, mark completed
     if (session.status === 'IN_PROGRESS') {
       await this.prisma.quizSession.update({
@@ -399,6 +401,16 @@ export class QuizService {
           ...(leveledUp ? { lastLevelUpAt: new Date() } : {}),
         },
       });
+    }
+
+    if (wasInProgress) {
+      await this.updateMastery(
+        session.userId,
+        session.categoryId,
+        answeredCount,
+        session.correctAnswers,
+      );
+      await this.updateLeaderboards(session.userId, newXpTotal, session.categoryId);
     }
 
     // Mascot range based on accuracy
@@ -737,5 +749,86 @@ export class QuizService {
       const j = Math.floor(Math.random() * (i + 1));
       [array[i], array[j]] = [array[j], array[i]];
     }
+  }
+
+  private async updateMastery(
+    userId: string,
+    categoryId: string | null,
+    questionsSeen: number,
+    correctCount: number,
+  ) {
+    if (!categoryId) return;
+
+    const existing = await this.prisma.userMastery.findFirst({
+      where: { userId, categoryId, themeId: null },
+    });
+
+    if (existing) {
+      const newSeen = existing.questionsSeen + questionsSeen;
+      const newCorrect = existing.correctCount + correctCount;
+      await this.prisma.userMastery.update({
+        where: { id: existing.id },
+        data: {
+          questionsSeen: newSeen,
+          correctCount: newCorrect,
+          masteryLevel: newSeen > 0 ? newCorrect / newSeen : 0,
+          lastPracticedAt: new Date(),
+        },
+      });
+    } else {
+      await this.prisma.userMastery.create({
+        data: {
+          userId,
+          categoryId,
+          themeId: null,
+          questionsSeen,
+          correctCount,
+          masteryLevel: questionsSeen > 0 ? correctCount / questionsSeen : 0,
+          lastPracticedAt: new Date(),
+        },
+      });
+    }
+  }
+
+  private async updateLeaderboards(
+    userId: string,
+    newXpTotal: number,
+    categoryId: string | null,
+  ) {
+    // Global leaderboard
+    let globalLb = await this.prisma.leaderboard.findFirst({
+      where: { type: 'GLOBAL', isActive: true },
+    });
+    if (!globalLb) {
+      globalLb = await this.prisma.leaderboard.create({
+        data: { type: 'GLOBAL', isActive: true },
+      });
+    }
+    await this.prisma.leaderboardEntry.upsert({
+      where: { leaderboardId_userId: { leaderboardId: globalLb.id, userId } },
+      create: { leaderboardId: globalLb.id, userId, score: newXpTotal, rank: 0 },
+      update: { score: newXpTotal },
+    });
+
+    // Category leaderboard
+    if (!categoryId) return;
+
+    let categoryLb = await this.prisma.leaderboard.findFirst({
+      where: { type: 'CATEGORY', categoryId, isActive: true },
+    });
+    if (!categoryLb) {
+      categoryLb = await this.prisma.leaderboard.create({
+        data: { type: 'CATEGORY', categoryId, isActive: true },
+      });
+    }
+    const { _sum } = await this.prisma.quizSession.aggregate({
+      where: { userId, categoryId, status: 'COMPLETED' },
+      _sum: { xpEarned: true },
+    });
+    await this.prisma.leaderboardEntry.upsert({
+      where: { leaderboardId_userId: { leaderboardId: categoryLb.id, userId } },
+      create: { leaderboardId: categoryLb.id, userId, score: _sum.xpEarned ?? 0, rank: 0 },
+      update: { score: _sum.xpEarned ?? 0 },
+    });
   }
 }

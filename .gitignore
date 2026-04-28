@@ -39,3 +39,6 @@ yarn-error.log*
 
 apps/*/pnpm-lock.yaml
 **/contenu_5_secondes_chrono/
+
+CLAUDE.md
+.claude/
