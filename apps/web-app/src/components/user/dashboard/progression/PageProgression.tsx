@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { use, useCallback } from "react";
 import { themes } from "@/data/themes";
 
 import { ProfileHeader } from "./ProfileHeader";
@@ -16,6 +16,8 @@ import {
     WEEK_DAYS,
 } from "../../../../data/progressionData";
 import { Divider } from "@/components/ui/divider";
+import { useAuthStore } from "@/store/auth.store";
+import { dashboardService } from "@/services/dashboard.service";
 
 interface IPageProgressionProps {
     onGoLeaderboard: () => void;
@@ -24,15 +26,17 @@ interface IPageProgressionProps {
 export function PageProgression({ onGoLeaderboard }: IPageProgressionProps) {
     // stable reference even if parent re-renders
     const handleGoLeaderboard = useCallback(onGoLeaderboard, [onGoLeaderboard]);
+    const user = useAuthStore((s) => s.user);    
+    const stats = use(dashboardService.getStats());
 
     return (
         <>
             <ProfileHeader
-                initial="T"
-                name="Thomas Renard"
-                level={4}
-                subscription="Abonné Compagnon"
-                memberSince="Membre depuis janvier 2025"
+                initial={user?.profile.displayName.charAt(0) || "U"}
+                name={user?.profile.displayName || "Unknown User"}
+                level={user?.profile.level || 4}
+                subscription={user?.subscription.plan === "PRO" ? "Abonné Compagnon" : "Abonné Gratuit"}
+                memberSince={user?.createdAt ? `Membre depuis ${new Date(user.createdAt).toLocaleDateString()}` : "Membre depuis Avril 2026"}
             />
 
             <div className="flex max-w-[1020px] mx-auto px-6 pb-10 items-start gap-0 max-[900px]:flex-col max-[900px]:px-4">
@@ -41,7 +45,7 @@ export function PageProgression({ onGoLeaderboard }: IPageProgressionProps) {
                     <h2 className="text-[22px] font-black text-charcoal mb-4 mt-1">Statistiques</h2>
 
                     <div className="grid grid-cols-2 gap-3 mb-1">
-                        {STATS.map((stat, i) => (
+                        {stats.map((stat, i) => (
                             <StatCard key={i} stat={stat} />
                         ))}
                     </div>

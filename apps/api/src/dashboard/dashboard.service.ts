@@ -39,10 +39,10 @@ export class DashboardService {
       : 0;
 
     return [
-      { label: 'Sessions jouées',  target: totalSessions },
-      { label: 'Taux de réussite', target: avgAccuracy, suffix: '%' },
-      { label: 'XP total',         target: user.profile?.xpTotal ?? 0 },
-      { label: 'Jours de série',   target: user.profile?.streakDays ?? 0, suffix: ' j' },
+        { id: 'sessions', label: 'Sessions jouées',  target: totalSessions },
+        { id: 'accuracy', label: 'Taux de réussite', target: avgAccuracy, suffix: '%' },
+        { id: 'xp', label: 'XP total',         target: user.profile?.xpTotal ?? 0 },
+        { id: 'streak', label: 'Jours de série',   target: user.profile?.streakDays ?? 0, suffix: ' j' },
     ];
   }
 

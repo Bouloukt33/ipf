@@ -72,7 +72,7 @@ export interface ILeaderboardEntry {
 }
 
 export interface IStatItem {
-    icon: ReactNode;
+    icon?: ReactNode;
     target: number;
     suffix?: string;
     label: string;

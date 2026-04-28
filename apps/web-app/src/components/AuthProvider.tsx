@@ -19,7 +19,7 @@ export function AuthProvider({ accessToken, children }: React.PropsWithChildren<
         }
 
         syncUserWithBackend(accessToken)
-            .then(setUser)
+            .then(setUser as any) 
             .catch((err) => {
                 console.error('[AuthProvider] sync error:', err);
                 clearUser();

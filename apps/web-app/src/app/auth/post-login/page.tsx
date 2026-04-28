@@ -9,7 +9,7 @@ export default async function CallbackPage() {
 
     const user = await syncUserWithBackend(session.tokenSet.accessToken!);
 
-    switch (user.role) {
+    switch (user?.role) {
         case 'ADMIN':
         case 'MODERATOR':
             redirect('/dashboard/admin');
