@@ -42,3 +42,5 @@ apps/*/pnpm-lock.yaml
 
 CLAUDE.md
 .claude/
+*.dev.*
+*.dev
