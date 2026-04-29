@@ -11,7 +11,7 @@ interface Props {
 export function AuthProvider({ accessToken, children }: React.PropsWithChildren<Props>) {
     const setUser = useAuthStore((s) => s.setUser);
     const clearUser = useAuthStore((s) => s.clearUser);
-    
+
     useEffect(() => {
         if (!accessToken) {
             clearUser();

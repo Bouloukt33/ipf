@@ -7,8 +7,8 @@ export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost
 
 export const API_ENDPOINTS = {
     auth: {
-        syncUser: '/auth/sync-user',
-        me: '/auth/me',
+        syncUser: '/api/sync-user',
+        me: '/api/sync-user',
     },
 
     user: {
