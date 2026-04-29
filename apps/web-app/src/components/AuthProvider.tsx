@@ -11,19 +11,17 @@ interface Props {
 export function AuthProvider({ accessToken, children }: React.PropsWithChildren<Props>) {
     const setUser = useAuthStore((s) => s.setUser);
     const clearUser = useAuthStore((s) => s.clearUser);
-    
+
     useEffect(() => {
         if (!accessToken) {
             clearUser();
             return;
         }
 
-        syncUserWithBackend(accessToken)
-            .then(setUser)
-            .catch((err) => {
-                console.error('[AuthProvider] sync error:', err);
-                clearUser();
-            });
+        syncUserWithBackend().then(user => {
+            if (user) setUser(user);
+            else clearUser();
+        });
     }, [accessToken]);
 
     return <>{children}</>;
