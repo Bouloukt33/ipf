@@ -14,32 +14,34 @@ export interface StreakResponse {
     weekDays: StreakDay[];
 }
 
-const session = await auth0.getSession();
-const token = session?.tokenSet.accessToken ?? undefined;
-
 export const dashboardService = {
     /**
      * Récupère les statistiques globales de l'utilisateur
      * (quiz réalisés, taux de réussite, temps moyen, jours de série).
      */
     getStats: (): Promise<IStatItem[]> =>
-        apiFetch(API_ENDPOINTS.dashboard.stats, { token }),
+        apiFetch(API_ENDPOINTS.dashboard.stats, {}),
 
+    
+    getThemes: (): Promise<{ name: string; count: string; pct: number; stars: number }[]> =>
+        apiFetch(API_ENDPOINTS.progression.themes, {}),
     /**
      * Récupère les succès/achievements de l'utilisateur avec leur progression.
      */
     getAchievements: (): Promise<IAchievement[]> =>
-        apiFetch(API_ENDPOINTS.dashboard.achievements, { token }),
+        apiFetch(API_ENDPOINTS.dashboard.achievements, {}),
 
     /**
      * Récupère la streak courante et l'état des 7 derniers jours.
      */
     getStreak: (): Promise<StreakResponse> =>
-        apiFetch(API_ENDPOINTS.dashboard.streak, { token }),
+        apiFetch(API_ENDPOINTS.dashboard.streak, {}),
 
     /**
      * Récupère le mini-leaderboard affiché sur le dashboard (top 3 + user).
      */
     getLeaderboardPreview: (): Promise<ILeaderboardEntry[]> =>
-        apiFetch(API_ENDPOINTS.leaderboard.global, { token }),
+        apiFetch<{ podium: ILeaderboardEntry[]; rows: ILeaderboardEntry[] }>(
+            API_ENDPOINTS.leaderboard.preview, {}
+        ).then((raw) => [...raw.podium, ...raw.rows]),
 };

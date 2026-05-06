@@ -15,11 +15,11 @@ export const themesService = {
      * Récupère tous les thèmes avec leur progression utilisateur.
      */
     getAll: (token: string): Promise<ThemeProgression[]> =>
-        apiFetch(API_ENDPOINTS.themes.list, { token }),
+        apiFetch(API_ENDPOINTS.themes.list),
 
     /**
      * Récupère un thème spécifique par son slug (ex: "bail-commercial").
      */
     getBySlug: (slug: string, token: string): Promise<ThemeProgression> =>
-        apiFetch(API_ENDPOINTS.themes.bySlug(slug), { token }),
+        apiFetch(API_ENDPOINTS.themes.bySlug(slug)),
 };

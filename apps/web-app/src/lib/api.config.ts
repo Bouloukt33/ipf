@@ -1,9 +1,4 @@
-/**
- * Point de sortie centralisé pour toutes les requêtes API.
- * Tous les fichiers d'appels API doivent importer depuis ce fichier.
- */
-
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+export const API_BASE_URL = 'http://localhost:3000/api';
 
 export const API_ENDPOINTS = {
     auth: {
@@ -30,12 +25,14 @@ export const API_ENDPOINTS = {
     progression: {
         list: '/progression',
         byMonth: (month: string) => `/progression/${month}`,
+        themes: '/progression/themes',         
         update: (id: string) => `/progression/${id}`,
     },
 
     leaderboard: {
         global: '/leaderboard',
         podium: '/leaderboard/podium',
+        preview: '/leaderboard/preview',       
         byTheme: (theme: string) => `/leaderboard/${theme}`,
     },
 } as const;

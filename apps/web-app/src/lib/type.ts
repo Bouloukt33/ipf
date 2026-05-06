@@ -34,10 +34,21 @@ export interface IAuthUser {
     subscription: IUserSubscription;
 }
 
+export interface IUser {
+    id: number;
+    auth0Id: string;
+    email: string;
+    role: UserRole;
+    isActive: boolean;
+    createdAt: string;
+    profile: IUserProfile;
+    subscription: IUserSubscription;
+}
 export interface IAuthState {
-    user: IAuthUser | null;
+    user: IUser | null;
+    accessToken: string | null;  
     isLoading: boolean;
-    setUser: (user: IAuthUser) => void;
+    setUser: (user: IUser, accessToken: string) => void; 
     clearUser: () => void;
 }
 
@@ -94,7 +105,9 @@ export interface IThemeItem {
 }
 
 export interface IAchievement {
-    icon: ReactNode;
+    icon?: ReactNode;
+    conditionType?: string;  // ← ajouter si absent
+    slug?: string;
     gradient: string;
     levelLabel: string;
     title: string;
@@ -104,5 +117,3 @@ export interface IAchievement {
     barColor: string;
     locked?: boolean;
 }
-
-

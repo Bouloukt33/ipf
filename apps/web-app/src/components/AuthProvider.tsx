@@ -4,27 +4,21 @@ import { useEffect } from 'react';
 import { useAuthStore } from '@/store/auth.store';
 import { syncUserWithBackend } from '@/services/auth.service';
 
-interface Props {
-    accessToken: string | null;
-}
-
-export function AuthProvider({ accessToken, children }: React.PropsWithChildren<Props>) {
+export function AuthProvider({ children }: { children: React.ReactNode }) {
     const setUser = useAuthStore((s) => s.setUser);
     const clearUser = useAuthStore((s) => s.clearUser);
 
     useEffect(() => {
-        if (!accessToken) {
-            clearUser();
-            return;
-        }
-
-        syncUserWithBackend()
-            .then(setUser as any) 
-            .catch((err) => {
-                console.error('[AuthProvider] sync error:', err);
-                clearUser();
-            });
-    }, [accessToken]);
+        fetch('/api/auth/token')
+            .then((res) => res.ok ? res.json() : null)
+            .then(async (data) => {
+                if (!data?.accessToken) return clearUser(); 
+                const user = await syncUserWithBackend(data.accessToken);
+                if (user) setUser(user, data.accessToken); 
+                else clearUser();
+            })
+            .catch(() => clearUser());
+    }, []);
 
     return <>{children}</>;
 }

@@ -1,23 +1,20 @@
 import { API_BASE_URL } from "./api.config";
 
-/**
- * Wrapper fetch centralisé — injecte automatiquement le baseUrl,
- * le Content-Type et le token Auth0 si disponible.
- */
 export async function apiFetch<T>(
     path: string,
-    options: RequestInit & { token?: string } = {}
+    options: RequestInit = {}
 ): Promise<T> {
-    const { token, ...fetchOptions } = options;
+    const { useAuthStore } = await import('@/store/auth.store');
+    const token = useAuthStore.getState().accessToken;
 
     const headers: HeadersInit = {
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        ...fetchOptions.headers,
+        ...options.headers,
     };
 
     const res = await fetch(`${API_BASE_URL}${path}`, {
-        ...fetchOptions,
+        ...options,
         headers,
     });
 
@@ -26,7 +23,6 @@ export async function apiFetch<T>(
         throw new Error(error?.message ?? `API error ${res.status}`);
     }
 
-    // 204 No Content
     if (res.status === 204) return undefined as T;
 
     return res.json() as Promise<T>;

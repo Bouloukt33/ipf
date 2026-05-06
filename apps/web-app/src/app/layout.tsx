@@ -9,8 +9,6 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-    const session = await auth0.getSession();
-    const accessToken = session?.tokenSet.accessToken ?? null;
 
     return (
         <html lang="fr">
@@ -23,7 +21,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 />
             </head>
             <body>
-                <AuthProvider accessToken={accessToken}>
+                <AuthProvider>
                     {children}
                 </AuthProvider>
             </body>

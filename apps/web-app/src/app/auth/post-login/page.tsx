@@ -23,6 +23,7 @@ export default async function PostLoginPage() {
 
         if (response.ok) {
             const data = await response.json();
+            
             isNewUser = data.isNewUser ?? false;
             role = data.user?.role ?? 'USER';
         }
@@ -32,5 +33,5 @@ export default async function PostLoginPage() {
 
     if (isNewUser) redirect('/welcome?type=register');
     if (role === 'ADMIN' || role === 'MODERATOR') redirect('/dashboard/admin');
-    redirect('/dashboard');
+    redirect('/dashboard'); 
 }

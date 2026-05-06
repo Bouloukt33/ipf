@@ -1,16 +1,17 @@
-import { API_ENDPOINTS } from "@/lib/api.config";
-import { apiFetch } from "@/lib/api.fetch";
 import { IAuthUser } from "@/lib/type";
 
-export async function syncUserWithBackend(): Promise<IAuthUser | null> {
+export async function syncUserWithBackend(accessToken: string): Promise<IAuthUser | null> {
     try {
-        const data = await apiFetch<{ user: IAuthUser; isNewUser: boolean }>(
-            API_ENDPOINTS.auth.syncUser,
-            { method: 'GET' }
-        );
-        return data.user ?? null;
-    } catch (err) {
-        console.error('Sync failed:', err);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+            },
+        });
+
+        if (!res.ok) return null;
+        return await res.json();
+    } catch {
         return null;
     }
 }
