@@ -29,18 +29,6 @@ export const StreakCard = memo(function StreakCard({ streak, weekDays }: IStreak
                 <div className="text-[14px] font-black text-muted uppercase tracking-[0.8px] mt-1">
                     Jours d&apos;affilée
                 </div>
-                <div className="flex justify-center gap-1.5 mt-4">
-                    {weekDays.map((day, i) => (
-                        <div key={i} className="flex flex-col items-center gap-1">
-                            <div
-                                className={`w-[34px] h-[34px] rounded-full border-2 flex items-center justify-center ${DAY_CLASSES[day.status]}`}
-                            >
-                                {day.status !== "none" && <CheckIcon />}
-                            </div>
-                            <div className="text-[11px] font-black text-muted">{day.label}</div>
-                        </div>
-                    ))}
-                </div>
             </div>
         </div>
     );

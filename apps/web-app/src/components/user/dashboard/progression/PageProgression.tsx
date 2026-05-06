@@ -13,12 +13,44 @@ import { useAuthStore } from "@/store/auth.store";
 import { dashboardService, StreakResponse } from "@/services/dashboard.service";
 import { IAchievement, ILeaderboardEntry, IStatItem } from "@/lib/type";
 
-// ── Icône par conditionType ───────────────────────────────────────────────────
 import { FlameWhiteBadge }  from "@/components/ui/badges/FlameWhiteBadge";
 import { ArrowRightBadge }  from "@/components/ui/badges/ArrowRightBadge";
 import { TrophyIcon }       from "@/components/ui/icons/TrophyIcon";
 import type { ReactNode } from "react";
 
+import {
+    FileText, Scale, Clock, AlertTriangle,
+    ShieldAlert, Share2, BookOpen, Gavel,
+    Building2, Key, Landmark, Briefcase,
+} from "lucide-react";
+
+// ── Palette thèmes ────────────────────────────────────────────────────────────
+const THEME_PALETTES = [
+    { icBg: "#FFF3E8", color: "#D27A2D" }, // orange
+    { icBg: "#E8F4FF", color: "#1CB0F6" }, // bleu
+    { icBg: "#EDFBE8", color: "#58CC02" }, // vert
+    { icBg: "#F3E8FF", color: "#CE82FF" }, // violet
+    { icBg: "#FFE8E8", color: "#FF4B4B" }, // rouge
+    { icBg: "#FFF8E8", color: "#FFC800" }, // jaune
+];
+
+const THEME_ICONS = [
+    FileText, Scale, Clock, AlertTriangle,
+    ShieldAlert, Share2, BookOpen, Gavel,
+    Building2, Key, Landmark, Briefcase,
+];
+
+function getThemeDecoration(index: number) {
+    const palette = THEME_PALETTES[index % THEME_PALETTES.length];
+    const Icon = THEME_ICONS[index % THEME_ICONS.length];
+    return {
+        icBg: palette.icBg,
+        icSvg: <Icon size={24} color={palette.color} strokeWidth={2.5} />,
+        barStyle: `background:${palette.color}`,
+    };
+}
+
+// ── Badge icons ───────────────────────────────────────────────────────────────
 const BADGE_ICONS: Record<string, ReactNode> = {
     STREAK_DAYS:      <FlameWhiteBadge />,
     CORRECT_STREAK:   <ArrowRightBadge />,
@@ -39,21 +71,22 @@ interface IPageProgressionProps {
 export function PageProgression({ onGoLeaderboard }: IPageProgressionProps) {
     const handleGoLeaderboard = useCallback(onGoLeaderboard, [onGoLeaderboard]);
     const user = useAuthStore((s) => s.user);
-    const [themes, setThemes] = useState<{ name: string; count: string; pct: number; stars: number; icBg: string; icSvg: ReactNode }[]>([]);
+    const [themes, setThemes] = useState<{ name: string; count: string; pct: number; stars: number; icBg: string; icSvg: ReactNode; barStyle?: string }[]>([]);
 
     const [stats,        setStats]        = useState<IStatItem[]>([]);
     const [achievements, setAchievements] = useState<IAchievement[]>([]);
     const [streak,       setStreak]       = useState<StreakResponse | null>(null);
     const [leaderboard,  setLeaderboard]  = useState<ILeaderboardEntry[]>([]);
 
-    const isLoading = useAuthStore((s) => s.isLoading);  
+    const isLoading   = useAuthStore((s) => s.isLoading);
     const accessToken = useAuthStore((s) => s.accessToken);
 
-    useEffect(() => {        
+    useEffect(() => {
         if (isLoading || !accessToken) return;
 
         dashboardService.getStats().then(setStats).catch(console.error);
         dashboardService.getStreak().then(setStreak).catch(console.error);
+
         dashboardService.getLeaderboardPreview().then((raw: any) => {
             const entries = Array.isArray(raw) ? raw : [...(raw.podium ?? []), ...(raw.rows ?? [])];
             setLeaderboard(entries);
@@ -68,10 +101,13 @@ export function PageProgression({ onGoLeaderboard }: IPageProgressionProps) {
         }).catch(console.error);
 
         dashboardService.getThemes().then((raw) => {
-            setThemes(raw.map((t) => ({ ...t, icBg: '', icSvg: null })));
+            setThemes(raw.map((t, i) => ({
+                ...t,
+                ...getThemeDecoration(i),
+            })));
         }).catch(console.error);
 
-    }, [isLoading, accessToken]); 
+    }, [isLoading, accessToken]);
 
     return (
         <>
@@ -132,10 +168,10 @@ export function PageProgression({ onGoLeaderboard }: IPageProgressionProps) {
                         streak={streak?.currentStreak ?? 0}
                         weekDays={streak?.weekDays ?? WEEK_DAYS}
                     />
-                    <MiniLeaderboard
+                    {/*<MiniLeaderboard
                         entries={leaderboard}
                         onViewAll={handleGoLeaderboard}
-                    />
+                    />*/}
                 </div>
             </div>
         </>
