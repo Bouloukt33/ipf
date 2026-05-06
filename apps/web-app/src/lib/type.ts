@@ -101,12 +101,12 @@ export interface IThemeItem {
     stars: number;
     icBg: string;
     icSvg: ReactNode;
-    barStyle?: string; // matches the type coming from @/data/themes
+    barStyle?: string; 
 }
 
 export interface IAchievement {
     icon?: ReactNode;
-    conditionType?: string;  // ← ajouter si absent
+    conditionType?: string;  
     slug?: string;
     gradient: string;
     levelLabel: string;

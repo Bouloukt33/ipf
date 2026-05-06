@@ -86,6 +86,8 @@ services:
       - app
     networks:
       - ipf-network
+    volumes:
+      - ./contenu_5_secondes_chrono:/app/contenu_5_secondes_chrono
 
   # Web App Next.js
   web-app:

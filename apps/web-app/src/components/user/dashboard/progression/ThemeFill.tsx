@@ -10,7 +10,11 @@ export const ThemeFill = memo(function ThemeFill({ pct, barStyle }: IThemeFillPr
     return (
         <div
             className="h-full rounded-[5px] transition-[width] duration-500 ease-out"
-            style={{ width: `${pct}%`, ...parseStyle(barStyle) }}
+            style={{ 
+                width: `${pct}%`, 
+                background: '#D27A2D', 
+                ...parseStyle(barStyle) 
+            }}
         />
     );
 });

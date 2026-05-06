@@ -7,7 +7,6 @@ import React, { useEffect, useRef, useState } from 'react'
 const minimalStyles = `
     @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap');
 
-    /* Theme bar animated fill */
     .theme-fill-anim {
         height: 100%;
         border-radius: 5px;
@@ -15,13 +14,13 @@ const minimalStyles = `
         transition: width 1.1s cubic-bezier(0.34, 1.2, 0.64, 1);
     }
 
-    /* Succes bar animated fill */
     .succes-bar-fill {
         height: 100%;
         border-radius: 4px;
+        background: #D27A2D;         /* ← couleur manquante */
+        transition: width 0.5s ease-out;  /* ← animation bonus */
     }
 `
-
 export default function ProgressionPage() {
     const [tab, setTab] = useState<'progression' | 'leaderboard'>('progression')
 
