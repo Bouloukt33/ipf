@@ -117,3 +117,40 @@ export interface IAchievement {
     barColor: string;
     locked?: boolean;
 }
+
+export interface IProfileData {
+    displayName:        string | null;
+    email:              string;
+    avatarUrl:          string | null;
+    ageRange:           string | null;
+    professionalStatus: string | null;
+    jobProfileId:       string | null;
+    sector:             string | null;  
+    jobTitle:           string | null;  
+    level:              number;
+    xpTotal:            number;
+    streakDays:         number;
+    subscription: {
+        plan:              string;
+        status:            string;
+        cancelAtPeriodEnd: boolean;
+        currentPeriodEnd:  string;
+    } | null;
+}
+
+export interface IPaymentMethod {
+    brand: string;
+    last4: string;
+    expiry: string;
+    holderName: string;
+}
+
+export interface IPlan {
+    slug: string;
+    name: string;
+    price: number;
+    yearlyPrice?: number;
+    description: string;
+    savePct?: number;
+    nextBilling?: string;
+}

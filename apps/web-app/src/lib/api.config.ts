@@ -35,4 +35,13 @@ export const API_ENDPOINTS = {
         preview: '/leaderboard/preview',       
         byTheme: (theme: string) => `/leaderboard/${theme}`,
     },
+
+    profile: {
+        me:                 '/profile/me',
+        update:             '/profile/me',
+        paymentMethod:      '/profile/payment-method',
+        plans:              '/profile/plans',
+        choosePlan:         '/profile/plans/choose',
+        cancelSubscription: '/profile/subscription/cancel',
+    },
 } as const;
