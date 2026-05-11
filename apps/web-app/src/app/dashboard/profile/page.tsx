@@ -43,7 +43,7 @@ export default function PageProfil() {
         })
         .finally(() => setFetching(false));
 
-    }, [isLoading, accessToken]); // ← clé : se re-déclenche quand le token arrive
+    }, [isLoading, accessToken]); 
 
     const handleSave = useCallback(async (data: Partial<IProfileData>) => {
         await profileService.updateProfile(data);

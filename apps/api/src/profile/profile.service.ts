@@ -9,7 +9,7 @@ export class ProfileService {
 
     private async findUser(userId: string) {
         const user = await this.prisma.user.findUnique({
-            where: { id: userId },
+            where: { auth0Id: userId }, 
             include: {
                 profile: true,
                 subscription: { include: { plan: true } },
@@ -137,9 +137,14 @@ export class ProfileService {
 
         // Placeholder — à remplacer par un appel Stripe quand intégré
         // const customer = await stripe.customers.retrieve(user.subscription?.stripeCustomerId);
-        if (!user.subscription?.stripeCustomerId) return null;
+        //if (!user.subscription?.stripeCustomerId) return null;
 
-        return null;
+        return {
+            brand: 'Visa',
+            last4: '4242',
+            expMonth: 12,
+            expYear: 2025,
+        };
     }
 
     // ── Plans ──
