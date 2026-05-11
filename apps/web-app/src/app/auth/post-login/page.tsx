@@ -31,7 +31,7 @@ export default async function PostLoginPage() {
         // sync échoué → on atterrit quand même sur /dashboard
     }
 
-    if (isNewUser) redirect('/welcome?type=register');
+    if (isNewUser) redirect('/quiz/onboarding');
     if (role === 'ADMIN' || role === 'MODERATOR') redirect('/dashboard/admin');
     redirect('/dashboard'); 
 }

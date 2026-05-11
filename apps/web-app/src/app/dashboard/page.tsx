@@ -36,34 +36,12 @@ export default async function DashboardPage() {
 
     return (
         <div className="min-h-screen bg-white">
-            <nav className="bg-white/95 backdrop-blur-lg border-b border-gray-200 shadow-soft">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between h-16 items-center">
-                        <Link href="/" className="flex items-center gap-2">
-                            <h1 className="text-2xl font-black gradient-text-animate">
-                                ⚡ 5 Secondes Chrono
-                            </h1>
-                        </Link>
-                        <div className="flex items-center gap-4">
-                            <span className="text-sm text-charcoal/70 font-semibold">
-                                {user.name || user.email}
-                            </span>
-                            <a 
-                                href="/auth/logout"
-                                className="px-4 py-2 bg-gray-100 border border-gray-200 text-navy rounded-lg font-bold text-sm transition-all duration-300 hover:bg-primary hover:text-white hover:border-primary"
-                            >
-                                Déconnexion
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </nav>
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="mb-8">
                     <h2 className="text-3xl font-black text-navy">Dashboard</h2>
                     <p className="text-charcoal/70 mt-2 font-semibold">
-                        Bienvenue {user.name || user.nickname} ! 👋
+                        Bienvenue {user.name || user.nickname} !
                     </p>
                 </div>
 
