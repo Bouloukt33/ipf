@@ -2,8 +2,8 @@ export const API_BASE_URL = 'http://localhost:3000/api';
 
 export const API_ENDPOINTS = {
     auth: {
-        syncUser: '/api/sync-user',
-        me: '/api/sync-user',
+        syncUser: '/sync-user',
+        me: '/sync-user',
     },
 
     user: {

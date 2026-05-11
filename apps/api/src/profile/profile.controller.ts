@@ -19,7 +19,7 @@ export class ProfileController {
         return this.profileService.getProfile(userId);
     }
 
-    @Put()
+    @Patch('me')
     @ApiOperation({ summary: 'Mettre à jour le profil', description: "Met à jour les informations du profil" })
     @ApiBody({
         schema: {
@@ -33,8 +33,6 @@ export class ProfileController {
             },
         },
     })
-
-    @Patch('me')
     @ApiResponse({ status: 200, description: 'Profil mis à jour avec succès' })
     @ApiResponse({ status: 400, description: 'Données invalides' })
     @ApiResponse({ status: 401, description: 'Non autorisé' })

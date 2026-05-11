@@ -17,7 +17,7 @@ const CSV_DIR = join(CONTENT_DIR, 'base de donnee csv');
 
 if (!existsSync(CSV_DIR)) {
   console.error(`❌ Dossier CSV introuvable: ${CSV_DIR}`);
-  process.exit(1);
+  //process.exit(1);
 }
 
 // ── Category definitions ──
@@ -262,6 +262,7 @@ const DEV_USERS = [
     email: 'admin@dev.local',
     role: 'ADMIN' as const,
     displayName: 'Admin Dev',
+    avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=AdminDev&backgroundColor=b6e3f4',
     xpTotal: 2400,
     level: 8,
     streakDays: 14,
@@ -826,24 +827,26 @@ async function main() {
 
     // UserProfile
     await prisma.userProfile.upsert({
-      where: { userId: user.id },
-      update: {
-        displayName: u.displayName,
-        xpTotal: u.xpTotal,
-        level: u.level,
-        streakDays: u.streakDays,
-        bestStreak: u.bestStreak,
-        lastPlayedAt: daysAgo(1),
-      },
-      create: {
-        userId: user.id,
-        displayName: u.displayName,
-        xpTotal: u.xpTotal,
-        level: u.level,
-        streakDays: u.streakDays,
-        bestStreak: u.bestStreak,
-        lastPlayedAt: daysAgo(1),
-      },
+        where: { userId: user.id },
+        update: {
+            displayName: u.displayName,
+            avatarUrl: u.avatarUrl,        
+            xpTotal: u.xpTotal,
+            level: u.level,
+            streakDays: u.streakDays,
+            bestStreak: u.bestStreak,
+            lastPlayedAt: daysAgo(1),
+        },
+        create: {
+            userId: user.id,
+            displayName: u.displayName,
+            avatarUrl: u.avatarUrl,        
+            xpTotal: u.xpTotal,
+            level: u.level,
+            streakDays: u.streakDays,
+            bestStreak: u.bestStreak,
+            lastPlayedAt: daysAgo(1),
+        },
     });
 
     // UserRanking

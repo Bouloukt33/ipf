@@ -113,6 +113,7 @@ export function PageProgression({ onGoLeaderboard }: IPageProgressionProps) {
         <>
             <ProfileHeader
                 initial={user?.profile.displayName?.charAt(0) ?? "U"}
+                avatarUrl={user?.profile.avatarUrl}
                 name={user?.profile.displayName ?? "Unknown User"}
                 level={user?.profile.level ?? 1}
                 subscription={user?.subscription?.plan === "PRO" ? "Abonné Compagnon" : "Abonné Gratuit"}

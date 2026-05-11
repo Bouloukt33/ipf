@@ -13,7 +13,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             .then((res) => res.ok ? res.json() : null)
             .then(async (data) => {
                 if (!data?.accessToken) return clearUser(); 
-                const user = await syncUserWithBackend(data.accessToken);
+                const user = await syncUserWithBackend(data.accessToken);                
                 if (user) setUser(user, data.accessToken); 
                 else clearUser();
             })

@@ -76,7 +76,7 @@ export class AuthController {
   }
 
   /**
-   * GET /api/auth/me
+   * GET /auth/me
    * Récupère les informations de l'utilisateur connecté
    */
   @Get('me')
@@ -87,6 +87,7 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Non autorisé' })
   @ApiResponse({ status: 404, description: 'Utilisateur non trouvé' })
   async getMe(@CurrentUser() user: any) {
+    console.log('user from token:', user);
     return this.authService.getUser(user.userId);
   }
 
