@@ -1,6 +1,6 @@
 "use client";
 
-import { WelcomeLogin } from "../components/welcome/WelcomeLogin";
+import { WelcomeLogin } from "../../components/welcome/WelcomeLogin";
 
 export default function LoginPage() {
     return (

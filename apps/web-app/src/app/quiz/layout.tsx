@@ -1,8 +1,8 @@
 'use client'
 
-import FloatingBackground from "@/app/components/FloatingBackground";
+import FloatingBackground from "@/components/FloatingBackground";
 import { useUser } from "@auth0/nextjs-auth0/client";
-import { UserSidebar } from '@/components/user/sidebar/Sidebar';
+import { UserSidebar } from '@/components/sidebar/Sidebar';
 
 export default function QuizLayout({ children }: { children: React.ReactNode }) {
     const { user } = useUser();

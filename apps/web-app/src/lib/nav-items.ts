@@ -29,3 +29,20 @@ export const userNavItems = [
         iconColor: '#ce82ff',
     },
 ];
+
+export const adminNavItems = [
+    {
+        label: 'Tableau de bord',
+        href: '/admin/dashboard',
+        icon: Home,
+        iconBg: 'rgba(195,209,185,0.2)',
+        iconColor: '#fff',
+    },
+    {
+        label: 'Questions',
+        href: '/admin/questions',
+        icon: CircleGauge,
+        iconBg: 'rgba(210,122,45,0.2)',
+        iconColor: '#D27A2D',
+    },
+];

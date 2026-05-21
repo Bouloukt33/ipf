@@ -5,7 +5,7 @@ import QuizReadyState from '@/components/quiz/QuizReadyState'
 import { api } from '@/lib/api'
 import { useUser } from '@auth0/nextjs-auth0/client'
 import { useEffect, useState } from 'react'
-import FloatingBackground from '../components/FloatingBackground'
+import FloatingBackground from '../../components/FloatingBackground'
 
 export default function QuizPage() {
     const [profileComplete, setProfileComplete] = useState<boolean | null>(null)

@@ -12,8 +12,9 @@ const prisma = new PrismaClient({ adapter });
 // ── Path to content data ──
 const CONTENT_DIR =
   process.env.CONTENT_DIR ??
-  resolve(__dirname, '../../../../contenu_5_secondes_chrono');
+  resolve(__dirname, '../../../contenu_5_secondes_chrono');
 const CSV_DIR = join(CONTENT_DIR, 'base de donnee csv');
+
 
 if (!existsSync(CSV_DIR)) {
   console.error(`❌ Dossier CSV introuvable: ${CSV_DIR}`);
