@@ -53,5 +53,9 @@ export const API_ENDPOINTS = {
         delete:       (id: string) => `/questions/${id}`,
         toggleActive: (id: string) => `/questions/${id}/toggle-active`,
     },
+
+    categories: {
+        list: '/categories',
+    }
         
 } as const;

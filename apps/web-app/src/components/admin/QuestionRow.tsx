@@ -8,6 +8,7 @@ import {
     LEASE_TYPE_LABELS,
     DIFFICULTY_LABELS,
     STATUS_LABELS,
+    ICategory,
 } from '@/lib/question.types';
 import { truncateText } from '@/lib/generateCode';
 import {
@@ -22,6 +23,7 @@ import {
 
 interface QuestionRowProps {
     question: IQuestion;
+    categories: ICategory[];
     isEven: boolean;
     onEdit: (question: IQuestion) => void;
     onDelete: (id: string) => void;
@@ -57,6 +59,7 @@ export function QuestionRow({
     onSuspend,
     onArchive,
     onRestore,
+    categories
 }: QuestionRowProps) {
     const [menuOpen, setMenuOpen] = useState(false);
 
@@ -108,14 +111,14 @@ export function QuestionRow({
             {/* Lease type */}
             <td className="px-4 py-3 whitespace-nowrap">
                 <span className="text-[12px] font-extrabold text-[#D27A2D] bg-[rgba(210,122,45,0.1)] px-2.5 py-1 rounded-full">
-                    {LEASE_TYPE_LABELS[question.leaseType]}
+                    {question.category?.name ?? '—'}
                 </span>
             </td>
 
             {/* Category */}
             <td className="px-4 py-3">
                 <span className="text-[13px] font-semibold text-[#172E42]">
-                    {question.categoryName ?? '—'}
+                    {question.category.name ?? '—'}
                 </span>
             </td>
 

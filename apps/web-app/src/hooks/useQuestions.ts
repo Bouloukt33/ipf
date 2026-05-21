@@ -1,6 +1,7 @@
 'use client';
 
-import { IQuestion, IQuestionFilters, IQuestionFormData, IQuestionStats } from '@/lib/question.types';
+import { ICategory, IQuestion, IQuestionFilters, IQuestionFormData, IQuestionStats } from '@/lib/question.types';
+import { categoriesService } from '@/services/categories.service';
 import { questionsService } from '@/services/questions.service';
 import { useAuthStore } from '@/store/auth.store';
 import { useState, useEffect, useCallback } from 'react';
@@ -15,6 +16,7 @@ interface UseQuestionsReturn {
     error: string | null;
     currentPage: number;
     totalPages: number;
+    categories: ICategory[];
     total: number;
     setPage: (page: number) => void;
     setFilters: (filters: Partial<IQuestionFilters>) => void;
@@ -38,6 +40,7 @@ const DEFAULT_FILTERS: IQuestionFilters = {
 
 export function useQuestions(): UseQuestionsReturn {
     const [questions, setQuestions]  = useState<IQuestion[]>([]);
+    const [categories, setCategories]  = useState<ICategory[]>([]);
     const [stats, setStats]          = useState<IQuestionStats | null>(null);
     const [filters, setFiltersState] = useState<IQuestionFilters>(DEFAULT_FILTERS);
     const [isLoading, setIsLoading]  = useState(false);
@@ -68,10 +71,20 @@ export function useQuestions(): UseQuestionsReturn {
         }
     }, []);
 
+    const loadCategories = useCallback(async () => {
+        try {
+            const cats = await categoriesService.getCategories();            
+            setCategories(cats);
+        } catch (err) {
+            console.error('Failed to load categories:', err);
+        }
+    }, []);
+
     useEffect(() => {
         if (authLoading || !accessToken) return;
         loadQuestions(filters, currentPage);
-    }, [filters, currentPage, loadQuestions, authLoading, accessToken]);
+        loadCategories();
+    }, [filters, currentPage, loadQuestions, loadCategories, authLoading, accessToken]);
 
     const setFilters = useCallback((newFilters: Partial<IQuestionFilters>) => {
         setFiltersState((prev) => ({ ...prev, ...newFilters }));
@@ -132,6 +145,7 @@ export function useQuestions(): UseQuestionsReturn {
 
     return {
         questions,
+        categories,
         stats,
         filters,
         isLoading,

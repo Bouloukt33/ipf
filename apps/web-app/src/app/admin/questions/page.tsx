@@ -17,6 +17,7 @@ import {
     PaginationPrevious,
 } from '@/components/ui/pagination';
 import React, { useState, useCallback } from 'react';
+import { useEffect } from 'react';
 
 export default function AdminQuestionsPage() {
     const {
@@ -37,6 +38,7 @@ export default function AdminQuestionsPage() {
         suspendQuestion,
         archiveQuestion,
         restoreQuestion,
+        categories
     } = useQuestions();
 
     const [modalOpen, setModalOpen]             = useState(false);
@@ -96,7 +98,7 @@ export default function AdminQuestionsPage() {
             )}
 
             <QuestionActions stats={stats} onCreateNew={openCreate} />
-            <QuestionFilters filters={filters} onChange={setFilters} onReset={resetFilters} />
+            <QuestionFilters categories={categories} filters={filters} onChange={setFilters} onReset={resetFilters} />
 
             {!isLoading && (
                 <p className="text-[12px] font-bold text-[#5a7a99] mb-3">
@@ -108,6 +110,7 @@ export default function AdminQuestionsPage() {
                 questions={questions}
                 isLoading={isLoading}
                 onEdit={openEdit}
+                categories={categories}
                 onDelete={handleDelete}
                 onSuspend={handleSuspend}
                 onArchive={handleArchive}

@@ -11,6 +11,20 @@ export type LeaseType =
     | 'AGR'
     | 'RUR';
 
+export interface ICategory {
+    id: string;
+    name: string;
+    slug: string;
+    description: string;
+    iconUrl: string | null;
+    color: string;
+    order: number;
+    isActive: boolean;
+    isPremium: boolean;
+    createdAt: string;
+    updatedAt: string;
+};
+
 export interface IQuestion {
     id: string;
     code: string;
@@ -23,6 +37,7 @@ export interface IQuestion {
     leaseType: LeaseType;
     categoryId: string;
     categoryName?: string;
+    category: ICategory;
     difficulty: DifficultyLevel;
     timeToRead: number;
     packId?: string;

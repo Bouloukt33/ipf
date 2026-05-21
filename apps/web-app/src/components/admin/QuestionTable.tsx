@@ -1,10 +1,11 @@
 'use client';
 
 import React from 'react';
-import { IQuestion, LEASE_TYPE_LABELS, DIFFICULTY_LABELS, STATUS_LABELS } from '@/lib/question.types';
+import { IQuestion, LEASE_TYPE_LABELS, DIFFICULTY_LABELS, STATUS_LABELS, ICategory } from '@/lib/question.types';
 import { QuestionRow } from './QuestionRow';
 
 interface QuestionTableProps {
+    categories: ICategory[];
     questions: IQuestion[];
     isLoading: boolean;
     onEdit: (question: IQuestion) => void;
@@ -34,6 +35,7 @@ export function QuestionTable({
     onSuspend,
     onArchive,
     onRestore,
+    categories
 }: QuestionTableProps) {
     if (isLoading) {
         return (
@@ -91,6 +93,7 @@ export function QuestionTable({
                                 onSuspend={onSuspend}
                                 onArchive={onArchive}
                                 onRestore={onRestore}
+                                categories={categories}
                             />
                         ))}
                     </tbody>

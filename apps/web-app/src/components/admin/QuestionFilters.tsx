@@ -3,28 +3,30 @@
 import React from 'react';
 import {
     IQuestionFilters,
-    LEASE_TYPE_LABELS,
     DIFFICULTY_LABELS,
     STATUS_LABELS,
     LeaseType,
     DifficultyLevel,
     QuestionStatus,
+    ICategory,
 } from '@/lib/question.types';
+import { useQuestions } from '@/hooks/useQuestions';
 
 interface QuestionFiltersProps {
     filters: IQuestionFilters;
+    categories: ICategory[];
     onChange: (filters: Partial<IQuestionFilters>) => void;
     onReset: () => void;
 }
 
-export function QuestionFilters({ filters, onChange, onReset }: QuestionFiltersProps) {
+export function QuestionFilters({ filters, categories, onChange, onReset }: QuestionFiltersProps) {
     const hasActiveFilters =
         filters.search ||
         filters.leaseType ||
         filters.difficulty ||
         filters.status ||
-        filters.categoryId;
-
+        filters.categoryId;        
+        
     return (
         <div className="flex flex-wrap items-center gap-3 mb-6">
             {/* Search */}
@@ -62,10 +64,10 @@ export function QuestionFilters({ filters, onChange, onReset }: QuestionFiltersP
           focus:border-[#D27A2D] transition-colors font-nunito"
             >
                 <option value="">Tous les types</option>
-                {(Object.entries(LEASE_TYPE_LABELS) as [LeaseType, string][]).map(
+                {(Object.entries(categories) as [string, ICategory][]).map(                    
                     ([key, label]) => (
-                        <option key={key} value={key}>
-                            {label}
+                        <option key={key} value={label.id}>
+                            {label.name}
                         </option>
                     )
                 )}

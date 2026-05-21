@@ -51,7 +51,7 @@ export const questionsService = {
         params.set('page', String(page));
         params.set('limit', String(limit));
         if (filters?.search)     params.set('search', filters.search);
-        if (filters?.leaseType)  params.set('leaseType', filters.leaseType);
+        if (filters?.leaseType)  params.set('categoryId', filters.leaseType);
         if (filters?.categoryId) params.set('categoryId', filters.categoryId);
         if (filters?.difficulty) params.set('difficulty', filters.difficulty);
         if (filters?.status)     params.set('isActive', filters.status === 'ACTIVE' ? 'true' : 'false');
