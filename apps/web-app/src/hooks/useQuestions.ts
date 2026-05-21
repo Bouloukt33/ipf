@@ -1,10 +1,11 @@
-// src/app/hooks/useQuestions.ts
-
 'use client';
 
 import { IQuestion, IQuestionFilters, IQuestionFormData, IQuestionStats } from '@/lib/question.types';
 import { questionsService } from '@/services/questions.service';
+import { useAuthStore } from '@/store/auth.store';
 import { useState, useEffect, useCallback } from 'react';
+
+const ITEMS_PER_PAGE = 10;
 
 interface UseQuestionsReturn {
     questions: IQuestion[];
@@ -12,17 +13,18 @@ interface UseQuestionsReturn {
     filters: IQuestionFilters;
     isLoading: boolean;
     error: string | null;
-    // Filter actions
+    currentPage: number;
+    totalPages: number;
+    total: number;
+    setPage: (page: number) => void;
     setFilters: (filters: Partial<IQuestionFilters>) => void;
     resetFilters: () => void;
-    // CRUD
     createQuestion: (data: IQuestionFormData) => Promise<IQuestion>;
     updateQuestion: (id: string, data: Partial<IQuestionFormData>) => Promise<IQuestion>;
     deleteQuestion: (id: string) => Promise<void>;
     suspendQuestion: (id: string) => Promise<IQuestion>;
     archiveQuestion: (id: string) => Promise<IQuestion>;
     restoreQuestion: (id: string) => Promise<IQuestion>;
-    // Refresh
     refresh: () => Promise<void>;
 }
 
@@ -35,21 +37,29 @@ const DEFAULT_FILTERS: IQuestionFilters = {
 };
 
 export function useQuestions(): UseQuestionsReturn {
-    const [questions, setQuestions] = useState<IQuestion[]>([]);
-    const [stats, setStats] = useState<IQuestionStats | null>(null);
+    const [questions, setQuestions]  = useState<IQuestion[]>([]);
+    const [stats, setStats]          = useState<IQuestionStats | null>(null);
     const [filters, setFiltersState] = useState<IQuestionFilters>(DEFAULT_FILTERS);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const [isLoading, setIsLoading]  = useState(false);
+    const [error, setError]          = useState<string | null>(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [total, setTotal]             = useState(0);
+    const [totalPages, setTotalPages]   = useState(1);
 
-    const loadQuestions = useCallback(async (currentFilters: IQuestionFilters) => {
+    const authLoading = useAuthStore((s) => s.isLoading);
+    const accessToken = useAuthStore((s) => s.accessToken);
+
+    const loadQuestions = useCallback(async (currentFilters: IQuestionFilters, page: number) => {
         setIsLoading(true);
         setError(null);
         try {
-            const [data, statsData] = await Promise.all([
-                questionsService.getAll(currentFilters),
+            const [{ data, total: count, totalPages: pages }, statsData] = await Promise.all([
+                questionsService.getAll(currentFilters, page, ITEMS_PER_PAGE),
                 questionsService.getStats(),
             ]);
             setQuestions(data);
+            setTotal(count);
+            setTotalPages(pages);
             setStats(statsData);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Une erreur est survenue');
@@ -59,20 +69,27 @@ export function useQuestions(): UseQuestionsReturn {
     }, []);
 
     useEffect(() => {
-        loadQuestions(filters);
-    }, [filters, loadQuestions]);
+        if (authLoading || !accessToken) return;
+        loadQuestions(filters, currentPage);
+    }, [filters, currentPage, loadQuestions, authLoading, accessToken]);
 
     const setFilters = useCallback((newFilters: Partial<IQuestionFilters>) => {
         setFiltersState((prev) => ({ ...prev, ...newFilters }));
+        setCurrentPage(1);
     }, []);
 
     const resetFilters = useCallback(() => {
         setFiltersState(DEFAULT_FILTERS);
+        setCurrentPage(1);
     }, []);
 
+    const setPage = useCallback((page: number) => {
+        if (page >= 1 && page <= totalPages) setCurrentPage(page);
+    }, [totalPages]);
+
     const refresh = useCallback(async () => {
-        await loadQuestions(filters);
-    }, [filters, loadQuestions]);
+        await loadQuestions(filters, currentPage);
+    }, [filters, currentPage, loadQuestions]);
 
     const createQuestion = useCallback(async (data: IQuestionFormData): Promise<IQuestion> => {
         const created = await questionsService.create(data);
@@ -80,19 +97,20 @@ export function useQuestions(): UseQuestionsReturn {
         return created;
     }, [refresh]);
 
-    const updateQuestion = useCallback(
-        async (id: string, data: Partial<IQuestionFormData>): Promise<IQuestion> => {
-            const updated = await questionsService.update(id, data);
-            await refresh();
-            return updated;
-        },
-        [refresh]
-    );
+    const updateQuestion = useCallback(async (id: string, data: Partial<IQuestionFormData>): Promise<IQuestion> => {
+        const updated = await questionsService.update(id, data);
+        await refresh();
+        return updated;
+    }, [refresh]);
 
     const deleteQuestion = useCallback(async (id: string): Promise<void> => {
         await questionsService.delete(id);
-        await refresh();
-    }, [refresh]);
+        const newTotal = total - 1;
+        const maxPage = Math.max(1, Math.ceil(newTotal / ITEMS_PER_PAGE));
+        const nextPage = Math.min(currentPage, maxPage);
+        setCurrentPage(nextPage);
+        await loadQuestions(filters, nextPage);
+    }, [filters, currentPage, total, loadQuestions]);
 
     const suspendQuestion = useCallback(async (id: string): Promise<IQuestion> => {
         const updated = await questionsService.suspend(id);
@@ -118,6 +136,10 @@ export function useQuestions(): UseQuestionsReturn {
         filters,
         isLoading,
         error,
+        currentPage,
+        totalPages,
+        total,
+        setPage,
         setFilters,
         resetFilters,
         createQuestion,

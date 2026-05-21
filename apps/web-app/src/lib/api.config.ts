@@ -44,4 +44,14 @@ export const API_ENDPOINTS = {
         choosePlan:         '/profile/plans/choose',
         cancelSubscription: '/profile/subscription/cancel',
     },
+
+    questions: {
+        list:         '/questions',
+        byId:         (id: string) => `/questions/${id}`,
+        create:       '/questions',
+        update:       (id: string) => `/questions/${id}`,
+        delete:       (id: string) => `/questions/${id}`,
+        toggleActive: (id: string) => `/questions/${id}/toggle-active`,
+    },
+        
 } as const;

@@ -10,6 +10,15 @@ import {
     STATUS_LABELS,
 } from '@/lib/question.types';
 import { truncateText } from '@/lib/generateCode';
+import {
+    Pencil,
+    MoreHorizontal,
+    CheckCircle2,
+    PauseCircle,
+    Archive,
+    Trash2,
+    Star,
+} from 'lucide-react';
 
 interface QuestionRowProps {
     question: IQuestion;
@@ -83,9 +92,7 @@ export function QuestionRow({
                     <div className="flex items-center gap-2">
                         {question.successRate !== undefined && (
                             <span className="text-[11px] font-bold text-[#5a7a99] flex items-center gap-1">
-                                <svg width="10" height="10" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
+                                <Star size={10} fill="currentColor" strokeWidth={0} />
                                 {question.successRate}%
                             </span>
                         )}
@@ -159,9 +166,9 @@ export function QuestionRow({
                         onClick={() => onEdit(question)}
                         className="w-[34px] h-[34px] rounded-[9px] flex items-center justify-center
               bg-[rgba(30,58,95,0.08)] text-[#1e3a5f] hover:bg-[rgba(30,58,95,0.18)]
-              transition-all text-sm cursor-pointer border-none"
+              transition-all cursor-pointer border-none"
                     >
-                        ✏️
+                        <Pencil size={15} strokeWidth={2.2} />
                     </button>
 
                     {/* Status toggle menu */}
@@ -171,9 +178,9 @@ export function QuestionRow({
                             onClick={() => setMenuOpen((v) => !v)}
                             className="w-[34px] h-[34px] rounded-[9px] flex items-center justify-center
                 bg-[rgba(210,122,45,0.08)] text-[#D27A2D] hover:bg-[rgba(210,122,45,0.18)]
-                transition-all text-sm cursor-pointer border-none"
+                transition-all cursor-pointer border-none"
                         >
-                            ⋯
+                            <MoreHorizontal size={17} strokeWidth={2.2} />
                         </button>
                         {menuOpen && (
                             <>
@@ -185,33 +192,37 @@ export function QuestionRow({
                                     {question.status !== 'ACTIVE' && (
                                         <button
                                             onClick={() => { setMenuOpen(false); onRestore(question.id); }}
-                                            className="w-full px-4 py-2 text-left text-[13px] font-bold text-[#10B981] hover:bg-[rgba(16,185,129,0.06)] transition-colors"
+                                            className="w-full px-4 py-2 text-left text-[13px] font-bold text-[#10B981] hover:bg-[rgba(16,185,129,0.06)] transition-colors flex items-center gap-2.5"
                                         >
-                                            ✅ Activer
+                                            <CheckCircle2 size={14} strokeWidth={2.2} />
+                                            Activer
                                         </button>
                                     )}
                                     {question.status !== 'SUSPENDED' && (
                                         <button
                                             onClick={() => { setMenuOpen(false); onSuspend(question.id); }}
-                                            className="w-full px-4 py-2 text-left text-[13px] font-bold text-[#F59E0B] hover:bg-[rgba(245,158,11,0.06)] transition-colors"
+                                            className="w-full px-4 py-2 text-left text-[13px] font-bold text-[#F59E0B] hover:bg-[rgba(245,158,11,0.06)] transition-colors flex items-center gap-2.5"
                                         >
-                                            ⏸️ Suspendre
+                                            <PauseCircle size={14} strokeWidth={2.2} />
+                                            Suspendre
                                         </button>
                                     )}
                                     {question.status !== 'ARCHIVED' && (
                                         <button
                                             onClick={() => { setMenuOpen(false); onArchive(question.id); }}
-                                            className="w-full px-4 py-2 text-left text-[13px] font-bold text-[#6B7280] hover:bg-[rgba(107,114,128,0.06)] transition-colors"
+                                            className="w-full px-4 py-2 text-left text-[13px] font-bold text-[#6B7280] hover:bg-[rgba(107,114,128,0.06)] transition-colors flex items-center gap-2.5"
                                         >
-                                            📦 Archiver
+                                            <Archive size={14} strokeWidth={2.2} />
+                                            Archiver
                                         </button>
                                     )}
                                     <div className="my-1 h-px bg-[rgba(210,122,45,0.1)]" />
                                     <button
                                         onClick={handleDelete}
-                                        className="w-full px-4 py-2 text-left text-[13px] font-bold text-[#EF4444] hover:bg-[rgba(239,68,68,0.06)] transition-colors"
+                                        className="w-full px-4 py-2 text-left text-[13px] font-bold text-[#EF4444] hover:bg-[rgba(239,68,68,0.06)] transition-colors flex items-center gap-2.5"
                                     >
-                                        🗑️ Supprimer
+                                        <Trash2 size={14} strokeWidth={2.2} />
+                                        Supprimer
                                     </button>
                                 </div>
                             </>

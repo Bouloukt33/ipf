@@ -7,9 +7,16 @@ import { QuestionTable } from '@/components/admin/QuestionTable';
 import { Toast, useToast } from '@/components/admin/Toast';
 import { useQuestions } from '@/hooks/useQuestions';
 import { IQuestion, IQuestionFormData } from '@/lib/question.types';
+import {
+    Pagination,
+    PaginationContent,
+    PaginationEllipsis,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious,
+} from '@/components/ui/pagination';
 import React, { useState, useCallback } from 'react';
-
-const ITEMS_PER_PAGE = 10;
 
 export default function AdminQuestionsPage() {
     const {
@@ -18,6 +25,10 @@ export default function AdminQuestionsPage() {
         filters,
         isLoading,
         error,
+        currentPage,
+        totalPages,
+        total,
+        setPage,
         setFilters,
         resetFilters,
         createQuestion,
@@ -28,103 +39,38 @@ export default function AdminQuestionsPage() {
         restoreQuestion,
     } = useQuestions();
 
-    // Modal state
-    const [modalOpen, setModalOpen] = useState(false);
+    const [modalOpen, setModalOpen]             = useState(false);
     const [editingQuestion, setEditingQuestion] = useState<IQuestion | null>(null);
-
-    // Pagination
-    const [currentPage, setCurrentPage] = useState(1);
-
-    // Toast
     const { toast, show: showToast, hide: hideToast } = useToast();
 
-    // ── Pagination logic ──────────────────────────────────────────────────────
-    const totalPages = Math.max(1, Math.ceil(questions.length / ITEMS_PER_PAGE));
-    const paginatedQuestions = questions.slice(
-        (currentPage - 1) * ITEMS_PER_PAGE,
-        currentPage * ITEMS_PER_PAGE
-    );
+    const openCreate = useCallback(() => { setEditingQuestion(null); setModalOpen(true); }, []);
+    const openEdit   = useCallback((q: IQuestion) => { setEditingQuestion(q); setModalOpen(true); }, []);
+    const closeModal = useCallback(() => { setModalOpen(false); setEditingQuestion(null); }, []);
 
-    const handlePageChange = (page: number) => {
-        if (page >= 1 && page <= totalPages) setCurrentPage(page);
-    };
+    const handleSave = useCallback(async (data: IQuestionFormData) => {
+        if (editingQuestion) {
+            await updateQuestion(editingQuestion.id, data);
+            showToast('Question modifiée avec succès !', 'success');
+        } else {
+            await createQuestion(data);
+            showToast('Question créée avec succès !', 'success');
+        }
+    }, [editingQuestion, updateQuestion, createQuestion, showToast]);
 
-    // ── Modal handlers ────────────────────────────────────────────────────────
-    const openCreate = useCallback(() => {
-        setEditingQuestion(null);
-        setModalOpen(true);
-    }, []);
+    const handleDelete  = useCallback(async (id: string) => { await deleteQuestion(id);  showToast('Question supprimée.', 'info'); },    [deleteQuestion, showToast]);
+    const handleSuspend = useCallback(async (id: string) => { await suspendQuestion(id); showToast('Question suspendue.', 'info'); },    [suspendQuestion, showToast]);
+    const handleArchive = useCallback(async (id: string) => { await archiveQuestion(id); showToast('Question archivée.', 'info'); },    [archiveQuestion, showToast]);
+    const handleRestore = useCallback(async (id: string) => { await restoreQuestion(id); showToast('Question réactivée.', 'success'); }, [restoreQuestion, showToast]);
 
-    const openEdit = useCallback((question: IQuestion) => {
-        setEditingQuestion(question);
-        setModalOpen(true);
-    }, []);
-
-    const closeModal = useCallback(() => {
-        setModalOpen(false);
-        setEditingQuestion(null);
-    }, []);
-
-    const handleSave = useCallback(
-        async (data: IQuestionFormData) => {
-            if (editingQuestion) {
-                await updateQuestion(editingQuestion.id, data);
-                showToast('Question modifiée avec succès !', 'success');
-            } else {
-                await createQuestion(data);
-                showToast('Question créée avec succès !', 'success');
-            }
-            setCurrentPage(1);
-        },
-        [editingQuestion, updateQuestion, createQuestion, showToast]
-    );
-
-    // ── CRUD action handlers ──────────────────────────────────────────────────
-    const handleDelete = useCallback(
-        async (id: string) => {
-            await deleteQuestion(id);
-            showToast('Question supprimée.', 'info');
-        },
-        [deleteQuestion, showToast]
-    );
-
-    const handleSuspend = useCallback(
-        async (id: string) => {
-            await suspendQuestion(id);
-            showToast('Question suspendue.', 'info');
-        },
-        [suspendQuestion, showToast]
-    );
-
-    const handleArchive = useCallback(
-        async (id: string) => {
-            await archiveQuestion(id);
-            showToast('Question archivée.', 'info');
-        },
-        [archiveQuestion, showToast]
-    );
-
-    const handleRestore = useCallback(
-        async (id: string) => {
-            await restoreQuestion(id);
-            showToast('Question réactivée.', 'success');
-        },
-        [restoreQuestion, showToast]
-    );
-
-    // ── Pagination pages array ────────────────────────────────────────────────
-    const getPageNumbers = () => {
+    // Build page numbers with ellipsis
+    const getPageNumbers = (): (number | '…')[] => {
         const pages: (number | '…')[] = [];
         if (totalPages <= 7) {
             for (let i = 1; i <= totalPages; i++) pages.push(i);
         } else {
             pages.push(1);
             if (currentPage > 3) pages.push('…');
-            for (
-                let i = Math.max(2, currentPage - 1);
-                i <= Math.min(totalPages - 1, currentPage + 1);
-                i++
-            ) {
+            for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
                 pages.push(i);
             }
             if (currentPage < totalPages - 2) pages.push('…');
@@ -135,7 +81,6 @@ export default function AdminQuestionsPage() {
 
     return (
         <div className="flex-1 p-8 min-h-screen bg-[#F8F5F1]">
-            {/* Page header */}
             <div className="mb-6">
                 <h1 className="text-[24px] font-black text-[#172E42] mb-1">Questions / Quiz</h1>
                 <p className="text-[14px] font-semibold text-[#5a7a99]">
@@ -143,31 +88,24 @@ export default function AdminQuestionsPage() {
                 </p>
             </div>
 
-            {/* Error banner */}
             {error && (
                 <div className="mb-5 px-4 py-3 bg-[rgba(239,68,68,0.08)] border border-[rgba(239,68,68,0.2)] rounded-xl
-          text-[13px] font-bold text-[#EF4444] flex items-center gap-2">
+                    text-[13px] font-bold text-[#EF4444] flex items-center gap-2">
                     <span>⚠️</span> {error}
                 </div>
             )}
 
-            {/* Stats + CTA */}
             <QuestionActions stats={stats} onCreateNew={openCreate} />
-
-            {/* Filters */}
             <QuestionFilters filters={filters} onChange={setFilters} onReset={resetFilters} />
 
-            {/* Results count */}
             {!isLoading && (
                 <p className="text-[12px] font-bold text-[#5a7a99] mb-3">
-                    {questions.length} question{questions.length !== 1 ? 's' : ''} trouvée
-                    {questions.length !== 1 ? 's' : ''}
+                    {total} question{total !== 1 ? 's' : ''} trouvée{total !== 1 ? 's' : ''}
                 </p>
             )}
 
-            {/* Table */}
             <QuestionTable
-                questions={paginatedQuestions}
+                questions={questions}
                 isLoading={isLoading}
                 onEdit={openEdit}
                 onDelete={handleDelete}
@@ -176,57 +114,49 @@ export default function AdminQuestionsPage() {
                 onRestore={handleRestore}
             />
 
-            {/* Pagination */}
+            {/* Shadcn Pagination */}
             {!isLoading && totalPages > 1 && (
-                <div className="flex justify-center items-center gap-1.5 mt-7">
-                    {/* Prev */}
-                    <button
-                        onClick={() => handlePageChange(currentPage - 1)}
-                        disabled={currentPage === 1}
-                        className="w-9 h-9 rounded-[9px] border-[1.5px] border-[rgba(210,122,45,0.18)] bg-white
-              text-[#172E42] font-extrabold text-[13px] cursor-pointer flex items-center justify-center
-              hover:border-[#D27A2D] hover:text-[#D27A2D] transition-all
-              disabled:opacity-40 disabled:cursor-not-allowed"
-                    >
-                        ‹
-                    </button>
+                <div className="mt-7 flex justify-center">
+                    <Pagination>
+                        <PaginationContent>
+                            <PaginationItem>
+                                <PaginationPrevious
+                                    onClick={() => setPage(currentPage - 1)}
+                                    aria-disabled={currentPage === 1}
+                                    className={currentPage === 1 ? 'pointer-events-none opacity-40' : 'cursor-pointer'}
+                                />
+                            </PaginationItem>
 
-                    {getPageNumbers().map((page, idx) =>
-                        page === '…' ? (
-                            <span key={`ellipsis-${idx}`} className="w-9 h-9 flex items-center justify-center text-[#5a7a99] font-bold">
-                                …
-                            </span>
-                        ) : (
-                            <button
-                                key={page}
-                                onClick={() => handlePageChange(page as number)}
-                                className={`w-9 h-9 rounded-[9px] border-[1.5px] font-extrabold text-[13px] cursor-pointer
-                  flex items-center justify-center transition-all
-                  ${currentPage === page
-                                        ? 'bg-gradient-to-br from-[#D27A2D] to-[#F59E0B] border-transparent text-white'
-                                        : 'border-[rgba(210,122,45,0.18)] bg-white text-[#172E42] hover:border-[#D27A2D] hover:text-[#D27A2D]'
-                                    }`}
-                            >
-                                {page}
-                            </button>
-                        )
-                    )}
+                            {getPageNumbers().map((page, idx) =>
+                                page === '…' ? (
+                                    <PaginationItem key={`ellipsis-${idx}`}>
+                                        <PaginationEllipsis />
+                                    </PaginationItem>
+                                ) : (
+                                    <PaginationItem key={page}>
+                                        <PaginationLink
+                                            onClick={() => setPage(page as number)}
+                                            isActive={currentPage === page}
+                                            className="cursor-pointer"
+                                        >
+                                            {page}
+                                        </PaginationLink>
+                                    </PaginationItem>
+                                ),
+                            )}
 
-                    {/* Next */}
-                    <button
-                        onClick={() => handlePageChange(currentPage + 1)}
-                        disabled={currentPage === totalPages}
-                        className="w-9 h-9 rounded-[9px] border-[1.5px] border-[rgba(210,122,45,0.18)] bg-white
-              text-[#172E42] font-extrabold text-[13px] cursor-pointer flex items-center justify-center
-              hover:border-[#D27A2D] hover:text-[#D27A2D] transition-all
-              disabled:opacity-40 disabled:cursor-not-allowed"
-                    >
-                        ›
-                    </button>
+                            <PaginationItem>
+                                <PaginationNext
+                                    onClick={() => setPage(currentPage + 1)}
+                                    aria-disabled={currentPage === totalPages}
+                                    className={currentPage === totalPages ? 'pointer-events-none opacity-40' : 'cursor-pointer'}
+                                />
+                            </PaginationItem>
+                        </PaginationContent>
+                    </Pagination>
                 </div>
             )}
 
-            {/* Modal */}
             <QuestionModal
                 isOpen={modalOpen}
                 question={editingQuestion}
@@ -234,7 +164,6 @@ export default function AdminQuestionsPage() {
                 onSave={handleSave}
             />
 
-            {/* Toast */}
             <Toast
                 message={toast.message}
                 type={toast.type}
