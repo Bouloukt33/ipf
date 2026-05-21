@@ -45,6 +45,21 @@ export class AuthController {
   }
 
   /**
+   * POST /api/auth/sync-user
+   * Alias de /login — appelé côté client après la connexion Auth0
+   */
+  @Post('sync-user')
+  @UseGuards(AuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Sync utilisateur (client-side)', description: 'Alias de /login. Synchronise l\'utilisateur Auth0 depuis le frontend après connexion.' })
+  @ApiResponse({ status: 200, description: 'Utilisateur synchronisé' })
+  @ApiResponse({ status: 401, description: 'Token invalide' })
+  async syncUser(@CurrentUser() user: any) {
+    return this.authService.syncUser(user);
+  }
+
+  /**
    * POST /api/auth/login
    * Synchronise l'utilisateur Auth0 avec notre base de données
    * Appelé à chaque connexion pour mettre à jour les infos
@@ -61,7 +76,7 @@ export class AuthController {
   }
 
   /**
-   * GET /api/auth/me
+   * GET /auth/me
    * Récupère les informations de l'utilisateur connecté
    */
   @Get('me')
@@ -72,6 +87,7 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Non autorisé' })
   @ApiResponse({ status: 404, description: 'Utilisateur non trouvé' })
   async getMe(@CurrentUser() user: any) {
+    console.log('user from token:', user);
     return this.authService.getUser(user.userId);
   }
 

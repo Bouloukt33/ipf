@@ -27,6 +27,10 @@ const config: Config = {
                     secondary: '#2A262A',
                     muted: '#6B7280',
                 },
+                border: "hsl(var(--border))",
+                input: "hsl(var(--input))",
+                ring: "hsl(var(--ring))",
+                foreground: "hsl(var(--foreground))",
             },
             fontFamily: {
                 nunito: ['Nunito', 'sans-serif'],

@@ -1,0 +1,17 @@
+import { IAuthState } from '@/lib/type';
+import { create } from 'zustand';
+
+export const useAuthStore = create<IAuthState>((set) => ({
+    user: null,
+    accessToken: null,                    
+    isLoading: true,
+    setUser: (user, accessToken) => set({ user, accessToken, isLoading: false }),  
+    clearUser: () => set({ user: null, accessToken: null, isLoading: false }),    
+}));
+
+// Selectors
+export const useRole = () => useAuthStore((s) => s.user?.role);
+export const useIsAdmin = () => useAuthStore((s) => s.user?.role === 'ADMIN');
+export const useIsModerator = () => useAuthStore((s) =>
+    s.user?.role === 'ADMIN' || s.user?.role === 'MODERATOR'
+);
