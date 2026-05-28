@@ -1,35 +1,49 @@
-import { api, PackData, PackWithQuestions, CreatePackPayload, UpdatePackPayload, PackType } from '@/lib/api';
-
-export type { PackData, PackWithQuestions, PackType };
+import { API_ENDPOINTS } from '@/lib/api.config';
+import { apiFetch } from '@/lib/api.fetch';
+import { IPack, IPackFilters, IPackFormData } from '@/lib/pack.types';
 
 export const packsService = {
-    getAll: (params?: { categoryId?: string; type?: PackType; isFree?: boolean }) =>
-        api.packs.list(params),
+    getAll: (filters?: Partial<IPackFilters>): Promise<IPack[]> => {
+        const params = new URLSearchParams();
+        params.set('includeInactive', 'true');
+        if (filters?.categoryId) params.set('categoryId', filters.categoryId);
+        if (filters?.type)       params.set('type', filters.type);
+        return apiFetch(`${API_ENDPOINTS.packs.list}?${params.toString()}`);
+    },
 
-    getById: (id: string) =>
-        api.packs.get(id),
+    getById: (id: string): Promise<IPack> =>
+        apiFetch(API_ENDPOINTS.packs.byId(id)),
 
-    getBySlug: (categorySlug: string, packSlug: string) =>
-        api.packs.bySlug(categorySlug, packSlug),
+    create: (data: IPackFormData): Promise<IPack> =>
+        apiFetch(API_ENDPOINTS.packs.create, {
+            method: 'POST',
+            body: JSON.stringify({
+                ...data,
+                price: data.price ? parseFloat(data.price) : undefined,
+            }),
+        }),
 
-    getVisiteur: () =>
-        api.packs.list({ type: 'VISITEUR', isFree: true }),
+    update: (id: string, data: Partial<IPackFormData>): Promise<IPack> =>
+        apiFetch(API_ENDPOINTS.packs.update(id), {
+            method: 'PUT',
+            body: JSON.stringify({
+                ...data,
+                price: data.price !== undefined ? (data.price ? parseFloat(data.price) : null) : undefined,
+            }),
+        }),
 
-    create: (data: CreatePackPayload) =>
-        api.packs.create(data),
+    delete: (id: string): Promise<void> =>
+        apiFetch(API_ENDPOINTS.packs.delete(id), { method: 'DELETE' }),
 
-    update: (id: string, data: UpdatePackPayload) =>
-        api.packs.update(id, data),
+    toggleActive: (id: string): Promise<IPack> =>
+        apiFetch(API_ENDPOINTS.packs.toggleActive(id), { method: 'POST' }),
 
-    delete: (id: string) =>
-        api.packs.delete(id),
+    addQuestions: (id: string, questionIds: string[]): Promise<IPack> =>
+        apiFetch(API_ENDPOINTS.packs.addQuestions(id), {
+            method: 'POST',
+            body: JSON.stringify({ questionIds }),
+        }),
 
-    toggleActive: (id: string) =>
-        api.packs.toggleActive(id),
-
-    addQuestions: (id: string, questionIds: string[]) =>
-        api.packs.addQuestions(id, questionIds),
-
-    removeQuestion: (id: string, questionId: string) =>
-        api.packs.removeQuestion(id, questionId),
+    removeQuestion: (id: string, questionId: string): Promise<{ success: boolean }> =>
+        apiFetch(API_ENDPOINTS.packs.removeQuestion(id, questionId), { method: 'DELETE' }),
 };
