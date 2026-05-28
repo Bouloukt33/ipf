@@ -13,6 +13,7 @@ import { AdminModule } from './admin';
 import { DashboardModule } from './dashboard';
 import { LeaderboardModule } from './leaderboard';
 import { ProgressionModule } from './progression';
+import { SubscriptionModule } from './subscription';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { ProgressionModule } from './progression';
     DashboardModule,
     LeaderboardModule,
     ProgressionModule,
+    SubscriptionModule,
   ],
   controllers: [AppController],
   providers: [AppService],
