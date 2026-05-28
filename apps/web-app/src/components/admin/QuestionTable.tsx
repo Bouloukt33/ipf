@@ -36,7 +36,7 @@ export function QuestionTable({
     onArchive,
     onRestore,
     categories
-}: QuestionTableProps) {
+}: QuestionTableProps) {    
     if (isLoading) {
         return (
             <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">

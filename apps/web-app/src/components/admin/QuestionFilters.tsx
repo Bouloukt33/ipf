@@ -82,7 +82,7 @@ export function QuestionFilters({ filters, categories, onChange, onReset }: Ques
           focus:border-[#D27A2D] transition-colors font-nunito"
             >
                 <option value="">Toutes les difficultés</option>
-                {(Object.entries(DIFFICULTY_LABELS) as [DifficultyLevel, string][]).map(
+                {(Object.entries(DIFFICULTY_LABELS) as [string, string][]).map(
                     ([key, label]) => (
                         <option key={key} value={key}>
                             {label}

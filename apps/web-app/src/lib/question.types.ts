@@ -1,6 +1,6 @@
 export type QuestionStatus = 'ACTIVE' | 'SUSPENDED' | 'ARCHIVED';
 
-export type DifficultyLevel = 'FACILE' | 'MOYEN' | 'DIFFICILE' | 'ETUDE_DE_CAS';
+export type DifficultyLevel = 1 | 2 | 3 | 4;
 
 export type LeaseType =
     | 'COM'
@@ -38,12 +38,12 @@ export interface IQuestion {
     categoryId: string;
     categoryName?: string;
     category: ICategory;
-    difficulty: DifficultyLevel;
+    level: DifficultyLevel;
     timeToRead: number;
     packId?: string;
     videoUrl?: string;
     pedagogicalUrl?: string;
-    status: QuestionStatus;
+    status: QuestionStatus | 'ACTIVE';
     isPremium: boolean;
     explanation?: string;
     successRate?: number;
@@ -98,10 +98,10 @@ export const LEASE_TYPE_LABELS: Record<LeaseType, string> = {
 };
 
 export const DIFFICULTY_LABELS: Record<DifficultyLevel, string> = {
-    FACILE: 'Facile',
-    MOYEN: 'Moyen',
-    DIFFICILE: 'Difficile',
-    ETUDE_DE_CAS: 'Étude de cas',
+    1: 'Facile',
+    2: 'Moyen',
+    3: 'Difficile',
+    4: 'Étude de cas',
 };
 
 export const STATUS_LABELS: Record<QuestionStatus, string> = {
@@ -111,8 +111,8 @@ export const STATUS_LABELS: Record<QuestionStatus, string> = {
 };
 
 export const DIFFICULTY_LEVEL_MAP: Record<DifficultyLevel, string> = {
-    FACILE: 'F',
-    MOYEN: 'M',
-    DIFFICILE: 'D',
-    ETUDE_DE_CAS: 'EC',
+    1: 'F',
+    2: 'M',
+    3: 'D',
+    4: 'EC',
 };

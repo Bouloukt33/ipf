@@ -33,10 +33,10 @@ interface QuestionRowProps {
 }
 
 const DIFFICULTY_STYLES: Record<DifficultyLevel, string> = {
-    FACILE: 'text-[#10B981] bg-[rgba(16,185,129,0.1)]',
-    MOYEN: 'text-[#D27A2D] bg-[rgba(210,122,45,0.1)]',
-    DIFFICILE: 'text-[#EF4444] bg-[rgba(239,68,68,0.1)]',
-    ETUDE_DE_CAS: 'text-[#7C3AED] bg-[rgba(124,58,237,0.1)]',
+    1: 'text-[#10B981] bg-[rgba(16,185,129,0.1)]',
+    2: 'text-[#D27A2D] bg-[rgba(210,122,45,0.1)]',
+    3: 'text-[#EF4444] bg-[rgba(239,68,68,0.1)]',
+    4: 'text-[#7C3AED] bg-[rgba(124,58,237,0.1)]',
 };
 
 const STATUS_STYLES: Record<QuestionStatus, string> = {
@@ -125,15 +125,15 @@ export function QuestionRow({
             {/* Difficulty */}
             <td className="px-4 py-3 whitespace-nowrap">
                 <span
-                    className={`text-[12px] font-extrabold px-2.5 py-1 rounded-full ${DIFFICULTY_STYLES[question.difficulty]}`}
+                    className={`text-[12px] font-extrabold px-2.5 py-1 rounded-full ${DIFFICULTY_STYLES[question.level]}`}
                 >
-                    {DIFFICULTY_LABELS[question.difficulty]}
+                    {DIFFICULTY_LABELS[question.level]}
                 </span>
             </td>
 
             {/* Duration */}
             <td className="px-4 py-3 whitespace-nowrap">
-                <span className="text-[13px] font-bold text-[#5a7a99]">{question.timeToRead}s</span>
+                <span className="text-[13px] font-bold text-[#5a7a99]">{question.timeToRead ?? '5'}s</span>
             </td>
 
             {/* Pack */}
