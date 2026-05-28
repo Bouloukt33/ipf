@@ -56,6 +56,18 @@ export const API_ENDPOINTS = {
 
     categories: {
         list: '/categories',
-    }
-        
+    },
+
+    packs: {
+        list:           '/packs',
+        byId:           (id: string) => `/packs/${id}`,
+        bySlug:         (categorySlug: string, packSlug: string) => `/packs/slug/${categorySlug}/${packSlug}`,
+        create:         '/packs',
+        update:         (id: string) => `/packs/${id}`,
+        delete:         (id: string) => `/packs/${id}`,
+        toggleActive:   (id: string) => `/packs/${id}/toggle-active`,
+        addQuestions:   (id: string) => `/packs/${id}/questions`,
+        removeQuestion: (id: string, questionId: string) => `/packs/${id}/questions/${questionId}`,
+    },
+
 } as const;

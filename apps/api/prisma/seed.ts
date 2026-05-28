@@ -158,6 +158,50 @@ const THEMES: Record<
   ],
 };
 
+// ── Pack definitions ──
+const PACKS: {
+  categorySlug: string;
+  name: string;
+  slug: string;
+  description: string;
+  type: 'STANDARD' | 'VISITEUR' | 'PREMIUM';
+  isFree: boolean;
+  order: number;
+  questionCount?: number; // nb de questions à associer depuis cette catégorie
+}[] = [
+  {
+    categorySlug: 'bail-commercial',
+    name: 'Pack Découverte — Bail commercial',
+    slug: 'visiteur',
+    description:
+      "Pack gratuit de découverte : 10 questions pour tester la plateforme. Configurable par l'admin.",
+    type: 'VISITEUR',
+    isFree: true,
+    order: 0,
+    questionCount: 10,
+  },
+  {
+    categorySlug: 'bail-commercial',
+    name: 'Bail commercial — Essentiel',
+    slug: 'essentiel',
+    description: 'Les fondamentaux du bail commercial en 20 questions.',
+    type: 'STANDARD',
+    isFree: false,
+    order: 1,
+    questionCount: 20,
+  },
+  {
+    categorySlug: 'bail-professionnel',
+    name: 'Bail professionnel — Initiation',
+    slug: 'initiation',
+    description: 'Introduction au bail professionnel.',
+    type: 'STANDARD',
+    isFree: false,
+    order: 1,
+    questionCount: 15,
+  },
+];
+
 // ── Badge definitions ──
 const BADGES = [
   {
@@ -525,6 +569,60 @@ async function main() {
   }
 
   console.log(`\n📊 Total questions seeded: ${totalSeeded}`);
+
+  // ─────────────────────────────────────────────
+  // 3b. Packs
+  // ─────────────────────────────────────────────
+  console.log('\n📦 Seeding packs...');
+
+  for (const pack of PACKS) {
+    const categoryId = categoryMap.get(pack.categorySlug);
+    if (!categoryId) {
+      console.warn(`  ⚠ Category not found for pack: ${pack.slug}`);
+      continue;
+    }
+
+    const created = await prisma.pack.upsert({
+      where: { categoryId_slug: { categoryId, slug: pack.slug } },
+      update: {
+        name: pack.name,
+        description: pack.description,
+        type: pack.type,
+        isFree: pack.isFree,
+        order: pack.order,
+      },
+      create: {
+        categoryId,
+        name: pack.name,
+        slug: pack.slug,
+        description: pack.description,
+        type: pack.type,
+        isFree: pack.isFree,
+        order: pack.order,
+      },
+    });
+
+    // Associate questions from this category (first N by insertion order)
+    if (pack.questionCount) {
+      const questionIds = (questionIdsByCat.get(pack.categorySlug) ?? []).slice(
+        0,
+        pack.questionCount,
+      );
+      if (questionIds.length > 0) {
+        await prisma.question.updateMany({
+          where: { id: { in: questionIds } },
+          data: { packId: created.id },
+        });
+        console.log(
+          `  ✅ [${pack.type}] "${pack.name}" — ${questionIds.length} questions associées`,
+        );
+      } else {
+        console.log(`  ✅ [${pack.type}] "${pack.name}" — aucune question disponible`);
+      }
+    } else {
+      console.log(`  ✅ [${pack.type}] "${pack.name}" — pack vide (à configurer par l'admin)`);
+    }
+  }
 
   // ─────────────────────────────────────────────
   // 4. QuestionStats

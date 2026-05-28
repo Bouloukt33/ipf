@@ -196,6 +196,8 @@ model Pack {
   name        String
   slug        String
   description String?
+  type        PackType   @default(STANDARD)
+  isFree      Boolean    @default(false) @map("is_free")
   price       Decimal?   @db.Decimal(10, 2)
   isActive    Boolean    @default(true) @map("is_active")
   order       Int        @default(0)
@@ -486,6 +488,12 @@ enum SubscriptionStatus {
   CANCELED
   UNPAID
   TRIALING
+}
+
+enum PackType {
+  STANDARD
+  VISITEUR
+  PREMIUM
 }
 
 enum AgeRange {
