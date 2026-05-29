@@ -58,6 +58,23 @@ export const API_ENDPOINTS = {
         list: '/categories',
     },
 
+    subscriptions: {
+        list:             '/admin/subscriptions',
+        prospects:        '/admin/subscriptions/prospects',
+    },
+
+    plans: {
+        list:   '/admin/plans',
+        update: (id: string) => `/admin/plans/${id}`,
+    },
+
+    email: {
+        templates:       '/admin/email/templates',
+        preview:         (id: string) => `/admin/email/templates/${id}/preview`,
+        sendToUser:      (userId: string) => `/admin/email/send/user/${userId}`,
+        sendToSegment:   '/admin/email/send/segment',
+    },
+
     analytics: {
         dashboard:      '/admin/dashboard',
         questionStats:  '/admin/questions/stats',

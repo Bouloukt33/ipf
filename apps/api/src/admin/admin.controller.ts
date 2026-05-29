@@ -1,6 +1,6 @@
-import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Put, Post, Param, Query, Body, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiQuery } from '@nestjs/swagger';
-import { AdminService } from './admin.service';
+import { AdminService, EmailTemplateId } from './admin.service';
 import { AuthGuard, PermissionsGuard, Permissions } from '../auth';
 
 @ApiTags('Administration')
@@ -63,6 +63,102 @@ export class AdminController {
   @ApiResponse({ status: 404 })
   async getAnalyticsUserDetail(@Param('id') id: string) {
     return this.adminService.getAnalyticsUserDetail(id);
+  }
+
+  // ── Subscriptions ──────────────────────────────────────────────────────────
+
+  @Get('subscriptions')
+  @Permissions('read:admin')
+  @ApiOperation({ summary: 'Liste des abonnements' })
+  @ApiQuery({ name: 'planSlug', required: false, enum: ['apprenti', 'compagnon', 'reussite'] })
+  @ApiQuery({ name: 'status', required: false, enum: ['ACTIVE', 'CANCELED', 'PAST_DUE', 'UNPAID', 'TRIALING'] })
+  @ApiQuery({ name: 'search', required: false })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  async getSubscriptions(
+    @Query('planSlug') planSlug?: string,
+    @Query('status')   status?: string,
+    @Query('search')   search?: string,
+    @Query('page')     page?: string,
+    @Query('limit')    limit?: string,
+  ) {
+    return this.adminService.getSubscriptions({
+      planSlug, status, search,
+      page:  page  ? parseInt(page)  : 1,
+      limit: limit ? parseInt(limit) : 20,
+    });
+  }
+
+  @Get('subscriptions/prospects')
+  @Permissions('read:admin')
+  @ApiOperation({ summary: 'Prospects — upsell et coaching' })
+  async getProspects() {
+    return this.adminService.getProspects();
+  }
+
+  // ── Plans ───────────────────────────────────────────────────────────────────
+
+  @Get('plans')
+  @Permissions('read:admin')
+  @ApiOperation({ summary: 'Liste des plans tarifaires' })
+  async getAdminPlans() {
+    return this.adminService.getAdminPlans();
+  }
+
+  @Put('plans/:id')
+  @Permissions('write:questions')
+  @ApiOperation({ summary: 'Modifier un plan (Admin)' })
+  @ApiParam({ name: 'id' })
+  async updateAdminPlan(
+    @Param('id') id: string,
+    @Body() data: {
+      name?: string;
+      description?: string;
+      price?: number;
+      features?: string[];
+      isActive?: boolean;
+      order?: number;
+    },
+  ) {
+    return this.adminService.updateAdminPlan(id, data);
+  }
+
+  // ── Email ───────────────────────────────────────────────────────────────────
+
+  @Get('email/templates')
+  @Permissions('read:admin')
+  @ApiOperation({ summary: 'Liste des templates email' })
+  async getEmailTemplates() {
+    return this.adminService.getEmailTemplates();
+  }
+
+  @Get('email/templates/:id/preview')
+  @Permissions('read:admin')
+  @ApiOperation({ summary: 'Prévisualisation HTML d\'un template' })
+  @ApiParam({ name: 'id' })
+  async previewEmailTemplate(@Param('id') id: string) {
+    return this.adminService.getEmailTemplatePreview(id as EmailTemplateId);
+  }
+
+  @Post('email/send/user/:userId')
+  @Permissions('write:questions')
+  @ApiOperation({ summary: 'Envoyer un email à un utilisateur' })
+  @ApiParam({ name: 'userId' })
+  async sendEmailToUser(
+    @Param('userId') userId: string,
+    @Body('templateId') templateId: string,
+  ) {
+    return this.adminService.sendEmailToUser(userId, templateId as EmailTemplateId);
+  }
+
+  @Post('email/send/segment')
+  @Permissions('write:questions')
+  @ApiOperation({ summary: 'Envoyer un email à un segment (upsell ou coaching)' })
+  async sendEmailToSegment(
+    @Body('segment')    segment:    'upsell' | 'coaching',
+    @Body('templateId') templateId: string,
+  ) {
+    return this.adminService.sendEmailToSegment(segment, templateId as EmailTemplateId);
   }
 
   @Get('questions/stats')
