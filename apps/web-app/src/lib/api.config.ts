@@ -58,6 +58,13 @@ export const API_ENDPOINTS = {
         list: '/categories',
     },
 
+    analytics: {
+        dashboard:      '/admin/dashboard',
+        questionStats:  '/admin/questions/stats',
+        users:          '/admin/users',
+        userDetail:     (id: string) => `/admin/users/${id}`,
+    },
+
     packs: {
         list:           '/packs',
         byId:           (id: string) => `/packs/${id}`,

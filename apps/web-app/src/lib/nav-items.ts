@@ -1,4 +1,4 @@
-import { Home, Zap, TrendingUp, User, CircleGauge, Package } from 'lucide-react';
+import { Home, Zap, TrendingUp, User, CircleGauge, Package, Users } from 'lucide-react';
 export const userNavItems = [
     {
         label: 'Accueil',
@@ -51,5 +51,12 @@ export const adminNavItems = [
         icon: Package,
         iconBg: 'rgba(30,58,95,0.15)',
         iconColor: '#1e3a5f',
+    },
+    {
+        label: 'Utilisateurs',
+        href: '/admin/users',
+        icon: Users,
+        iconBg: 'rgba(16,185,129,0.15)',
+        iconColor: '#10B981',
     },
 ];

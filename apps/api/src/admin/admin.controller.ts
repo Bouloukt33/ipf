@@ -1,5 +1,5 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { AdminService } from './admin.service';
 import { AuthGuard, PermissionsGuard, Permissions } from '../auth';
 
@@ -28,6 +28,41 @@ export class AdminController {
   @ApiResponse({ status: 403, description: 'Permission insuffisante - Accès admin requis' })
   async getRecentActivity() {
     return this.adminService.getRecentActivity();
+  }
+
+  @Get('users')
+  @Permissions('read:admin')
+  @ApiOperation({ summary: 'Analytics utilisateurs', description: 'Liste des utilisateurs avec stats de performance et engagement' })
+  @ApiQuery({ name: 'search', required: false })
+  @ApiQuery({ name: 'professionalStatus', required: false, enum: ['SALARIE', 'INDEPENDANT', 'MANDATAIRE'] })
+  @ApiQuery({ name: 'ageRange', required: false })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiResponse({ status: 200 })
+  async getAnalyticsUsers(
+    @Query('search') search?: string,
+    @Query('professionalStatus') professionalStatus?: string,
+    @Query('ageRange') ageRange?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.adminService.getAnalyticsUsers({
+      search,
+      professionalStatus,
+      ageRange,
+      page:  page  ? parseInt(page)  : 1,
+      limit: limit ? parseInt(limit) : 20,
+    });
+  }
+
+  @Get('users/:id')
+  @Permissions('read:admin')
+  @ApiOperation({ summary: 'Détail analytique utilisateur' })
+  @ApiParam({ name: 'id', description: 'ID de l\'utilisateur' })
+  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 404 })
+  async getAnalyticsUserDetail(@Param('id') id: string) {
+    return this.adminService.getAnalyticsUserDetail(id);
   }
 
   @Get('questions/stats')
