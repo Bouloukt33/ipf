@@ -3,6 +3,8 @@ import {
   Get,
   Put,
   Post,
+  Delete,
+  Patch,
   Param,
   Body,
   Query,
@@ -92,6 +94,34 @@ export class UsersController {
   @ApiResponse({ status: 404, description: 'Utilisateur non trouvé' })
   async toggleActive(@Param('id') id: string) {
     return this.usersService.toggleActive(id);
+  }
+
+  @Delete(':id')
+  @Permissions('manage:users')
+  @ApiOperation({ summary: 'Supprimer un utilisateur', description: 'Supprime définitivement un utilisateur et toutes ses données (cascade)' })
+  @ApiParam({ name: 'id', description: "ID de l'utilisateur" })
+  @ApiResponse({ status: 200, description: 'Utilisateur supprimé' })
+  @ApiResponse({ status: 404, description: 'Utilisateur non trouvé' })
+  async deleteUser(@Param('id') id: string) {
+    return this.usersService.deleteUser(id);
+  }
+
+  @Patch(':id/profile')
+  @Permissions('manage:users')
+  @ApiOperation({ summary: "Modifier le profil d'un utilisateur (admin)", description: 'Permet à un admin de modifier les informations de profil' })
+  @ApiParam({ name: 'id', description: "ID de l'utilisateur" })
+  @ApiBody({ schema: { type: 'object', properties: {
+    displayName:        { type: 'string' },
+    ageRange:           { type: 'string', enum: ['AGE_18_25', 'AGE_26_35', 'AGE_36_45', 'AGE_46_55', 'AGE_56_PLUS'] },
+    professionalStatus: { type: 'string', enum: ['SALARIE', 'INDEPENDANT', 'MANDATAIRE'] },
+  }}})
+  @ApiResponse({ status: 200, description: 'Profil mis à jour' })
+  @ApiResponse({ status: 404, description: 'Utilisateur non trouvé' })
+  async updateUserProfile(
+    @Param('id') id: string,
+    @Body() data: { displayName?: string; ageRange?: string; professionalStatus?: string },
+  ) {
+    return this.usersService.updateUserProfile(id, data);
   }
 
   @Post(':id/ban')

@@ -1,4 +1,4 @@
-import { Controller, Get, Put, Post, Param, Query, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Put, Post, Delete, Patch, Param, Query, Body, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { AdminService, EmailTemplateId } from './admin.service';
 import { AuthGuard, PermissionsGuard, Permissions } from '../auth';
@@ -89,6 +89,25 @@ export class AdminController {
     });
   }
 
+  @Post('subscriptions/:id/cancel')
+  @Permissions('write:questions')
+  @ApiOperation({ summary: 'Annuler un abonnement (Admin override)' })
+  @ApiParam({ name: 'id' })
+  async cancelSubscription(@Param('id') id: string) {
+    return this.adminService.cancelSubscription(id);
+  }
+
+  @Patch('subscriptions/:id/plan')
+  @Permissions('write:questions')
+  @ApiOperation({ summary: "Changer le plan d'un abonnement (Admin override)" })
+  @ApiParam({ name: 'id' })
+  async changeSubscriptionPlan(
+    @Param('id') id: string,
+    @Body('planId') planId: string,
+  ) {
+    return this.adminService.changeSubscriptionPlan(id, planId);
+  }
+
   @Get('subscriptions/prospects')
   @Permissions('read:admin')
   @ApiOperation({ summary: 'Prospects — upsell et coaching' })
@@ -103,6 +122,27 @@ export class AdminController {
   @ApiOperation({ summary: 'Liste des plans tarifaires' })
   async getAdminPlans() {
     return this.adminService.getAdminPlans();
+  }
+
+  @Post('plans')
+  @Permissions('write:questions')
+  @ApiOperation({ summary: 'Créer un plan (Admin)' })
+  async createAdminPlan(
+    @Body() data: {
+      name: string; slug: string; description?: string;
+      price: number; currency?: string; intervalMonths?: number;
+      features?: string[]; stripePriceId?: string; isActive?: boolean; order?: number;
+    },
+  ) {
+    return this.adminService.createAdminPlan(data);
+  }
+
+  @Delete('plans/:id')
+  @Permissions('write:questions')
+  @ApiOperation({ summary: 'Supprimer un plan (Admin)' })
+  @ApiParam({ name: 'id' })
+  async deleteAdminPlan(@Param('id') id: string) {
+    return this.adminService.deleteAdminPlan(id);
   }
 
   @Put('plans/:id')

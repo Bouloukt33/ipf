@@ -629,6 +629,55 @@ export class AdminService {
     });
   }
 
+  async createAdminPlan(data: {
+    name: string;
+    slug: string;
+    description?: string;
+    price: number;
+    currency?: string;
+    intervalMonths?: number;
+    features?: string[];
+    stripePriceId?: string;
+    isActive?: boolean;
+    order?: number;
+  }) {
+    const existing = await this.prisma.plan.findFirst({
+      where: { OR: [{ name: data.name }, { slug: data.slug }] },
+    });
+    if (existing) throw new Error(`Un plan avec ce nom ou ce slug existe déjà`);
+
+    return this.prisma.plan.create({
+      data: {
+        name:           data.name,
+        slug:           data.slug,
+        description:    data.description    ?? null,
+        price:          data.price,
+        currency:       data.currency       ?? 'EUR',
+        intervalMonths: data.intervalMonths ?? 1,
+        features:       data.features       ? JSON.stringify(data.features) : null,
+        stripePriceId:  data.stripePriceId  ?? null,
+        isActive:       data.isActive       ?? true,
+        order:          data.order          ?? 0,
+      },
+      include: { _count: { select: { subscriptions: true } } },
+    });
+  }
+
+  async deleteAdminPlan(id: string) {
+    const plan = await this.prisma.plan.findUnique({
+      where: { id },
+      include: { _count: { select: { subscriptions: true } } },
+    });
+    if (!plan) throw new NotFoundException('Plan introuvable');
+    if (plan._count.subscriptions > 0) {
+      throw new Error(
+        `Impossible de supprimer ce plan : ${plan._count.subscriptions} abonnement(s) y sont rattachés`,
+      );
+    }
+    await this.prisma.plan.delete({ where: { id } });
+    return { deleted: true, id };
+  }
+
   async updateAdminPlan(
     id: string,
     data: {
@@ -653,6 +702,33 @@ export class AdminService {
         ...(data.isActive    !== undefined && { isActive: data.isActive }),
         ...(data.order       !== undefined && { order: data.order }),
       },
+    });
+  }
+
+  async cancelSubscription(subscriptionId: string) {
+    const sub = await this.prisma.subscription.findUnique({ where: { id: subscriptionId } });
+    if (!sub) throw new NotFoundException('Abonnement introuvable');
+    return this.prisma.subscription.update({
+      where: { id: subscriptionId },
+      data: {
+        status:            'CANCELED',
+        canceledAt:        new Date(),
+        cancelAtPeriodEnd: false,
+      },
+    });
+  }
+
+  async changeSubscriptionPlan(subscriptionId: string, planId: string) {
+    const [sub, plan] = await Promise.all([
+      this.prisma.subscription.findUnique({ where: { id: subscriptionId } }),
+      this.prisma.plan.findUnique({ where: { id: planId } }),
+    ]);
+    if (!sub)  throw new NotFoundException('Abonnement introuvable');
+    if (!plan) throw new NotFoundException('Plan introuvable');
+    return this.prisma.subscription.update({
+      where: { id: subscriptionId },
+      data:  { planId },
+      include: { plan: true },
     });
   }
 

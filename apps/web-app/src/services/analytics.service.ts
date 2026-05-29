@@ -32,4 +32,17 @@ export const analyticsService = {
 
     getUserDetail: (id: string): Promise<IUserAnalyticsDetail> =>
         apiFetch(API_ENDPOINTS.analytics.userDetail(id)),
+
+    deleteUser: (id: string): Promise<{ deleted: boolean; id: string }> =>
+        apiFetch(API_ENDPOINTS.analytics.deleteUser(id), { method: 'DELETE' }),
+
+    updateUserProfile: (id: string, data: {
+        displayName?:        string;
+        ageRange?:           string;
+        professionalStatus?: string;
+    }): Promise<unknown> =>
+        apiFetch(API_ENDPOINTS.analytics.updateUserProfile(id), {
+            method: 'PATCH',
+            body:   JSON.stringify(data),
+        }),
 };

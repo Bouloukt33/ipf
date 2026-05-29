@@ -66,13 +66,17 @@ export const API_ENDPOINTS = {
     },
 
     subscriptions: {
-        list:             '/admin/subscriptions',
-        prospects:        '/admin/subscriptions/prospects',
+        list:       '/admin/subscriptions',
+        prospects:  '/admin/subscriptions/prospects',
+        cancel:     (id: string) => `/admin/subscriptions/${id}/cancel`,
+        changePlan: (id: string) => `/admin/subscriptions/${id}/plan`,
     },
 
     plans: {
         list:   '/admin/plans',
+        create: '/admin/plans',
         update: (id: string) => `/admin/plans/${id}`,
+        delete: (id: string) => `/admin/plans/${id}`,
     },
 
     email: {
@@ -83,10 +87,12 @@ export const API_ENDPOINTS = {
     },
 
     analytics: {
-        dashboard:      '/admin/dashboard',
-        questionStats:  '/admin/questions/stats',
-        users:          '/admin/users',
-        userDetail:     (id: string) => `/admin/users/${id}`,
+        dashboard:         '/admin/dashboard',
+        questionStats:     '/admin/questions/stats',
+        users:             '/admin/users',
+        userDetail:        (id: string) => `/admin/users/${id}`,
+        deleteUser:        (id: string) => `/users/${id}`,
+        updateUserProfile: (id: string) => `/users/${id}/profile`,
     },
 
     packs: {

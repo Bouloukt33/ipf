@@ -38,7 +38,7 @@ export function useAdminSubscriptions() {
     }, []);
 
     return {
-        users, filters, isLoading, error, currentPage, totalPages, total,
+        users, setUsers, filters, isLoading, error, currentPage, totalPages, total,
         setPage: (p: number) => { if (p >= 1 && p <= totalPages) setCurrentPage(p); },
         setFilters,
         resetFilters: () => { setFiltersState(DEFAULT_FILTERS); setCurrentPage(1); },

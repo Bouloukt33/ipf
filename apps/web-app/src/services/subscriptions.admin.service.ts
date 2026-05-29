@@ -28,11 +28,30 @@ export const subscriptionsAdminService = {
 
     getProspects: (): Promise<{ upsell: IProspect[]; coaching: IProspect[] }> =>
         apiFetch(API_ENDPOINTS.subscriptions.prospects),
+
+    cancel: (subscriptionId: string): Promise<{ id: string; status: string }> =>
+        apiFetch(API_ENDPOINTS.subscriptions.cancel(subscriptionId), { method: 'POST' }),
+
+    changePlan: (subscriptionId: string, planId: string): Promise<{ id: string; planId: string }> =>
+        apiFetch(API_ENDPOINTS.subscriptions.changePlan(subscriptionId), {
+            method: 'PATCH',
+            body:   JSON.stringify({ planId }),
+        }),
 };
 
 export const plansAdminService = {
     getAll: (): Promise<IAdminPlan[]> =>
         apiFetch(API_ENDPOINTS.plans.list),
+
+    create: (data: {
+        name: string; slug: string; description?: string; price: number;
+        currency?: string; intervalMonths?: number; features?: string[];
+        stripePriceId?: string; isActive?: boolean; order?: number;
+    }): Promise<IAdminPlan> =>
+        apiFetch(API_ENDPOINTS.plans.create, {
+            method: 'POST',
+            body:   JSON.stringify(data),
+        }),
 
     update: (id: string, data: Partial<{
         name: string; description: string; price: number;
@@ -40,8 +59,11 @@ export const plansAdminService = {
     }>): Promise<IAdminPlan> =>
         apiFetch(API_ENDPOINTS.plans.update(id), {
             method: 'PUT',
-            body: JSON.stringify(data),
+            body:   JSON.stringify(data),
         }),
+
+    delete: (id: string): Promise<{ deleted: boolean; id: string }> =>
+        apiFetch(API_ENDPOINTS.plans.delete(id), { method: 'DELETE' }),
 };
 
 export const emailAdminService = {

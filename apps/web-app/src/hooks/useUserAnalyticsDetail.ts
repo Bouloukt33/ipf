@@ -3,10 +3,11 @@
 import { IUserAnalyticsDetail } from '@/lib/user.analytics.types';
 import { analyticsService } from '@/services/analytics.service';
 import { useAuthStore } from '@/store/auth.store';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Dispatch, SetStateAction } from 'react';
 
 interface UseUserAnalyticsDetailReturn {
     user:      IUserAnalyticsDetail | null;
+    setUser:   Dispatch<SetStateAction<IUserAnalyticsDetail | null>>;
     isLoading: boolean;
     error:     string | null;
     refresh:   () => Promise<void>;
@@ -41,5 +42,5 @@ export function useUserAnalyticsDetail(id: string): UseUserAnalyticsDetailReturn
 
     const refresh = useCallback(async () => { await load(); }, [load]);
 
-    return { user, isLoading, error, refresh };
+    return { user, setUser, isLoading, error, refresh };
 }
