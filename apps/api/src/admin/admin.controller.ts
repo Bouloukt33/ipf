@@ -161,6 +161,50 @@ export class AdminController {
     return this.adminService.sendEmailToSegment(segment, templateId as EmailTemplateId);
   }
 
+  // ── Categories ──────────────────────────────────────────────────────────────
+
+  @Get('categories')
+  @Permissions('read:admin')
+  @ApiOperation({ summary: 'Liste tous les types de baux (admin)' })
+  async getAdminCategories() {
+    return this.adminService.getAdminCategories();
+  }
+
+  @Post('categories')
+  @Permissions('write:questions')
+  @ApiOperation({ summary: 'Créer un type de bail (Admin)' })
+  async createCategory(
+    @Body() data: {
+      name: string; slug: string; description?: string;
+      color?: string; iconUrl?: string; order?: number; isPremium?: boolean;
+    },
+  ) {
+    return this.adminService.createCategory(data);
+  }
+
+  @Put('categories/:id')
+  @Permissions('write:questions')
+  @ApiOperation({ summary: 'Modifier un type de bail (Admin)' })
+  @ApiParam({ name: 'id' })
+  async updateCategory(
+    @Param('id') id: string,
+    @Body() data: {
+      name?: string; slug?: string; description?: string;
+      color?: string; iconUrl?: string; order?: number;
+      isPremium?: boolean; isActive?: boolean;
+    },
+  ) {
+    return this.adminService.updateCategory(id, data);
+  }
+
+  @Post('categories/:id/toggle-active')
+  @Permissions('write:questions')
+  @ApiOperation({ summary: 'Activer / Désactiver un type de bail (Admin)' })
+  @ApiParam({ name: 'id' })
+  async toggleCategoryActive(@Param('id') id: string) {
+    return this.adminService.toggleCategoryActive(id);
+  }
+
   @Get('questions/stats')
   @Permissions('read:admin')
   @ApiOperation({ summary: 'Statistiques des questions', description: 'Récupère les statistiques détaillées sur les questions (par catégorie, taux de réussite, etc.)' })

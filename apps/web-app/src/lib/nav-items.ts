@@ -1,4 +1,4 @@
-import { Home, Zap, TrendingUp, User, CircleGauge, Package, Users, CreditCard, Target, Mail } from 'lucide-react';
+import { Home, Zap, TrendingUp, User, CircleGauge, Package, Users, CreditCard, Target, Mail, BookOpen } from 'lucide-react';
 export const userNavItems = [
     {
         label: 'Accueil',
@@ -44,6 +44,13 @@ export const adminNavItems = [
         icon: CircleGauge,
         iconBg: 'rgba(210,122,45,0.2)',
         iconColor: '#D27A2D',
+    },
+    {
+        label: 'Types de baux',
+        href: '/admin/categories',
+        icon: BookOpen,
+        iconBg: 'rgba(88,204,2,0.15)',
+        iconColor: '#58cc02',
     },
     {
         label: 'Packs',

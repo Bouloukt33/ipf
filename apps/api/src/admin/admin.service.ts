@@ -759,4 +759,86 @@ export class AdminService {
       results,
     };
   }
+
+  // ── Categories (types de baux) ────────────────────────────────────────────────
+
+  async getAdminCategories() {
+    return this.prisma.category.findMany({
+      orderBy: { order: 'asc' },
+      include: {
+        _count: { select: { questions: true, packs: true, themes: true } },
+      },
+    });
+  }
+
+  async createCategory(data: {
+    name: string;
+    slug: string;
+    description?: string;
+    color?: string;
+    iconUrl?: string;
+    order?: number;
+    isPremium?: boolean;
+  }) {
+    const existing = await this.prisma.category.findUnique({ where: { slug: data.slug } });
+    if (existing) throw new Error(`Un type de bail avec le slug "${data.slug}" existe déjà`);
+
+    return this.prisma.category.create({
+      data: {
+        name:        data.name,
+        slug:        data.slug,
+        description: data.description ?? null,
+        color:       data.color       ?? '#D27A2D',
+        iconUrl:     data.iconUrl     ?? null,
+        order:       data.order       ?? 0,
+        isPremium:   data.isPremium   ?? false,
+      },
+    });
+  }
+
+  async updateCategory(
+    id: string,
+    data: {
+      name?:        string;
+      slug?:        string;
+      description?: string;
+      color?:       string;
+      iconUrl?:     string;
+      order?:       number;
+      isPremium?:   boolean;
+      isActive?:    boolean;
+    },
+  ) {
+    const cat = await this.prisma.category.findUnique({ where: { id } });
+    if (!cat) throw new NotFoundException('Catégorie non trouvée');
+
+    if (data.slug && data.slug !== cat.slug) {
+      const conflict = await this.prisma.category.findUnique({ where: { slug: data.slug } });
+      if (conflict) throw new Error(`Le slug "${data.slug}" est déjà utilisé`);
+    }
+
+    return this.prisma.category.update({
+      where: { id },
+      data: {
+        ...(data.name        !== undefined && { name:        data.name }),
+        ...(data.slug        !== undefined && { slug:        data.slug }),
+        ...(data.description !== undefined && { description: data.description }),
+        ...(data.color       !== undefined && { color:       data.color }),
+        ...(data.iconUrl     !== undefined && { iconUrl:     data.iconUrl }),
+        ...(data.order       !== undefined && { order:       data.order }),
+        ...(data.isPremium   !== undefined && { isPremium:   data.isPremium }),
+        ...(data.isActive    !== undefined && { isActive:    data.isActive }),
+      },
+      include: { _count: { select: { questions: true, packs: true, themes: true } } },
+    });
+  }
+
+  async toggleCategoryActive(id: string) {
+    const cat = await this.prisma.category.findUnique({ where: { id } });
+    if (!cat) throw new NotFoundException('Catégorie non trouvée');
+    return this.prisma.category.update({
+      where: { id },
+      data:  { isActive: !cat.isActive },
+    });
+  }
 }

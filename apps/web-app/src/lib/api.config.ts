@@ -58,6 +58,13 @@ export const API_ENDPOINTS = {
         list: '/categories',
     },
 
+    adminCategories: {
+        list:         '/admin/categories',
+        create:       '/admin/categories',
+        update:       (id: string) => `/admin/categories/${id}`,
+        toggleActive: (id: string) => `/admin/categories/${id}/toggle-active`,
+    },
+
     subscriptions: {
         list:             '/admin/subscriptions',
         prospects:        '/admin/subscriptions/prospects',

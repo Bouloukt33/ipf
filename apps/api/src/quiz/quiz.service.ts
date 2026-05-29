@@ -8,7 +8,7 @@ import { PrismaService } from '../prisma';
 import { QuizMode, SessionStatus } from '@prisma/client';
 
 // XP formula constants
-const XP_BASE = { 1: 10, 2: 15, 3: 20 } as const;
+const XP_BASE = { 1: 10, 2: 15, 3: 20, 4: 30 } as const;
 const SPEED_MULTIPLIERS = [
   { maxMs: 1000, mult: 1.5 },
   { maxMs: 2000, mult: 1.3 },
