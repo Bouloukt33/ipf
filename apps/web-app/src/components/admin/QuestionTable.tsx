@@ -1,18 +1,20 @@
 'use client';
 
 import React from 'react';
-import { IQuestion, LEASE_TYPE_LABELS, DIFFICULTY_LABELS, STATUS_LABELS, ICategory } from '@/lib/question.types';
+import { IQuestion, DIFFICULTY_LABELS, STATUS_LABELS, ICategory } from '@/lib/question.types';
+import { IPack } from '@/lib/pack.types';
 import { QuestionRow } from './QuestionRow';
 
 interface QuestionTableProps {
     categories: ICategory[];
-    questions: IQuestion[];
-    isLoading: boolean;
-    onEdit: (question: IQuestion) => void;
-    onDelete: (id: string) => void;
-    onSuspend: (id: string) => void;
-    onArchive: (id: string) => void;
-    onRestore: (id: string) => void;
+    packs:      IPack[];
+    questions:  IQuestion[];
+    isLoading:  boolean;
+    onEdit:     (question: IQuestion) => void;
+    onDelete:   (id: string) => void;
+    onSuspend:  (id: string) => void;
+    onArchive:  (id: string) => void;
+    onRestore:  (id: string) => void;
 }
 
 const COLUMNS = [
@@ -28,14 +30,7 @@ const COLUMNS = [
 ];
 
 export function QuestionTable({
-    questions,
-    isLoading,
-    onEdit,
-    onDelete,
-    onSuspend,
-    onArchive,
-    onRestore,
-    categories
+    questions, isLoading, onEdit, onDelete, onSuspend, onArchive, onRestore, categories, packs,
 }: QuestionTableProps) {    
     if (isLoading) {
         return (
@@ -94,6 +89,7 @@ export function QuestionTable({
                                 onArchive={onArchive}
                                 onRestore={onRestore}
                                 categories={categories}
+                                packs={packs}
                             />
                         ))}
                     </tbody>

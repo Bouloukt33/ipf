@@ -94,7 +94,7 @@ export default function OnboardingPage() {
         setAnimating(false);
       }, 300);
     } else {
-      // Save all data
+      // Save profile then démarrer avec le pack VISITEUR
       setSaving(true);
       try {
         await api.profile.update({
@@ -102,6 +102,20 @@ export default function OnboardingPage() {
           professionalStatus: professionalStatus!,
           jobProfileId: jobProfileId!,
         });
+
+        // Chercher le pack VISITEUR pour démarrer le premier quiz
+        try {
+          const visiteurPacks = await api.packs.list({ type: 'VISITEUR', isFree: true });
+          if (visiteurPacks.length > 0) {
+            const pack = visiteurPacks[0];
+            const session = await api.quiz.start({ categoryId: pack.categoryId });
+            router.push(`/quiz/session/${session.sessionId}`);
+            return;
+          }
+        } catch {
+          // Pas de pack VISITEUR en base → flow normal
+        }
+
         router.push('/quiz/selection');
       } catch (err: any) {
         setSaving(false);
