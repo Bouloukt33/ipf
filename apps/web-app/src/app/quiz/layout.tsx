@@ -2,7 +2,7 @@
 
 import FloatingBackground from "@/components/FloatingBackground";
 import { useUser } from "@auth0/nextjs-auth0/client";
-import { UserSidebar } from '@/components/sidebar/Sidebar';
+import { UserSidebar } from '@/components/user/UserSidebar';
 
 export default function QuizLayout({ children }: { children: React.ReactNode }) {
     const { user } = useUser();

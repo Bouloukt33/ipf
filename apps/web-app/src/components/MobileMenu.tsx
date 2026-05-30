@@ -3,7 +3,9 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Menu, X } from 'lucide-react';
-import type { UserProfile } from '@auth0/nextjs-auth0/client';
+type Auth0User = {
+    [key: string]: unknown;
+};
 
 const navLinks = [
     { label: 'Accueil', href: '#accueil' },
@@ -12,7 +14,7 @@ const navLinks = [
     { label: 'Contact', href: '#contact' },
 ];
 
-export default function MobileMenu({ user }: { user: UserProfile | null }) {
+export default function MobileMenu({ user }: { user: Auth0User | null }) {
     const [open, setOpen] = useState(false);
 
     return (

@@ -15,8 +15,8 @@ export default function QuizPage() {
         if (!user) return
         api.profile
             .get()
-            .then(({ profile: p }) => {
-                setProfileComplete(!!(p?.ageRange && p?.professionalStatus && p?.jobProfileId))
+            .then((profile) => {
+                setProfileComplete(!!(profile?.ageRange && profile?.professionalStatus && profile?.jobProfileId))
             })
             .catch(() => setProfileComplete(false))
     }, [user])
