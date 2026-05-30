@@ -1,11 +1,62 @@
 import { auth0 } from '@/lib/auth0';
 import { redirect } from 'next/navigation';
 
+const API_BASE_URL = process.env.API_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+const isDev = process.env.NODE_ENV === 'development';
+
+async function syncUser(accessToken: string) {
+    try {
+        await fetch(`${API_BASE_URL}/api/auth/login`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
+            },
+            cache: 'no-store',
+        });
+    } catch (error) {
+        if (isDev) console.error('[Dashboard] Sync user error:', error);
+    }
+}
+
+async function isProfileComplete(accessToken: string) {
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/profile/me`, {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
+            },
+            cache: 'no-store',
+        });
+
+        if (!res.ok) {
+            return false;
+        }
+
+        const profile = await res.json();
+
+        return Boolean(profile && profile.ageRange && profile.professionalStatus && profile.jobProfileId);
+    } catch (error) {
+        if (isDev) console.error('[Dashboard] Profile check error:', error);
+        return false;
+    }
+}
+
 export default async function DashboardPage() {
     const session = await auth0.getSession();
 
     if (!session) {
         redirect('/auth/login');
+    }
+
+    const accessToken = session.tokenSet.accessToken;
+
+    if (accessToken) {
+        await syncUser(accessToken);
+        const profileComplete = await isProfileComplete(accessToken);
+        if (!profileComplete) {
+            redirect('/quiz/onboarding');
+        }
     }
 
     const user = session.user;

@@ -97,11 +97,17 @@ export class QuizService {
   ): Promise<StartSessionResult> {
     const user = await this.prisma.user.findUnique({
       where: { auth0Id },
-      include: { profile: true },
+      include: { profile: true, subscription: true },
     });
     if (!user) throw new NotFoundException('Utilisateur non trouvé');
 
-    // Free users: force Bail Commercial, no category choice
+    // Derive isPremium from active subscription
+    const isPremium =
+      user.subscription &&
+      user.subscription.status === 'ACTIVE' &&
+      user.subscription.currentPeriodEnd > new Date();
+
+    // Default to Bail Commercial if no category specified
     if (!categoryId) {
       const defaultCat = await this.prisma.category.findFirst({
         where: { slug: 'bail-commercial' },
@@ -115,6 +121,13 @@ export class QuizService {
       : null;
     if (categoryId && !category) {
       throw new NotFoundException('Catégorie non trouvée');
+    }
+
+    // SECURITY: Premium category access control
+    if (category?.isPremium && !isPremium) {
+      throw new ForbiddenException(
+        'Cette catégorie est réservée aux abonnés Premium',
+      );
     }
 
     // Select questions: prioritize unseen, randomize
