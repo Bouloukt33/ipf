@@ -61,14 +61,25 @@ export function useQuestions(): UseQuestionsReturn {
         setError(null);
         try {
             const token = await getToken();
-            const [paginatedData, statsData] = await Promise.all([
+            
+            // On lance les requêtes en parallèle mais on les gère individuellement
+            const [questionsRes, statsRes] = await Promise.allSettled([
                 questionsService.getAll(token, currentFilters, page, ITEMS_PER_PAGE),
                 questionsService.getStats(token),
             ]);
-            setQuestions(paginatedData.data);
-            setTotal(paginatedData.total);
-            setTotalPages(paginatedData.totalPages);
-            setStats(statsData);
+
+            if (questionsRes.status === 'fulfilled') {
+                setQuestions(questionsRes.value.data);
+                setTotal(questionsRes.value.total);
+                setTotalPages(questionsRes.value.totalPages);
+            } else {
+                console.error('Questions load error:', questionsRes.reason);
+                setError('Impossible de charger les questions');
+            }
+
+            if (statsRes.status === 'fulfilled') {
+                setStats(statsRes.value);
+            }
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Une erreur est survenue');
         } finally {

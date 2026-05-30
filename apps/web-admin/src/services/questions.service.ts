@@ -24,7 +24,7 @@ export const questionsService = {
         if (filters?.level) params.set('level', filters.level.toString());
         if (filters?.status) params.set('status', filters.status);
 
-        return apiRequest<any>(`/admin/questions?${params.toString()}`, token).then((res) => ({
+        return apiRequest<any>(`/questions?${params.toString()}`, token).then((res) => ({
             data: res.data || [],
             total: res.meta?.total || 0,
             totalPages: res.meta?.totalPages || 1,
@@ -32,22 +32,28 @@ export const questionsService = {
     },
 
     getById: (token: string, id: string): Promise<IQuestion> =>
-        apiRequest(`/admin/questions/${id}`, token),
+        apiRequest(`/questions/${id}`, token),
 
     create: (token: string, data: IQuestionFormData): Promise<IQuestion> =>
-        apiRequest('/admin/questions', token, { method: 'POST', body: JSON.stringify(data) }),
+        apiRequest('/questions', token, { method: 'POST', body: JSON.stringify(data) }),
 
     update: (token: string, id: string, data: Partial<IQuestionFormData>): Promise<IQuestion> =>
-        apiRequest(`/admin/questions/${id}`, token, { method: 'PUT', body: JSON.stringify(data) }),
+        apiRequest(`/questions/${id}`, token, { method: 'PUT', body: JSON.stringify(data) }),
 
     delete: (token: string, id: string): Promise<void> =>
-        apiRequest(`/admin/questions/${id}`, token, { method: 'DELETE' }),
+        apiRequest(`/questions/${id}`, token, { method: 'DELETE' }),
 
     updateStatus: (token: string, id: string, status: string): Promise<IQuestion> =>
-        apiRequest(`/admin/questions/${id}/status`, token, { method: 'PATCH', body: JSON.stringify({ status }) }),
+        apiRequest(`/questions/${id}/status`, token, { method: 'PATCH', body: JSON.stringify({ status }) }),
 
     getStats: (token: string): Promise<IQuestionStats> =>
-        apiRequest<IQuestionStats>('/admin/questions/stats', token).catch(() => ({
+        apiRequest<any>('/admin/questions/stats', token).then(stats => ({
+            total: stats.total || 0,
+            active: stats.active || 0,
+            suspended: stats.suspended || 0,
+            archived: stats.archived || 0,
+            premium: stats.premiumCount || 0
+        })).catch(() => ({
             total: 0,
             active: 0,
             suspended: 0,

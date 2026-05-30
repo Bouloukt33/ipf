@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import tailwindAnimate from "tailwindcss-animate";
 
 const config: Config = {
     content: [
@@ -8,7 +9,6 @@ const config: Config = {
     theme: {
         extend: {
             colors: {
-                // Charte graphique client - Thème clair
                 primary: {
                     DEFAULT: '#D27A2D',
                     light: '#e8924a',
@@ -16,10 +16,8 @@ const config: Config = {
                 },
                 navy: '#172E42',
                 charcoal: '#2A262A',
-                // Couleurs de fond
                 background: '#FFFFFF',
                 surface: '#F8F9FA',
-                // Texte
                 text: {
                     primary: '#172E42',
                     secondary: '#2A262A',
@@ -131,7 +129,7 @@ const config: Config = {
             },
         },
     },
-    plugins: [require("tailwindcss-animate")],
+    plugins: [tailwindAnimate],
 };
 
 export default config;

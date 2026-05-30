@@ -12,15 +12,26 @@ export class PacksService {
     isFree?: boolean;
     includeInactive?: boolean;
   }) {
-    const where: Record<string, unknown> = {};
+    const where: Record<string, any> = {};
     if (!filters?.includeInactive) where.isActive = true;
     if (filters?.categoryId) where.categoryId = filters.categoryId;
-    if (filters?.type) where.type = filters.type;
-    if (filters?.isFree !== undefined) where.isFree = filters.isFree;
+    
+    // NOTE: 'type' and 'isFree' columns are missing in the current database migration
+    // We exclude them from the query to avoid 500 errors.
 
     return this.prisma.pack.findMany({
       where,
-      include: {
+      select: {
+        id: true,
+        categoryId: true,
+        name: true,
+        slug: true,
+        description: true,
+        price: true,
+        isActive: true,
+        order: true,
+        createdAt: true,
+        updatedAt: true,
         category: true,
         _count: { select: { questions: true } },
       },
@@ -31,7 +42,17 @@ export class PacksService {
   async findOne(id: string) {
     const pack = await this.prisma.pack.findUnique({
       where: { id },
-      include: {
+      select: {
+        id: true,
+        categoryId: true,
+        name: true,
+        slug: true,
+        description: true,
+        price: true,
+        isActive: true,
+        order: true,
+        createdAt: true,
+        updatedAt: true,
         category: true,
         questions: {
           where: { isActive: true },
@@ -54,7 +75,17 @@ export class PacksService {
 
     const pack = await this.prisma.pack.findUnique({
       where: { categoryId_slug: { categoryId: category.id, slug: packSlug } },
-      include: {
+      select: {
+        id: true,
+        categoryId: true,
+        name: true,
+        slug: true,
+        description: true,
+        price: true,
+        isActive: true,
+        order: true,
+        createdAt: true,
+        updatedAt: true,
         category: true,
         questions: {
           where: { isActive: true },
@@ -76,8 +107,8 @@ export class PacksService {
         name: data.name,
         slug: data.slug,
         description: data.description,
-        type: data.type ?? 'STANDARD',
-        isFree: data.isFree ?? false,
+        // type: data.type ?? 'STANDARD', // Missing in DB
+        // isFree: data.isFree ?? false,   // Missing in DB
         price: data.price ? data.price : null,
         order: data.order ?? 0,
       },
@@ -87,12 +118,12 @@ export class PacksService {
 
   async update(id: string, data: UpdatePackDto) {
     await this.findOne(id);
-    const payload: Record<string, unknown> = {};
+    const payload: Record<string, any> = {};
     if (data.name !== undefined) payload.name = data.name;
     if (data.slug !== undefined) payload.slug = data.slug;
     if (data.description !== undefined) payload.description = data.description;
-    if (data.type !== undefined) payload.type = data.type;
-    if (data.isFree !== undefined) payload.isFree = data.isFree;
+    // if (data.type !== undefined) payload.type = data.type;
+    // if (data.isFree !== undefined) payload.isFree = data.isFree;
     if (data.price !== undefined) payload.price = data.price;
     if (data.order !== undefined) payload.order = data.order;
     if (data.isActive !== undefined) payload.isActive = data.isActive;
@@ -100,8 +131,7 @@ export class PacksService {
 
     return this.prisma.pack.update({
       where: { id },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      data: payload as any,
+      data: payload,
       include: { category: true },
     });
   }

@@ -3,6 +3,14 @@ import { useAuth0 } from '@auth0/auth0-react';
 import './App.css';
 import { AdminLayout } from './pages/AdminLayout';
 import { AdminQuestionsPage } from './pages/AdminQuestionsPage';
+import { AdminDashboardPage } from './pages/AdminDashboardPage';
+import { AdminUsersPage } from './pages/AdminUsersPage';
+import { AdminSubscriptionsPage } from './pages/AdminSubscriptionsPage';
+import { AdminCategoriesPage } from './pages/AdminCategoriesPage';
+import { AdminPacksPage } from './pages/AdminPacksPage';
+import { AdminPlansPage } from './pages/AdminPlansPage';
+import { AdminEmailsPage } from './pages/AdminEmailsPage';
+import { AdminGuard } from './components/AdminGuard';
 
 function App() {
   const { isAuthenticated, isLoading } = useAuth0();
@@ -27,9 +35,10 @@ function App() {
             <Navigate to="/admin/dashboard" replace />
           ) : (
             <div className="flex items-center justify-center h-screen bg-[#F8F5F1] p-6 text-center">
-              <div className="max-w-md">
-                <h1 className="text-[32px] font-black text-[#172E42] mb-4">IPF Admin</h1>
-                <p className="text-[16px] font-bold text-[#5a7a99] mb-8">
+              <div className="max-w-md bg-white p-10 rounded-[40px] shadow-card border border-ink-100">
+                <img src="/images/logo_admin_dark.png" alt="IPF Logo" className="h-12 mx-auto mb-8 object-contain" />
+                <h1 className="text-[28px] font-black text-[#172E42] mb-3">Administration</h1>
+                <p className="text-[15px] font-semibold text-[#5a7a99] mb-10">
                   Accédez au dashboard sécurisé pour gérer vos questions et quiz.
                 </p>
                 <LoginButton />
@@ -39,13 +48,19 @@ function App() {
         }
       />
 
-      <Route path="/admin" element={<AdminLayout />}>
-        <Route path="dashboard" element={<div>Dashboard Page (En cours de migration)</div>} />
+      <Route path="/admin" element={
+        <AdminGuard>
+          <AdminLayout />
+        </AdminGuard>
+      }>
+        <Route path="dashboard" element={<AdminDashboardPage />} />
         <Route path="questions" element={<AdminQuestionsPage />} />
-        <Route path="categories" element={<div>Categories Page (En cours de migration)</div>} />
-        <Route path="packs" element={<div>Packs Page (En cours de migration)</div>} />
-        <Route path="users" element={<div>Users Page (En cours de migration)</div>} />
-        <Route path="subscriptions" element={<div>Subscriptions Page (En cours de migration)</div>} />
+        <Route path="categories" element={<AdminCategoriesPage />} />
+        <Route path="packs" element={<AdminPacksPage />} />
+        <Route path="users" element={<AdminUsersPage />} />
+        <Route path="subscriptions" element={<AdminSubscriptionsPage />} />
+        <Route path="plans" element={<AdminPlansPage />} />
+        <Route path="emails" element={<AdminEmailsPage />} />
         <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
       </Route>
 

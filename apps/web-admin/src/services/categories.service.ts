@@ -6,5 +6,12 @@ export const categoriesService = {
         apiRequest('/categories', token),
         
     getAdminMeta: (token: string): Promise<{ categories: ICategory[], packs: any[], videos: any[] }> =>
-        apiRequest('/admin/questions/meta', token),
+        Promise.allSettled([
+            apiRequest<ICategory[]>('/admin/categories', token),
+            apiRequest<any[]>('/packs', token),
+        ]).then(([catRes, packsRes]) => ({
+            categories: catRes.status === 'fulfilled' ? catRes.value : [],
+            packs: packsRes.status === 'fulfilled' ? packsRes.value : [],
+            videos: []
+        })),
 };

@@ -23,7 +23,7 @@ export interface SidebarProps {
     logoAlt?: string;
 }
 
-export function Sidebar({ items, logoSrc = '/images/logo_admin.png', logoAlt = 'IPF Admin' }: SidebarProps) {
+export function Sidebar({ items, logoAlt = 'IPF Admin' }: SidebarProps) {
     const location = useLocation();
     const pathname = location.pathname;
     const { collapsed, toggle } = useSidebarStore();
@@ -79,27 +79,27 @@ export function Sidebar({ items, logoSrc = '/images/logo_admin.png', logoAlt = '
                     style={{
                         display: 'flex',
                         alignItems: 'center',
-                        marginBottom: 28,
+                        marginBottom: 32,
                         paddingLeft: 4,
                         paddingRight: 4,
-                        minHeight: 32,
-                        height: 32,
+                        minHeight: 40,
+                        height: 40,
                     }}
                 >
                     <img
-                        src={logoSrc}
+                        src="/images/logo_admin.png"
                         alt={logoAlt}
                         style={{
-                            height: 32,
+                            height: 38,
                             width: 'auto',
-                            maxWidth: collapsed ? 0 : 160,
+                            maxWidth: collapsed ? 0 : 180,
                             opacity: collapsed ? 0 : 1,
                             objectFit: 'contain',
                             flexShrink: 0,
                             display: 'block',
                             transition: collapsed
-                                ? 'max-width 0s, opacity 0s'
-                                : 'max-width 0s 0.28s, opacity 0.15s ease 0.28s',
+                                ? 'max-width 0.1s, opacity 0.1s'
+                                : 'max-width 0.3s 0.1s, opacity 0.2s 0.1s',
                             overflow: 'hidden',
                         }}
                     />
