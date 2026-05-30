@@ -5,11 +5,11 @@ import {
     IQuestion,
     QuestionStatus,
     DifficultyLevel,
-    LEASE_TYPE_LABELS,
     DIFFICULTY_LABELS,
     STATUS_LABELS,
     ICategory,
 } from '@/lib/question.types';
+import { IPack } from '@/lib/pack.types';
 import { truncateText } from '@/lib/generateCode';
 import {
     Pencil,
@@ -22,14 +22,15 @@ import {
 } from 'lucide-react';
 
 interface QuestionRowProps {
-    question: IQuestion;
+    question:   IQuestion;
     categories: ICategory[];
-    isEven: boolean;
-    onEdit: (question: IQuestion) => void;
-    onDelete: (id: string) => void;
-    onSuspend: (id: string) => void;
-    onArchive: (id: string) => void;
-    onRestore: (id: string) => void;
+    packs:      IPack[];
+    isEven:     boolean;
+    onEdit:     (question: IQuestion) => void;
+    onDelete:   (id: string) => void;
+    onSuspend:  (id: string) => void;
+    onArchive:  (id: string) => void;
+    onRestore:  (id: string) => void;
 }
 
 const DIFFICULTY_STYLES: Record<DifficultyLevel, string> = {
@@ -52,15 +53,11 @@ const STATUS_DOTS: Record<QuestionStatus, string> = {
 };
 
 export function QuestionRow({
-    question,
-    isEven,
-    onEdit,
-    onDelete,
-    onSuspend,
-    onArchive,
-    onRestore,
-    categories
+    question, isEven, onEdit, onDelete, onSuspend, onArchive, onRestore, categories, packs,
 }: QuestionRowProps) {
+    const packName = question.packId
+        ? (packs.find((p) => p.id === question.packId)?.name ?? question.packId)
+        : null;
     const [menuOpen, setMenuOpen] = useState(false);
 
     const handleDelete = () => {
@@ -138,9 +135,9 @@ export function QuestionRow({
 
             {/* Pack */}
             <td className="px-4 py-3 whitespace-nowrap">
-                {question.packId ? (
+                {packName ? (
                     <span className="text-[11px] font-extrabold text-[#1e3a5f] bg-[rgba(30,58,95,0.08)] px-2 py-0.5 rounded">
-                        {question.packId}
+                        {packName}
                     </span>
                 ) : (
                     <span className="text-[13px] text-[#5a7a99]">—</span>

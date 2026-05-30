@@ -1,4 +1,4 @@
-import { Home, Zap, TrendingUp, User, CircleGauge, Package } from 'lucide-react';
+import { Home, Zap, TrendingUp, User, CircleGauge, Package, Users, CreditCard, Target, Mail, BookOpen } from 'lucide-react';
 export const userNavItems = [
     {
         label: 'Accueil',
@@ -46,10 +46,52 @@ export const adminNavItems = [
         iconColor: '#D27A2D',
     },
     {
+        label: 'Types de baux',
+        href: '/admin/categories',
+        icon: BookOpen,
+        iconBg: 'rgba(88,204,2,0.15)',
+        iconColor: '#58cc02',
+    },
+    {
         label: 'Packs',
         href: '/admin/packs',
         icon: Package,
         iconBg: 'rgba(30,58,95,0.15)',
         iconColor: '#1e3a5f',
+    },
+    {
+        label: 'Utilisateurs',
+        href: '/admin/users',
+        icon: Users,
+        iconBg: 'rgba(16,185,129,0.15)',
+        iconColor: '#10B981',
+    },
+    {
+        label: 'Abonnements',
+        href: '/admin/subscriptions',
+        icon: CreditCard,
+        iconBg: 'rgba(28,176,246,0.15)',
+        iconColor: '#1CB0F6',
+    },
+    {
+        label: 'Prospects',
+        href: '/admin/prospects',
+        icon: Target,
+        iconBg: 'rgba(124,58,237,0.15)',
+        iconColor: '#7C3AED',
+    },
+    {
+        label: 'Plans',
+        href: '/admin/plans',
+        icon: CreditCard,
+        iconBg: 'rgba(245,158,11,0.15)',
+        iconColor: '#F59E0B',
+    },
+    {
+        label: 'Emails',
+        href: '/admin/emails',
+        icon: Mail,
+        iconBg: 'rgba(239,68,68,0.15)',
+        iconColor: '#EF4444',
     },
 ];

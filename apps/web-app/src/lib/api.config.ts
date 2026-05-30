@@ -58,6 +58,43 @@ export const API_ENDPOINTS = {
         list: '/categories',
     },
 
+    adminCategories: {
+        list:         '/admin/categories',
+        create:       '/admin/categories',
+        update:       (id: string) => `/admin/categories/${id}`,
+        toggleActive: (id: string) => `/admin/categories/${id}/toggle-active`,
+    },
+
+    subscriptions: {
+        list:       '/admin/subscriptions',
+        prospects:  '/admin/subscriptions/prospects',
+        cancel:     (id: string) => `/admin/subscriptions/${id}/cancel`,
+        changePlan: (id: string) => `/admin/subscriptions/${id}/plan`,
+    },
+
+    plans: {
+        list:   '/admin/plans',
+        create: '/admin/plans',
+        update: (id: string) => `/admin/plans/${id}`,
+        delete: (id: string) => `/admin/plans/${id}`,
+    },
+
+    email: {
+        templates:       '/admin/email/templates',
+        preview:         (id: string) => `/admin/email/templates/${id}/preview`,
+        sendToUser:      (userId: string) => `/admin/email/send/user/${userId}`,
+        sendToSegment:   '/admin/email/send/segment',
+    },
+
+    analytics: {
+        dashboard:         '/admin/dashboard',
+        questionStats:     '/admin/questions/stats',
+        users:             '/admin/users',
+        userDetail:        (id: string) => `/admin/users/${id}`,
+        deleteUser:        (id: string) => `/users/${id}`,
+        updateUserProfile: (id: string) => `/users/${id}/profile`,
+    },
+
     packs: {
         list:           '/packs',
         byId:           (id: string) => `/packs/${id}`,

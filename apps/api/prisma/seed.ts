@@ -298,7 +298,6 @@ const BADGES = [
 ];
 
 // ── Real user (ton compte Google Auth0) ──
-// Toutes les données utilisateur sont rattachées à ce seul compte.
 const REAL_USER_AUTH0_ID = 'google-oauth2|114633448715825913167';
 
 const DEV_USERS = [
@@ -313,6 +312,159 @@ const DEV_USERS = [
     streakDays: 14,
     bestStreak: 21,
     eloScore: 1450,
+  },
+];
+
+// ── Fake users pour les analytics (données de test riches) ──
+const FAKE_USERS: {
+  auth0Id: string;
+  email: string;
+  role: 'USER';
+  displayName: string;
+  ageRange: string;
+  professionalStatus: string;
+  jobProfileSlug: string;
+  xpTotal: number;
+  level: number;
+  streakDays: number;
+  bestStreak: number;
+  eloScore: number;
+  // catSlug → sessions sur 30j réparties selon ce pattern
+  sessions: { catSlug: string; count: number; accuracy: number }[];
+}[] = [
+  {
+    auth0Id: 'dev|user-marie-laurent',
+    email: 'marie.laurent@test.local',
+    role: 'USER',
+    displayName: 'Marie Laurent',
+    ageRange: 'AGE_26_35',
+    professionalStatus: 'SALARIE',
+    jobProfileSlug: 'agent-immo-transaction-pro',
+    xpTotal: 1850,
+    level: 6,
+    streakDays: 8,
+    bestStreak: 15,
+    eloScore: 1320,
+    sessions: [
+      { catSlug: 'bail-commercial',    count: 12, accuracy: 0.75 },
+      { catSlug: 'bail-professionnel', count:  7, accuracy: 0.62 },
+      { catSlug: 'bail-derogatoire',   count:  3, accuracy: 0.48 },
+    ],
+  },
+  {
+    auth0Id: 'dev|user-thomas-dubois',
+    email: 'thomas.dubois@test.local',
+    role: 'USER',
+    displayName: 'Thomas Dubois',
+    ageRange: 'AGE_36_45',
+    professionalStatus: 'INDEPENDANT',
+    jobProfileSlug: 'gestionnaire-locatif-pro',
+    xpTotal: 3200,
+    level: 10,
+    streakDays: 22,
+    bestStreak: 30,
+    eloScore: 1580,
+    sessions: [
+      { catSlug: 'bail-commercial',    count: 18, accuracy: 0.88 },
+      { catSlug: 'bail-professionnel', count: 14, accuracy: 0.82 },
+      { catSlug: 'bail-courte-duree',  count:  8, accuracy: 0.70 },
+      { catSlug: 'bail-derogatoire',   count:  5, accuracy: 0.65 },
+    ],
+  },
+  {
+    auth0Id: 'dev|user-sophie-martin',
+    email: 'sophie.martin@test.local',
+    role: 'USER',
+    displayName: 'Sophie Martin',
+    ageRange: 'AGE_46_55',
+    professionalStatus: 'MANDATAIRE',
+    jobProfileSlug: 'cgp',
+    xpTotal: 980,
+    level: 4,
+    streakDays: 3,
+    bestStreak: 9,
+    eloScore: 1180,
+    sessions: [
+      { catSlug: 'bail-commercial',    count:  5, accuracy: 0.55 },
+      { catSlug: 'bail-sous-location', count:  4, accuracy: 0.50 },
+    ],
+  },
+  {
+    auth0Id: 'dev|user-antoine-bernard',
+    email: 'antoine.bernard@test.local',
+    role: 'USER',
+    displayName: 'Antoine Bernard',
+    ageRange: 'AGE_26_35',
+    professionalStatus: 'SALARIE',
+    jobProfileSlug: 'assistant-commercial-agence',
+    xpTotal: 2100,
+    level: 7,
+    streakDays: 11,
+    bestStreak: 18,
+    eloScore: 1390,
+    sessions: [
+      { catSlug: 'bail-commercial',    count: 15, accuracy: 0.80 },
+      { catSlug: 'bail-professionnel', count:  9, accuracy: 0.71 },
+      { catSlug: 'bail-precaire',      count:  4, accuracy: 0.60 },
+    ],
+  },
+  {
+    auth0Id: 'dev|user-julie-moreau',
+    email: 'julie.moreau@test.local',
+    role: 'USER',
+    displayName: 'Julie Moreau',
+    ageRange: 'AGE_18_25',
+    professionalStatus: 'SALARIE',
+    jobProfileSlug: 'collaborateur-cabinet-comptable',
+    xpTotal: 540,
+    level: 2,
+    streakDays: 1,
+    bestStreak: 5,
+    eloScore: 1100,
+    sessions: [
+      { catSlug: 'bail-commercial', count: 4, accuracy: 0.45 },
+    ],
+  },
+  {
+    auth0Id: 'dev|user-pierre-leroy',
+    email: 'pierre.leroy@test.local',
+    role: 'USER',
+    displayName: 'Pierre Leroy',
+    ageRange: 'AGE_36_45',
+    professionalStatus: 'INDEPENDANT',
+    jobProfileSlug: 'expert-immobilier',
+    xpTotal: 4100,
+    level: 13,
+    streakDays: 27,
+    bestStreak: 35,
+    eloScore: 1720,
+    sessions: [
+      { catSlug: 'bail-commercial',    count: 22, accuracy: 0.92 },
+      { catSlug: 'bail-professionnel', count: 18, accuracy: 0.89 },
+      { catSlug: 'bail-courte-duree',  count: 12, accuracy: 0.85 },
+      { catSlug: 'bail-derogatoire',   count:  9, accuracy: 0.78 },
+      { catSlug: 'bail-precaire',      count:  6, accuracy: 0.72 },
+      { catSlug: 'bail-sous-location', count:  5, accuracy: 0.80 },
+    ],
+  },
+  {
+    auth0Id: 'dev|user-camille-petit',
+    email: 'camille.petit@test.local',
+    role: 'USER',
+    displayName: 'Camille Petit',
+    ageRange: 'AGE_26_35',
+    professionalStatus: 'MANDATAIRE',
+    jobProfileSlug: 'agent-immo-transaction-habitation',
+    xpTotal: 1420,
+    level: 5,
+    streakDays: 5,
+    bestStreak: 12,
+    eloScore: 1260,
+    sessions: [
+      { catSlug: 'bail-commercial',    count:  8, accuracy: 0.68 },
+      { catSlug: 'bail-professionnel', count:  6, accuracy: 0.60 },
+      { catSlug: 'bail-sous-location', count:  5, accuracy: 0.55 },
+    ],
   },
 ];
 
@@ -984,6 +1136,66 @@ async function main() {
   }
 
   // ─────────────────────────────────────────────
+  // 8b. Fake users analytics
+  // ─────────────────────────────────────────────
+  console.log('\n👥 Seeding fake analytics users...');
+
+  // Résoudre les jobProfile IDs
+  const allJobProfiles = await prisma.jobProfile.findMany({ select: { id: true, slug: true } });
+  const jobProfileSlugToId = new Map(allJobProfiles.map((j) => [j.slug, j.id]));
+
+  for (const u of FAKE_USERS) {
+    const user = await prisma.user.upsert({
+      where: { auth0Id: u.auth0Id },
+      update: { email: u.email, role: u.role },
+      create: { auth0Id: u.auth0Id, email: u.email, role: u.role },
+    });
+    userMap.set(u.auth0Id, user.id);
+
+    const jobProfileId = jobProfileSlugToId.get(u.jobProfileSlug) ?? null;
+
+    await prisma.userProfile.upsert({
+      where: { userId: user.id },
+      update: {
+        displayName:        u.displayName,
+        ageRange:           u.ageRange as any,
+        professionalStatus: u.professionalStatus as any,
+        jobProfileId,
+        xpTotal:      u.xpTotal,
+        level:        u.level,
+        streakDays:   u.streakDays,
+        bestStreak:   u.bestStreak,
+        lastPlayedAt: daysAgo(randomInt(0, 3)),
+      },
+      create: {
+        userId:             user.id,
+        displayName:        u.displayName,
+        ageRange:           u.ageRange as any,
+        professionalStatus: u.professionalStatus as any,
+        jobProfileId,
+        xpTotal:      u.xpTotal,
+        level:        u.level,
+        streakDays:   u.streakDays,
+        bestStreak:   u.bestStreak,
+        lastPlayedAt: daysAgo(randomInt(0, 3)),
+      },
+    });
+
+    await prisma.userRanking.upsert({
+      where: { userId: user.id },
+      update: { eloScore: u.eloScore, totalGames: u.sessions.reduce((s, c) => s + c.count, 0), totalWins: Math.floor(u.sessions.reduce((s, c) => s + c.count * c.accuracy, 0)) },
+      create: {
+        userId:     user.id,
+        eloScore:   u.eloScore,
+        totalGames: u.sessions.reduce((s, c) => s + c.count, 0),
+        totalWins:  Math.floor(u.sessions.reduce((s, c) => s + c.count * c.accuracy, 0)),
+      },
+    });
+
+    console.log(`  ✅ ${u.displayName} (${u.professionalStatus}, ${u.ageRange})`);
+  }
+
+  // ─────────────────────────────────────────────
   // 9. QuizSessions + QuizAnswers
   // ─────────────────────────────────────────────
   console.log('\n🎮 Seeding quiz sessions...');
@@ -1054,6 +1266,94 @@ async function main() {
       }
     }
     console.log(`  ✅ Sessions created for user ${auth0Id}`);
+  }
+
+  // ─────────────────────────────────────────────
+  // 9b. Sessions riches pour fake users (analytics)
+  // ─────────────────────────────────────────────
+  console.log('\n🎮 Seeding rich sessions for analytics users...');
+  const MODES = ['PRACTICE', 'PRACTICE', 'PRACTICE', 'RANKED', 'DAILY'] as const;
+
+  for (const fakeUser of FAKE_USERS) {
+    const userId = userMap.get(fakeUser.auth0Id);
+    if (!userId) continue;
+
+    // Vérifie si déjà des sessions (idempotence)
+    const existingCount = await prisma.quizSession.count({ where: { userId } });
+    if (existingCount > 0) {
+      console.log(`  ⏭  ${fakeUser.displayName} — sessions already exist (${existingCount}), skipping`);
+      continue;
+    }
+
+    let totalSessions = 0;
+
+    for (const cfg of fakeUser.sessions) {
+      const categoryId = categoryMap.get(cfg.catSlug);
+      const questionIds = questionIdsByCat.get(cfg.catSlug) ?? [];
+      if (!categoryId || questionIds.length < 5) continue;
+
+      for (let i = 0; i < cfg.count; i++) {
+        // Répartir les sessions sur les 30 derniers jours
+        const daysOffset = Math.floor((i / cfg.count) * 29) + randomInt(0, 1);
+        const completedAt = daysAgo(29 - daysOffset);
+        const qSlice = questionIds.slice((i * 5) % Math.max(1, questionIds.length - 5), (i * 5) % Math.max(1, questionIds.length - 5) + 5);
+        const totalQ = qSlice.length || 5;
+        const correctAnswers = Math.round(totalQ * cfg.accuracy * (0.85 + randomInt(0, 30) / 100));
+        const clampedCorrect = Math.min(totalQ, Math.max(0, correctAnswers));
+        const mode = MODES[randomInt(0, MODES.length - 1)];
+
+        const session = await prisma.quizSession.create({
+          data: {
+            userId,
+            categoryId,
+            mode,
+            totalQuestions: totalQ,
+            correctAnswers: clampedCorrect,
+            score:          clampedCorrect * 10,
+            xpEarned:       clampedCorrect * 15,
+            durationMs:     randomInt(45_000, 240_000),
+            livesRemaining: Math.max(0, 5 - (totalQ - clampedCorrect)),
+            status:         'COMPLETED',
+            startedAt:      new Date(completedAt.getTime() - randomInt(60_000, 240_000)),
+            completedAt,
+            questionOrder:  qSlice,
+          },
+        });
+
+        // Réponses
+        for (let qi = 0; qi < qSlice.length; qi++) {
+          const questionId = qSlice[qi];
+          const question = await prisma.question.findUnique({
+            where: { id: questionId },
+            select: { correctAnswer: true },
+          });
+          if (!question) continue;
+
+          const isCorrect = qi < clampedCorrect;
+          const options = ['A', 'B', 'C', 'D'];
+          const wrongOptions = options.filter((o) => o !== question.correctAnswer);
+          const userAnswer = isCorrect
+            ? question.correctAnswer
+            : wrongOptions[randomInt(0, wrongOptions.length - 1)];
+
+          await prisma.quizAnswer.create({
+            data: {
+              sessionId:      session.id,
+              questionId,
+              userAnswer,
+              isCorrect,
+              responseTimeMs: randomInt(1200, 8500),
+              xpEarned:       isCorrect ? 15 : 0,
+              answeredAt:     new Date(session.startedAt.getTime() + qi * randomInt(10_000, 50_000)),
+            },
+          });
+        }
+
+        totalSessions++;
+      }
+    }
+
+    console.log(`  ✅ ${fakeUser.displayName} — ${totalSessions} sessions créées`);
   }
 
   // ─────────────────────────────────────────────

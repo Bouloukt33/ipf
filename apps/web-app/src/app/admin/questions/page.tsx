@@ -7,6 +7,8 @@ import { QuestionTable } from '@/components/admin/QuestionTable';
 import { Toast, useToast } from '@/components/admin/Toast';
 import { useQuestions } from '@/hooks/useQuestions';
 import { IQuestion, IQuestionFormData } from '@/lib/question.types';
+import { IPack } from '@/lib/pack.types';
+import { packsService } from '@/services/packs.service';
 import {
     Pagination,
     PaginationContent,
@@ -16,8 +18,7 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from '@/components/ui/pagination';
-import React, { useState, useCallback } from 'react';
-import { useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 
 export default function AdminQuestionsPage() {
     const {
@@ -40,6 +41,9 @@ export default function AdminQuestionsPage() {
         restoreQuestion,
         categories
     } = useQuestions();
+
+    const [packs, setPacks] = useState<IPack[]>([]);
+    useEffect(() => { packsService.getAll({ }).then(setPacks).catch(() => {}); }, []);
 
     const [modalOpen, setModalOpen]             = useState(false);
     const [editingQuestion, setEditingQuestion] = useState<IQuestion | null>(null);
@@ -111,6 +115,7 @@ export default function AdminQuestionsPage() {
                 isLoading={isLoading}
                 onEdit={openEdit}
                 categories={categories}
+                packs={packs}
                 onDelete={handleDelete}
                 onSuspend={handleSuspend}
                 onArchive={handleArchive}
@@ -163,6 +168,8 @@ export default function AdminQuestionsPage() {
             <QuestionModal
                 isOpen={modalOpen}
                 question={editingQuestion}
+                categories={categories}
+                packs={packs}
                 onClose={closeModal}
                 onSave={handleSave}
             />
