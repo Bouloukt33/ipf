@@ -260,8 +260,8 @@ function CategoryRow({ cat, isEven, onEdit, onToggle }: {
             {/* Stats */}
             <td className="px-4 py-3 whitespace-nowrap">
                 <div className="flex flex-col gap-0.5">
-                    <span className="text-[12px] font-bold text-[#172E42]">{cat._count.questions} questions</span>
-                    <span className="text-[11px] font-semibold text-[#5a7a99]">{cat._count.packs} packs · {cat._count.themes} thèmes</span>
+                    <span className="text-[12px] font-bold text-[#172E42]">{cat._count?.questions ?? 0} questions</span>
+                    <span className="text-[11px] font-semibold text-[#5a7a99]">{cat._count?.packs ?? 0} packs · {cat._count?.themes ?? 0} thèmes</span>
                 </div>
             </td>
 

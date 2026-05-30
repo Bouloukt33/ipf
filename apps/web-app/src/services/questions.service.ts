@@ -53,7 +53,7 @@ export const questionsService = {
         if (filters?.search)     params.set('search', filters.search);
         if (filters?.leaseType)  params.set('categoryId', filters.leaseType);
         if (filters?.categoryId) params.set('categoryId', filters.categoryId);
-        if (filters?.difficulty) params.set('difficulty', filters.difficulty);
+        if (filters?.difficulty) params.set('level', filters.difficulty.toString());
         if (filters?.status)     params.set('isActive', filters.status === 'ACTIVE' ? 'true' : 'false');
         const url = `${API_ENDPOINTS.questions.list}?${params.toString()}`;
         return apiFetch(url).then(extractPaginated);

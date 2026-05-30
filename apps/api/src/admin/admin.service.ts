@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma';
 import * as nodemailer from 'nodemailer';
+import { Prisma } from '@prisma/client';
 
 // ── Email templates ────────────────────────────────────────────────────────────
 
@@ -462,10 +463,10 @@ export class AdminService {
       ];
     }
     if (filters?.planSlug) {
-      where.subscription = { ...where.subscription, plan: { slug: filters.planSlug } };
+        where.subscription = { ...where.subscription, is: { plan: { slug: filters.planSlug } } };
     }
     if (filters?.status) {
-      where.subscription = { ...where.subscription, status: filters.status };
+        where.subscription = { ...where.subscription, is: { status: filters.status } };
     }
 
     const [users, total] = await Promise.all([
@@ -654,7 +655,7 @@ export class AdminService {
         price:          data.price,
         currency:       data.currency       ?? 'EUR',
         intervalMonths: data.intervalMonths ?? 1,
-        features:       data.features       ? JSON.stringify(data.features) : null,
+        features: data.features ? JSON.stringify(data.features) : Prisma.JsonNull,
         stripePriceId:  data.stripePriceId  ?? null,
         isActive:       data.isActive       ?? true,
         order:          data.order          ?? 0,
