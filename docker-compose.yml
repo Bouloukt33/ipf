@@ -119,6 +119,35 @@ services:
     networks:
       - ipf-network
 
+  # Web Admin (Vite)
+  web-admin:
+    build:
+      context: ./apps/web-admin
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:3000}
+        VITE_AUTH0_DOMAIN: ${AUTH0_DOMAIN}
+        VITE_AUTH0_CLIENT_ID: ${AUTH0_CLIENT_ID}
+        VITE_AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
+        VITE_AUTH0_ROLE_CLAIM: ${VITE_AUTH0_ROLE_CLAIM:-https://ipf.com/roles}
+    container_name: ipf-web-admin
+    restart: unless-stopped
+    ports:
+      - "${WEB_ADMIN_PORT:-5173}:5173"
+    environment:
+      NODE_ENV: development
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:3000}
+      VITE_AUTH0_DOMAIN: ${AUTH0_DOMAIN}
+      VITE_AUTH0_CLIENT_ID: ${AUTH0_CLIENT_ID}
+      VITE_AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
+      VITE_AUTH0_ROLE_CLAIM: ${VITE_AUTH0_ROLE_CLAIM:-https://ipf.com/roles}
+    depends_on:
+      - api
+    profiles:
+      - app
+    networks:
+      - ipf-network
+
   # ===========================================================================
   # OUTILS DE DEV (profil "tools" — docker compose --profile tools up)
   # ===========================================================================

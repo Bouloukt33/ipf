@@ -21,7 +21,7 @@ Remplir les variables Auth0 dans le fichier `.env`.
 docker compose up -d
 ```
 
-### Infrastructure + Applications (API + Web App)
+### Infrastructure + Applications (API + Web App + Web Admin)
 
 ```bash
 docker compose --profile app up -d --build
@@ -51,6 +51,7 @@ docker compose --profile app down -v
 docker compose --profile app logs -f
 docker compose logs api -f
 docker compose logs web-app -f
+docker compose logs web-admin -f
 ```
 
 ### Rebuild une app specifique
@@ -58,6 +59,7 @@ docker compose logs web-app -f
 ```bash
 docker compose --profile app up -d --build api
 docker compose --profile app up -d --build web-app
+docker compose --profile app up -d --build web-admin
 ```
 
 ### Prisma Studio (inspecter la base)
@@ -76,6 +78,7 @@ Fonctionne pendant que Docker tourne car PostgreSQL est expose sur localhost:543
 | Redis            | 6379 |
 | API NestJS       | 3000 |
 | Web App Next.js  | 3001 |
+| Web Admin (Vite) | 5173 |
 | pgAdmin          | 5050 |
 | Redis Commander  | 8081 |
 

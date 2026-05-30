@@ -12,11 +12,14 @@ export default function QuizPage() {
     const { user, isLoading: authLoading } = useUser()
 
     useEffect(() => {
-        if (!user) return
+        if (!user) {
+            setProfileComplete(false)
+            return
+        }
         api.profile
             .get()
-            .then(({ profile: p }) => {
-                setProfileComplete(!!(p?.ageRange && p?.professionalStatus && p?.jobProfileId))
+            .then((profile) => {
+                setProfileComplete(!!(profile.ageRange && profile.professionalStatus && profile.jobProfileId))
             })
             .catch(() => setProfileComplete(false))
     }, [user])

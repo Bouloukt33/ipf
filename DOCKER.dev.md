@@ -21,7 +21,7 @@ Remplir les variables Auth0 dans le fichier `.env`.
 docker compose up -d
 ```
 
-### Développement avec hot-reload (API + Web App)
+### Développement avec hot-reload (API + Web App + Web Admin)
 
 ```bash
 docker compose --profile dev up -d --build
@@ -71,6 +71,7 @@ docker compose --profile app down -v
 docker compose --profile dev logs -f
 docker compose logs api-dev -f
 docker compose logs web-app-dev -f
+docker compose logs web-admin-dev -f
 
 # Mode production
 docker compose --profile app logs -f
@@ -84,6 +85,7 @@ docker compose logs web-app -f
 # Mode dev
 docker compose --profile dev up -d --build api-dev
 docker compose --profile dev up -d --build web-app-dev
+docker compose --profile dev up -d --build web-admin-dev
 
 # Mode production
 docker compose --profile app up -d --build api
@@ -106,6 +108,7 @@ Fonctionne pendant que Docker tourne car PostgreSQL est exposé sur `localhost:5
 | Redis            | 6379  | ✓          | ✓          |
 | API NestJS       | 3000  | `api-dev`  | `api`      |
 | Web App Next.js  | 3001  | `web-app-dev` | `web-app` |
+| Web Admin (Vite) | 5173  | `web-admin-dev` | `web-admin` |
 | Node.js debugger | 9229  | ✓          | —          |
 | pgAdmin          | 5050  | `--profile tools` | `--profile tools` |
 | Redis Commander  | 8081  | `--profile tools` | `--profile tools` |

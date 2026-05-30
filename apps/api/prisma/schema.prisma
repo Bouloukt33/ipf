@@ -152,6 +152,8 @@ model Question {
   timeToRead         Int?                @map("time_to_read")
   isPremium          Boolean             @default(false) @map("is_premium")
   isActive           Boolean             @default(true) @map("is_active")
+  status             QuestionStatus      @default(ACTIVE)
+  codification       String?             @map("codification")
   sourceFile         String?             @map("source_file")
   sourceId           String?             @map("source_id")
   createdAt          DateTime            @default(now()) @map("created_at")
@@ -462,6 +464,12 @@ enum SessionStatus {
   IN_PROGRESS
   COMPLETED
   ABANDONED
+}
+
+enum QuestionStatus {
+  ACTIVE
+  SUSPENDED
+  ARCHIVED
 }
 
 enum RecommendationType {

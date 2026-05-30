@@ -2,6 +2,10 @@ import { auth0 } from '@/lib/auth0';
 import { redirect } from 'next/navigation';
 
 const API_BASE = process.env.API_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+const ADMIN_DASHBOARD_URL =
+    process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_URL ||
+    process.env.NEXT_PUBLIC_ADMIN_URL ||
+    'http://localhost:5173/admin/dashboard';
 
 export default async function PostLoginPage() {
     const session = await auth0.getSession();
@@ -32,6 +36,6 @@ export default async function PostLoginPage() {
     }
 
     if (isNewUser) redirect('/quiz/onboarding');
-    if (role === 'ADMIN' || role === 'MODERATOR') redirect('/dashboard/admin');
+    if (role === 'ADMIN' || role === 'MODERATOR') redirect(ADMIN_DASHBOARD_URL);
     redirect('/dashboard'); 
 }
