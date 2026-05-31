@@ -178,6 +178,7 @@ export function useQuizEngine() {
     dispatch({ type: 'START_LOADING' });
     try {
       const res = await api.quiz.current(sessionId);
+      console.log('[QuizEngine] Session resumed:', res);
       dispatch({
         type: 'SESSION_STARTED',
         sessionId: res.sessionId,
@@ -213,6 +214,7 @@ export function useQuizEngine() {
     dispatch({ type: 'START_LOADING' });
     try {
       const res = await api.quiz.start({ categoryId, packId, mode });
+      console.log('[QuizEngine] Session started:', res);
       await api.quiz.ready(res.sessionId);
       dispatch({
         type: 'SESSION_STARTED',

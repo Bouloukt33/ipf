@@ -174,7 +174,12 @@ function QuizPlayContent() {
 
       {/* Timer */}
       <div className="mb-6">
-        <Timer duration={state.durationOverride || 5} isRunning={isTimerRunning} onTimeout={handleTimeout} />
+        <Timer 
+          key={state.question.id}
+          duration={state.durationOverride || 5} 
+          isRunning={isTimerRunning} 
+          onTimeout={handleTimeout} 
+        />
       </div>
 
       {/* Category Badge */}

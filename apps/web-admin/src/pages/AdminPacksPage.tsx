@@ -1,10 +1,15 @@
 import { useState } from 'react';
+import { useAuth0 } from '@auth0/auth0-react';
 import { useAdminPacks } from '../hooks/useAdminPacks';
 import { Package, Plus, Edit2, Trash2, Globe, Lock, User, Clock } from 'lucide-react';
 import { PackModal } from '../components/admin/PackModal';
+import { packsService } from '../services/packs.service';
+import { ENV } from '../lib/env';
+import { AUTH0_SCOPE } from '../lib/auth0';
 import type { IPack, IPackFormData } from '../lib/types';
 
 export function AdminPacksPage() {
+  const { getAccessTokenSilently } = useAuth0();
   const { packs, categories, isLoading, createPack, updatePack, deletePack } = useAdminPacks();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPack, setEditingPack] = useState<IPack | null>(null);
@@ -14,9 +19,20 @@ export function AdminPacksPage() {
     setIsModalOpen(true);
   };
 
-  const handleEdit = (pack: IPack) => {
-    setEditingPack(pack);
-    setIsModalOpen(true);
+  const handleEdit = async (pack: IPack) => {
+    try {
+      const token = await getAccessTokenSilently({
+        authorizationParams: {
+          audience: ENV.auth0Audience,
+          scope: AUTH0_SCOPE,
+        },
+      });
+      const fullPack = await packsService.getById(token, pack.id);
+      setEditingPack(fullPack);
+      setIsModalOpen(true);
+    } catch (err) {
+      console.error('Failed to load pack details:', err);
+    }
   };
 
   const handleSave = async (data: IPackFormData) => {

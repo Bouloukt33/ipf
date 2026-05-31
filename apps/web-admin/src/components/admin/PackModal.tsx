@@ -136,7 +136,14 @@ export function PackModal({ isOpen, pack, categories, onClose, onSave }: PackMod
         });
     };
 
+    const isFormValid = 
+        form.name.trim().length > 0 && 
+        form.categoryId !== '' && 
+        (form.visibility === 'PUBLIC' || (form.visibility === 'PRIVATE' && form.assignedUserId)) &&
+        (form.questionIds && form.questionIds.length > 0);
+
     const handleSave = async () => {
+        if (!isFormValid) return;
         setIsSaving(true);
         try {
             await onSave(form);
@@ -297,9 +304,9 @@ export function PackModal({ isOpen, pack, categories, onClose, onSave }: PackMod
                     <div className="flex flex-col space-y-4 min-h-0">
                         <h3 className="text-[15px] font-black text-navy flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                                <BookOpen size={18} className="text-orange-500" /> Sélection des questions
+                                <BookOpen size={18} className="text-orange-500" /> Sélection des questions <span className="text-red-500">*</span>
                             </div>
-                            <span className="px-3 py-1 rounded-lg bg-orange-100 text-orange-600 text-[11px] font-black">
+                            <span className={`px-3 py-1 rounded-lg text-[11px] font-black ${form.questionIds && form.questionIds.length > 0 ? 'bg-orange-100 text-orange-600' : 'bg-red-50 text-red-500 animate-pulse'}`}>
                                 {form.questionIds?.length || 0} sélectionnée(s)
                             </span>
                         </h3>
@@ -341,18 +348,29 @@ export function PackModal({ isOpen, pack, categories, onClose, onSave }: PackMod
                 </div>
 
                 {/* Footer */}
-                <div className="p-8 border-t border-gray-100 flex justify-end gap-4 bg-gray-50/50">
-                    <button onClick={onClose} className="px-6 py-3 rounded-2xl font-black text-[14px] text-gray-500 hover:bg-gray-100 transition-all">
-                        Annuler
-                    </button>
-                    <button 
-                        onClick={handleSave}
-                        disabled={isSaving || !form.name || (form.visibility === 'PRIVATE' && !form.assignedUserId)}
-                        className="px-10 py-3 rounded-2xl font-black text-[14px] text-white bg-navy hover:bg-black shadow-lg shadow-navy/20 transition-all disabled:opacity-50 flex items-center gap-2"
-                    >
-                        {isSaving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Check size={18} />}
-                        {pack ? 'Mettre à jour' : 'Créer le pack'}
-                    </button>
+                <div className="p-8 border-t border-gray-100 flex flex-col items-end gap-4 bg-gray-50/50">
+                    {!isFormValid && (
+                        <p className="text-[12px] font-bold text-red-500 bg-red-50 px-4 py-2 rounded-lg border border-red-100">
+                            Veuillez remplir tous les champs obligatoires (*) et sélectionner au moins une question.
+                        </p>
+                    )}
+                    <div className="flex gap-4">
+                        <button onClick={onClose} className="px-6 py-3 rounded-2xl font-black text-[14px] text-gray-500 hover:bg-gray-100 transition-all">
+                            Annuler
+                        </button>
+                        <button 
+                            onClick={handleSave}
+                            disabled={isSaving || !isFormValid}
+                            className={`px-10 py-3 rounded-2xl font-black text-[14px] text-white transition-all flex items-center gap-2 shadow-lg ${
+                                isFormValid 
+                                ? 'bg-navy hover:bg-black shadow-navy/20 active:scale-95' 
+                                : 'bg-gray-300 cursor-not-allowed shadow-none'
+                            }`}
+                        >
+                            {isSaving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Check size={18} />}
+                            {pack ? 'Mettre à jour' : 'Créer le pack'}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
