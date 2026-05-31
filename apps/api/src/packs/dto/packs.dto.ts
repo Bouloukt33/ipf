@@ -87,6 +87,12 @@ export class CreatePackDto {
   @Min(1)
   @Type(() => Number)
   targetQuestionCount?: number;
+
+  @ApiPropertyOptional({ description: 'IDs des questions à associer', type: [String] })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  questionIds?: string[];
 }
 
 // ── Update ──────────────────────────────────────────────────────────────────
@@ -164,6 +170,12 @@ export class UpdatePackDto {
   @Min(1)
   @Type(() => Number)
   targetQuestionCount?: number;
+
+  @ApiPropertyOptional({ description: 'IDs des questions à associer', type: [String] })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  questionIds?: string[];
 }
 
 // ── Add Questions ────────────────────────────────────────────────────────────

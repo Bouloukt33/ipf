@@ -27,6 +27,7 @@ export class PacksController {
   constructor(private packsService: PacksService) {}
 
   @Get()
+  @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Lister les packs', description: 'Route publique — filtrages par catégorie, type, gratuité' })
   @ApiQuery({ name: 'categoryId', required: false })
   @ApiQuery({ name: 'type', required: false, enum: ['STANDARD', 'VISITEUR', 'PREMIUM'] })
@@ -40,13 +41,17 @@ export class PacksController {
     @Query('isFree') isFree?: string,
     @Query('includeInactive') includeInactive?: string,
   ) {
-    const isAdmin = user?.role === 'ADMIN';
+    console.log('[PacksController] User from token:', JSON.stringify(user));
+    const roles = user?.roles || [];
+    const isAdmin = roles.some((r: string) => r.toLowerCase() === 'admin');
+    console.log('[PacksController] isAdmin:', isAdmin, 'userId:', user?.userId);
+    
     return this.packsService.findAll({
       categoryId,
       type,
       isFree: isFree !== undefined ? isFree === 'true' : undefined,
       includeInactive: includeInactive === 'true',
-      userId: user?.id,
+      auth0Id: user?.userId,
       isAdmin: isAdmin,
     });
   }

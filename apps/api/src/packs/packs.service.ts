@@ -11,7 +11,7 @@ export class PacksService {
     type?: string;
     isFree?: boolean;
     includeInactive?: boolean;
-    userId?: string;
+    auth0Id?: string;
     isAdmin?: boolean;
   }) {
     const where: Record<string, any> = {};
@@ -20,15 +20,25 @@ export class PacksService {
     
     // Logique de visibilité
     if (!filters?.isAdmin) {
-      if (filters?.userId) {
-        where.OR = [
-          { visibility: 'PUBLIC' },
-          { visibility: 'PRIVATE', assignedUserId: filters.userId }
-        ];
+      if (filters?.auth0Id) {
+        const user = await this.prisma.user.findUnique({
+          where: { auth0Id: filters.auth0Id }
+        });
+        console.log('[PacksService] User for visibility check:', user?.email, 'Internal ID:', user?.id);
+        if (user) {
+          where.OR = [
+            { visibility: 'PUBLIC' },
+            { visibility: 'PRIVATE', assignedUserId: user.id }
+          ];
+        } else {
+          where.visibility = 'PUBLIC';
+        }
       } else {
         where.visibility = 'PUBLIC';
       }
     }
+
+    console.log('[PacksService] Final WHERE clause:', JSON.stringify(where));
 
     return this.prisma.pack.findMany({
       where,
@@ -144,47 +154,77 @@ export class PacksService {
   }
 
   async create(data: CreatePackDto) {
-    return this.prisma.pack.create({
+    const { questionIds, ...packData } = data;
+    const pack = await this.prisma.pack.create({
       data: {
-        categoryId: data.categoryId,
-        name: data.name,
-        slug: data.slug,
-        description: data.description,
-        type: data.type ?? 'STANDARD',
-        isFree: data.isFree ?? false,
-        price: data.price ? data.price : null,
-        order: data.order ?? 0,
-        visibility: data.visibility ?? 'PUBLIC',
-        assignedUserId: data.assignedUserId ?? null,
-        durationOverride: data.durationOverride ?? null,
-        targetQuestionCount: data.targetQuestionCount ?? null,
+        categoryId: packData.categoryId,
+        name: packData.name,
+        slug: packData.slug,
+        description: packData.description,
+        type: packData.type ?? 'STANDARD',
+        isFree: packData.isFree ?? false,
+        price: packData.price ? packData.price : null,
+        order: packData.order ?? 0,
+        visibility: packData.visibility ?? 'PUBLIC',
+        assignedUserId: packData.assignedUserId ?? null,
+        durationOverride: packData.durationOverride ?? null,
+        targetQuestionCount: packData.targetQuestionCount ?? null,
       },
       include: { category: true },
     });
+
+    if (questionIds && questionIds.length > 0) {
+      await this.prisma.question.updateMany({
+        where: { id: { in: questionIds } },
+        data: { packId: pack.id },
+      });
+    }
+
+    return pack;
   }
 
   async update(id: string, data: UpdatePackDto) {
+    const { questionIds, ...updateData } = data;
     await this.findOne(id);
+    
     const payload: Record<string, any> = {};
-    if (data.name !== undefined) payload.name = data.name;
-    if (data.slug !== undefined) payload.slug = data.slug;
-    if (data.description !== undefined) payload.description = data.description;
-    if (data.type !== undefined) payload.type = data.type;
-    if (data.isFree !== undefined) payload.isFree = data.isFree;
-    if (data.price !== undefined) payload.price = data.price;
-    if (data.order !== undefined) payload.order = data.order;
-    if (data.isActive !== undefined) payload.isActive = data.isActive;
-    if (data.categoryId !== undefined) payload.categoryId = data.categoryId;
-    if (data.visibility !== undefined) payload.visibility = data.visibility;
-    if (data.assignedUserId !== undefined) payload.assignedUserId = data.assignedUserId;
-    if (data.durationOverride !== undefined) payload.durationOverride = data.durationOverride;
-    if (data.targetQuestionCount !== undefined) payload.targetQuestionCount = data.targetQuestionCount;
+    if (updateData.name !== undefined) payload.name = updateData.name;
+    if (updateData.slug !== undefined) payload.slug = updateData.slug;
+    if (updateData.description !== undefined) payload.description = updateData.description;
+    if (updateData.type !== undefined) payload.type = updateData.type;
+    if (updateData.isFree !== undefined) payload.isFree = updateData.isFree;
+    if (updateData.price !== undefined) payload.price = updateData.price;
+    if (updateData.order !== undefined) payload.order = updateData.order;
+    if (updateData.isActive !== undefined) payload.isActive = updateData.isActive;
+    if (updateData.categoryId !== undefined) payload.categoryId = updateData.categoryId;
+    if (updateData.visibility !== undefined) payload.visibility = updateData.visibility;
+    if (updateData.assignedUserId !== undefined) payload.assignedUserId = updateData.assignedUserId;
+    if (updateData.durationOverride !== undefined) payload.durationOverride = updateData.durationOverride;
+    if (updateData.targetQuestionCount !== undefined) payload.targetQuestionCount = updateData.targetQuestionCount;
 
-    return this.prisma.pack.update({
+    const pack = await this.prisma.pack.update({
       where: { id },
       data: payload,
       include: { category: true },
     });
+
+    if (questionIds !== undefined) {
+      // Dissocier les anciennes questions (optionnel, selon le besoin)
+      await this.prisma.question.updateMany({
+        where: { packId: id },
+        data: { packId: null },
+      });
+      
+      // Associer les nouvelles
+      if (questionIds.length > 0) {
+        await this.prisma.question.updateMany({
+          where: { id: { in: questionIds } },
+          data: { packId: id },
+        });
+      }
+    }
+
+    return pack;
   }
 
   async delete(id: string) {

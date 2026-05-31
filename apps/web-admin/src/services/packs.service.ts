@@ -22,31 +22,12 @@ export const packsService = {
         apiRequest<IPack>('/packs', token, {
             method: 'POST',
             body: JSON.stringify(data),
-        }).then(async (pack) => {
-            // Si des questions sont spécifiées, on les ajoute
-            if (data.questionIds && data.questionIds.length > 0) {
-                await apiRequest(`/packs/${pack.id}/questions`, token, {
-                    method: 'POST',
-                    body: JSON.stringify({ questionIds: data.questionIds }),
-                });
-            }
-            return pack;
         }),
 
     update: (token: string, id: string, data: Partial<IPackFormData>): Promise<IPack> =>
         apiRequest<IPack>(`/packs/${id}`, token, {
             method: 'PUT',
             body: JSON.stringify(data),
-        }).then(async (pack) => {
-            // Note: Simplification, on remplace toutes les questions
-            // L'API backend devrait normalement gérer la synchronisation
-            if (data.questionIds !== undefined) {
-                await apiRequest(`/packs/${pack.id}/questions`, token, {
-                    method: 'POST',
-                    body: JSON.stringify({ questionIds: data.questionIds }),
-                });
-            }
-            return pack;
         }),
 
     delete: (token: string, id: string): Promise<void> =>
