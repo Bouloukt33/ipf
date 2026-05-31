@@ -3,164 +3,95 @@ import { PrismaService } from '../prisma';
 import * as nodemailer from 'nodemailer';
 import { Prisma } from '@prisma/client';
 
-// ── Email templates ────────────────────────────────────────────────────────────
+// ── Email templates ──────────────────────────────────────────────────────────
+export type EmailTemplateId = 'upsell_premium' | 'coaching_relance';
 
-export const EMAIL_TEMPLATES = {
-  upsell: {
-    id:      'upsell',
-    name:    'Upsell — Plan Apprenti engagé',
-    subject: '🚀 Tu es prêt pour la prochaine étape !',
-    description: 'Envoyé aux utilisateurs Apprenti très actifs pour les inciter à passer Compagnon.',
-    html: (data: { displayName: string; streakDays: number; sessionsPlayed: number }) => `
-<!DOCTYPE html><html><body style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#172E42">
-<h2 style="color:#D27A2D">Bonjour ${data.displayName || 'là'} 👋</h2>
-<p>Tu joues depuis <strong>${data.streakDays} jours</strong> consécutifs et tu as déjà réalisé <strong>${data.sessionsPlayed} sessions</strong> — c'est impressionnant !</p>
-<p>Avec le plan <strong>Compagnon</strong>, tu débloqueras toutes les catégories de baux, le mode Daily et les vidéos explicatives.</p>
-<a href="https://app.ipf.com/profile" style="display:inline-block;margin:16px 0;padding:12px 24px;background:#D27A2D;color:white;border-radius:8px;text-decoration:none;font-weight:700">Passer au plan Compagnon →</a>
-<p style="color:#5a7a99;font-size:12px">IPF — 5 Secondes Chrono · Se désabonner</p>
-</body></html>`,
+const EMAIL_TEMPLATES: Record<EmailTemplateId, any> = {
+  upsell_premium: {
+    id: 'upsell_premium',
+    name: 'Upsell Premium',
+    subject: 'Passez au niveau supérieur avec IPF Premium !',
+    description: 'Envoyé aux utilisateurs Apprenti actifs.',
+    html: (data: any) => `<h1>Bonjour ${data.displayName}</h1><p>Vous êtes au niveau ${data.level}...</p>`,
   },
-  coaching: {
-    id:      'coaching',
-    name:    'Coaching — Faible précision',
-    subject: '💡 Un coup de pouce pour progresser plus vite',
-    description: 'Envoyé aux abonnés Compagnon/Réussite avec un taux de réussite inférieur à 55%.',
-    html: (data: { displayName: string; accuracy: number }) => `
-<!DOCTYPE html><html><body style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#172E42">
-<h2 style="color:#D27A2D">Bonjour ${data.displayName || 'là'} 👋</h2>
-<p>Ton taux de réussite actuel est de <strong>${data.accuracy}%</strong>. On a quelques conseils pour t'aider à progresser !</p>
-<p>Commencer par les thèmes où tu as le plus de lacunes, et alterner avec des révisions des bases peut faire une vraie différence.</p>
-<a href="https://app.ipf.com/dashboard" style="display:inline-block;margin:16px 0;padding:12px 24px;background:#D27A2D;color:white;border-radius:8px;text-decoration:none;font-weight:700">Reprendre l'entraînement →</a>
-<p style="color:#5a7a99;font-size:12px">IPF — 5 Secondes Chrono · Se désabonner</p>
-</body></html>`,
+  coaching_relance: {
+    id: 'coaching_relance',
+    name: 'Relance Coaching',
+    subject: 'Besoin d\'un coup de pouce sur vos révisions ?',
+    description: 'Envoyé aux abonnés avec une faible précision.',
+    html: (data: any) => `<h1>Bonjour ${data.displayName}</h1><p>Nous avons remarqué que...</p>`,
   },
-  welcome: {
-    id:      'welcome',
-    name:    'Bienvenue',
-    subject: '🎉 Bienvenue sur 5 Secondes Chrono !',
-    description: "Envoyé à un nouvel utilisateur lors de son inscription.",
-    html: (data: { displayName: string }) => `
-<!DOCTYPE html><html><body style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#172E42">
-<h2 style="color:#D27A2D">Bienvenue ${data.displayName || ''} 🎉</h2>
-<p>Tu viens de rejoindre la plateforme de formation quiz pour les professionnels de l'immobilier.</p>
-<p>Commence par <strong>5 questions</strong> sur le bail commercial — c'est gratuit et ça prend 2 minutes !</p>
-<a href="https://app.ipf.com/quiz" style="display:inline-block;margin:16px 0;padding:12px 24px;background:#D27A2D;color:white;border-radius:8px;text-decoration:none;font-weight:700">Lancer mon premier quiz →</a>
-<p style="color:#5a7a99;font-size:12px">IPF — 5 Secondes Chrono · Se désabonner</p>
-</body></html>`,
-  },
-  reminder: {
-    id:      'reminder',
-    name:    'Rappel de série',
-    subject: '🔥 Ta série est en danger !',
-    description: "Envoyé aux utilisateurs qui n'ont pas joué depuis 2+ jours.",
-    html: (data: { displayName: string; streakDays: number }) => `
-<!DOCTYPE html><html><body style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#172E42">
-<h2 style="color:#D27A2D">Hey ${data.displayName || ''} 🔥</h2>
-<p>Ta série de <strong>${data.streakDays} jours</strong> est en danger ! Il ne te reste que quelques heures pour la préserver.</p>
-<a href="https://app.ipf.com/quiz" style="display:inline-block;margin:16px 0;padding:12px 24px;background:#D27A2D;color:white;border-radius:8px;text-decoration:none;font-weight:700">Jouer maintenant →</a>
-<p style="color:#5a7a99;font-size:12px">IPF — 5 Secondes Chrono · Se désabonner</p>
-</body></html>`,
-  },
-} as const;
-
-export type EmailTemplateId = keyof typeof EMAIL_TEMPLATES;
+};
 
 @Injectable()
 export class AdminService {
   constructor(private prisma: PrismaService) {}
 
   async getDashboardStats() {
-    const sevenDaysAgo  = new Date(); sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    const thirtyDaysAgo = new Date(); thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-    const [
-      totalUsers,
-      activeUsers,
-      totalQuestions,
-      totalSessions,
-      totalCategories,
-      recentSessions,
-      newUsersThisWeek,
-      sessionDates,
-      proStatusGroups,
-      questionsByCategory,
-    ] = await Promise.all([
+    const [totalUsers, activeUsers, newUsers, totalQuestions, totalSessions, last7DaysSessions, totalCategories] = await Promise.all([
       this.prisma.user.count(),
       this.prisma.user.count({ where: { isActive: true } }),
+      this.prisma.user.count({
+        where: { createdAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } },
+      }),
       this.prisma.question.count(),
-      this.prisma.quizSession.count({ where: { status: 'COMPLETED' } }),
-      this.prisma.category.count({ where: { isActive: true } }),
-      this.prisma.quizSession.count({ where: { status: 'COMPLETED', completedAt: { gte: sevenDaysAgo } } }),
-      this.prisma.user.count({ where: { createdAt: { gte: sevenDaysAgo } } }),
-      // Sessions des 30 derniers jours pour le graphique
-      this.prisma.quizSession.findMany({
-        where: { status: 'COMPLETED', completedAt: { gte: thirtyDaysAgo } },
-        select: { completedAt: true },
+      this.prisma.quizSession.count(),
+      this.prisma.quizSession.count({
+        where: { startedAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } },
       }),
-      // Répartition par statut professionnel
-      this.prisma.userProfile.groupBy({
-        by: ['professionalStatus'],
-        _count: { id: true },
-        where: { professionalStatus: { not: null } },
-      }),
-      // Questions par catégorie
-      this.prisma.question.groupBy({
-        by: ['categoryId'],
-        _count: { id: true },
-      }),
+      this.prisma.category.count(),
     ]);
 
-    // Calendrier sessions (30j) — grouper par date
-    const dayMap = new Map<string, number>();
-    for (const s of sessionDates) {
-      if (!s.completedAt) continue;
-      const key = s.completedAt.toISOString().slice(0, 10);
-      dayMap.set(key, (dayMap.get(key) ?? 0) + 1);
-    }
-    const sessionsByDay = Array.from({ length: 30 }, (_, i) => {
-      const d = new Date(thirtyDaysAgo);
-      d.setDate(d.getDate() + i + 1);
-      const key = d.toISOString().slice(0, 10);
-      return { date: key, sessions: dayMap.get(key) ?? 0 };
+    // Sessions par jour (30j)
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const sessions = await this.prisma.quizSession.findMany({
+      where: { startedAt: { gte: thirtyDaysAgo } },
+      select: { startedAt: true },
     });
 
-    // Statut pro labels
-    const proStatusLabels: Record<string, string> = {
-      SALARIE:     'Salarié',
-      INDEPENDANT: 'Indépendant',
-      MANDATAIRE:  'Mandataire',
-    };
-    const usersByProStatus = proStatusGroups.map((g) => ({
-      status: g.professionalStatus ?? 'Inconnu',
-      label:  proStatusLabels[g.professionalStatus ?? ''] ?? g.professionalStatus ?? 'Inconnu',
-      count:  g._count.id,
+    const sessionsMap = new Map<string, number>();
+    for (const s of sessions) {
+      const date = s.startedAt.toISOString().split('T')[0];
+      sessionsMap.set(date, (sessionsMap.get(date) || 0) + 1);
+    }
+    const sessionsByDay = Array.from(sessionsMap.entries())
+      .map(([date, sessions]) => ({ date, sessions }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    // Users par statut pro
+    const usersByProStatus = await this.prisma.userProfile.groupBy({
+      by: ['professionalStatus'],
+      _count: true,
+    });
+
+    // Questions par catégorie
+    const questionsBycatRaw = await this.prisma.question.groupBy({
+      by: ['categoryId'],
+      _count: true,
+    });
+    const categories = await this.prisma.category.findMany({
+      select: { id: true, name: true, color: true },
+    });
+    const catMap = new Map(categories.map((c) => [c.id, c]));
+
+    const questionsBycat = questionsBycatRaw.map((q) => ({
+      category: catMap.get(q.categoryId)?.name || 'Inconnue',
+      count: q._count,
+      color: catMap.get(q.categoryId)?.color || '#D27A2D',
     }));
 
-    // Questions par catégorie — résoudre les noms
-    const catIds = questionsByCategory.map((q) => q.categoryId);
-    const categories = catIds.length
-      ? await this.prisma.category.findMany({
-          where: { id: { in: catIds } },
-          select: { id: true, name: true, color: true },
-        })
-      : [];
-    const catMap = new Map(categories.map((c) => [c.id, c]));
-    const questionsBycat = questionsByCategory
-      .map((q) => ({
-        category: catMap.get(q.categoryId)?.name ?? 'Inconnue',
-        color:    catMap.get(q.categoryId)?.color ?? '#D27A2D',
-        count:    q._count.id,
-      }))
-      .sort((a, b) => b.count - a.count);
-
     return {
-      users: { total: totalUsers, active: activeUsers, newThisWeek: newUsersThisWeek },
+      users: { total: totalUsers, active: activeUsers, newThisWeek: newUsers },
       questions: { total: totalQuestions },
-      sessions: { total: totalSessions, last7Days: recentSessions },
+      sessions: { total: totalSessions, last7Days: last7DaysSessions },
       categories: totalCategories,
       charts: {
         sessionsByDay,
-        usersByProStatus,
+        usersByProStatus: usersByProStatus.map((u) => ({
+          status: u.professionalStatus || 'AUTRE',
+          label: u.professionalStatus || 'Non renseigné',
+          count: u._count,
+        })),
         questionsByCategory: questionsBycat,
       },
     };
@@ -173,7 +104,11 @@ export class AdminService {
         where: { status: 'COMPLETED' },
         orderBy: { completedAt: 'desc' },
         include: {
-          user: { include: { profile: true } },
+          user: {
+            include: { profile: { select: { displayName: true, avatarUrl: true } } },
+          },
+          category: { select: { name: true } },
+          pack: { select: { name: true } },
         },
       }),
       this.prisma.user.findMany({
@@ -916,6 +851,28 @@ export class AdminService {
     return this.prisma.category.update({
       where: { id },
       data:  { isActive: !cat.isActive },
+    });
+  }
+
+  async searchUsers(query: string) {
+    return this.prisma.user.findMany({
+      where: {
+        OR: [
+          { email: { contains: query, mode: 'insensitive' } },
+          { profile: { displayName: { contains: query, mode: 'insensitive' } } },
+        ],
+      },
+      select: {
+        id: true,
+        email: true,
+        profile: {
+          select: {
+            displayName: true,
+            avatarUrl: true,
+          },
+        },
+      },
+      take: 10,
     });
   }
 }

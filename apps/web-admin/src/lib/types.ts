@@ -39,10 +39,34 @@ export interface IPack {
     id: string;
     name: string;
     slug: string;
-    description?: string;
+    description?: string | null;
     isActive: boolean;
     categoryId: string;
     category?: ICategory | null;
+    visibility: 'PUBLIC' | 'PRIVATE';
+    assignedUserId?: string | null;
+    assignedUser?: {
+        id: string;
+        email: string;
+        profile?: { displayName: string | null } | null;
+    } | null;
+    durationOverride?: number | null;
+    targetQuestionCount?: number | null;
+    questions?: IQuestion[];
+    _count?: { questions: number };
+}
+
+export interface IPackFormData {
+    name: string;
+    slug: string;
+    description?: string;
+    categoryId: string;
+    isActive: boolean;
+    visibility: 'PUBLIC' | 'PRIVATE';
+    assignedUserId?: string | null;
+    durationOverride?: number | null;
+    targetQuestionCount?: number | null;
+    questionIds?: string[];
 }
 
 export interface IVideo {

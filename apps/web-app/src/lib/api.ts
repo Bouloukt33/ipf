@@ -47,6 +47,7 @@ async function request<T>(
 
 export interface StartSessionPayload {
   categoryId?: string;
+  packId?: string;
   mode?: 'PRACTICE' | 'DAILY';
 }
 

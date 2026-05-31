@@ -33,6 +33,7 @@ interface QuizEngineState {
   xpEarned: number;
   totalXpSession: number;
   error: string | null;
+  durationOverride: number | null;
 }
 
 type QuizAction =
@@ -45,6 +46,7 @@ type QuizAction =
       comboCount: number;
       totalQuestions: number;
       categoryName: string;
+      durationOverride: number | null;
     }
   | { type: 'SELECT_ANSWER'; answer: string }
   | { type: 'SUBMITTING' }
@@ -74,6 +76,7 @@ const initialState: QuizEngineState = {
   xpEarned: 0,
   totalXpSession: 0,
   error: null,
+  durationOverride: null,
 };
 
 function reducer(state: QuizEngineState, action: QuizAction): QuizEngineState {
@@ -91,6 +94,7 @@ function reducer(state: QuizEngineState, action: QuizAction): QuizEngineState {
         comboCount: action.comboCount,
         totalQuestions: action.totalQuestions,
         categoryName: action.categoryName,
+        durationOverride: action.durationOverride,
         selectedAnswer: null,
         correctAnswer: null,
         isCorrect: null,
@@ -182,6 +186,7 @@ export function useQuizEngine() {
         comboCount: res.comboCount ?? 0,
         totalQuestions: res.question.totalQuestions,
         categoryName: res.categoryName ?? '',
+        durationOverride: res.durationOverride ?? null,
       });
       answerStartRef.current = performance.now();
     } catch (err: any) {
@@ -190,8 +195,9 @@ export function useQuizEngine() {
     }
   }, []);
 
-  const startSession = useCallback(async (categoryId?: string, mode?: 'PRACTICE' | 'DAILY') => {
+  const startSession = useCallback(async (options: { categoryId?: string; packId?: string; mode?: 'PRACTICE' | 'DAILY' } = {}) => {
     hasInitializedRef.current = true;
+    const { categoryId, packId, mode } = options;
 
     // Check for existing session first
     const existingSessionId = sessionStorage.getItem(SESSION_STORAGE_KEY);
@@ -206,7 +212,7 @@ export function useQuizEngine() {
 
     dispatch({ type: 'START_LOADING' });
     try {
-      const res = await api.quiz.start({ categoryId, mode });
+      const res = await api.quiz.start({ categoryId, packId, mode });
       await api.quiz.ready(res.sessionId);
       dispatch({
         type: 'SESSION_STARTED',
@@ -216,6 +222,7 @@ export function useQuizEngine() {
         comboCount: 0,
         totalQuestions: res.totalQuestions,
         categoryName: res.categoryName,
+        durationOverride: (res as any).durationOverride ?? null,
       });
       answerStartRef.current = performance.now();
     } catch (err: any) {

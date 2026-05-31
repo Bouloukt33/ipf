@@ -63,6 +63,30 @@ export class CreatePackDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @ApiPropertyOptional({ enum: ['PUBLIC', 'PRIVATE'], default: 'PUBLIC' })
+  @IsOptional()
+  @IsEnum(['PUBLIC', 'PRIVATE'])
+  visibility?: 'PUBLIC' | 'PRIVATE';
+
+  @ApiPropertyOptional({ description: 'ID de l\'utilisateur assigné (pour packs privés)' })
+  @IsOptional()
+  @IsString()
+  assignedUserId?: string;
+
+  @ApiPropertyOptional({ description: 'Temps imposé par question (en secondes)' })
+  @IsOptional()
+  @IsNumber()
+  @Min(5)
+  @Type(() => Number)
+  durationOverride?: number;
+
+  @ApiPropertyOptional({ description: 'Nombre de questions à jouer dans une session' })
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Type(() => Number)
+  targetQuestionCount?: number;
 }
 
 // ── Update ──────────────────────────────────────────────────────────────────
@@ -116,6 +140,30 @@ export class UpdatePackDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @ApiPropertyOptional({ enum: ['PUBLIC', 'PRIVATE'] })
+  @IsOptional()
+  @IsEnum(['PUBLIC', 'PRIVATE'])
+  visibility?: 'PUBLIC' | 'PRIVATE';
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  assignedUserId?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  @Min(5)
+  @Type(() => Number)
+  durationOverride?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Type(() => Number)
+  targetQuestionCount?: number;
 }
 
 // ── Add Questions ────────────────────────────────────────────────────────────

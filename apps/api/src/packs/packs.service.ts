@@ -11,13 +11,24 @@ export class PacksService {
     type?: string;
     isFree?: boolean;
     includeInactive?: boolean;
+    userId?: string;
+    isAdmin?: boolean;
   }) {
     const where: Record<string, any> = {};
     if (!filters?.includeInactive) where.isActive = true;
     if (filters?.categoryId) where.categoryId = filters.categoryId;
     
-    // NOTE: 'type' and 'isFree' columns are missing in the current database migration
-    // We exclude them from the query to avoid 500 errors.
+    // Logique de visibilité
+    if (!filters?.isAdmin) {
+      if (filters?.userId) {
+        where.OR = [
+          { visibility: 'PUBLIC' },
+          { visibility: 'PRIVATE', assignedUserId: filters.userId }
+        ];
+      } else {
+        where.visibility = 'PUBLIC';
+      }
+    }
 
     return this.prisma.pack.findMany({
       where,
@@ -27,12 +38,25 @@ export class PacksService {
         name: true,
         slug: true,
         description: true,
+        type: true,
+        isFree: true,
         price: true,
         isActive: true,
         order: true,
+        visibility: true,
+        assignedUserId: true,
+        durationOverride: true,
+        targetQuestionCount: true,
         createdAt: true,
         updatedAt: true,
         category: true,
+        assignedUser: {
+          select: {
+            id: true,
+            email: true,
+            profile: { select: { displayName: true } }
+          }
+        },
         _count: { select: { questions: true } },
       },
       orderBy: [{ order: 'asc' }, { createdAt: 'desc' }],
@@ -48,12 +72,25 @@ export class PacksService {
         name: true,
         slug: true,
         description: true,
+        type: true,
+        isFree: true,
         price: true,
         isActive: true,
         order: true,
+        visibility: true,
+        assignedUserId: true,
+        durationOverride: true,
+        targetQuestionCount: true,
         createdAt: true,
         updatedAt: true,
         category: true,
+        assignedUser: {
+          select: {
+            id: true,
+            email: true,
+            profile: { select: { displayName: true } }
+          }
+        },
         questions: {
           where: { isActive: true },
           include: { theme: true },
@@ -81,9 +118,15 @@ export class PacksService {
         name: true,
         slug: true,
         description: true,
+        type: true,
+        isFree: true,
         price: true,
         isActive: true,
         order: true,
+        visibility: true,
+        assignedUserId: true,
+        durationOverride: true,
+        targetQuestionCount: true,
         createdAt: true,
         updatedAt: true,
         category: true,
@@ -107,10 +150,14 @@ export class PacksService {
         name: data.name,
         slug: data.slug,
         description: data.description,
-        // type: data.type ?? 'STANDARD', // Missing in DB
-        // isFree: data.isFree ?? false,   // Missing in DB
+        type: data.type ?? 'STANDARD',
+        isFree: data.isFree ?? false,
         price: data.price ? data.price : null,
         order: data.order ?? 0,
+        visibility: data.visibility ?? 'PUBLIC',
+        assignedUserId: data.assignedUserId ?? null,
+        durationOverride: data.durationOverride ?? null,
+        targetQuestionCount: data.targetQuestionCount ?? null,
       },
       include: { category: true },
     });
@@ -122,12 +169,16 @@ export class PacksService {
     if (data.name !== undefined) payload.name = data.name;
     if (data.slug !== undefined) payload.slug = data.slug;
     if (data.description !== undefined) payload.description = data.description;
-    // if (data.type !== undefined) payload.type = data.type;
-    // if (data.isFree !== undefined) payload.isFree = data.isFree;
+    if (data.type !== undefined) payload.type = data.type;
+    if (data.isFree !== undefined) payload.isFree = data.isFree;
     if (data.price !== undefined) payload.price = data.price;
     if (data.order !== undefined) payload.order = data.order;
     if (data.isActive !== undefined) payload.isActive = data.isActive;
     if (data.categoryId !== undefined) payload.categoryId = data.categoryId;
+    if (data.visibility !== undefined) payload.visibility = data.visibility;
+    if (data.assignedUserId !== undefined) payload.assignedUserId = data.assignedUserId;
+    if (data.durationOverride !== undefined) payload.durationOverride = data.durationOverride;
+    if (data.targetQuestionCount !== undefined) payload.targetQuestionCount = data.targetQuestionCount;
 
     return this.prisma.pack.update({
       where: { id },

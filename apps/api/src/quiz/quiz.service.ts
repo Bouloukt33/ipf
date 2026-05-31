@@ -93,6 +93,7 @@ export class QuizService {
   async startSession(
     auth0Id: string,
     categoryId?: string,
+    packId?: string,
     mode: QuizMode = 'PRACTICE',
   ): Promise<StartSessionResult> {
     const user = await this.prisma.user.findUnique({
@@ -107,39 +108,70 @@ export class QuizService {
       user.subscription.status === 'ACTIVE' &&
       user.subscription.currentPeriodEnd > new Date();
 
-    // Default to Bail Commercial if no category specified
-    if (!categoryId) {
-      const defaultCat = await this.prisma.category.findFirst({
-        where: { slug: 'bail-commercial' },
+    let questionIds: string[] = [];
+    let sessionCategoryName = 'Bail commercial';
+    let durationOverride: number | null = null;
+
+    if (packId) {
+      const pack = await this.prisma.pack.findUnique({
+        where: { id: packId },
+        include: { category: true, questions: { where: { isActive: true }, select: { id: true } } }
       });
-      if (defaultCat) categoryId = defaultCat.id;
-    }
 
-    // Validate category exists
-    const category = categoryId
-      ? await this.prisma.category.findUnique({ where: { id: categoryId } })
-      : null;
-    if (categoryId && !category) {
-      throw new NotFoundException('Catégorie non trouvée');
-    }
+      if (!pack) throw new NotFoundException('Pack non trouvé');
 
-    // SECURITY: Premium category access control
-    if (category?.isPremium && !isPremium) {
-      throw new ForbiddenException(
-        'Cette catégorie est réservée aux abonnés Premium',
+      // Visibility check
+      if (pack.visibility === 'PRIVATE' && pack.assignedUserId !== user.id) {
+        throw new ForbiddenException('Ce pack est privé et ne vous est pas assigné');
+      }
+
+      const allPackQuestionIds = pack.questions.map(q => q.id);
+      this.shuffle(allPackQuestionIds);
+      
+      const count = pack.targetQuestionCount || allPackQuestionIds.length;
+      questionIds = allPackQuestionIds.slice(0, count);
+      
+      categoryId = pack.categoryId;
+      sessionCategoryName = pack.name;
+      durationOverride = pack.durationOverride;
+
+    } else {
+      // Default to Bail Commercial if no category specified
+      if (!categoryId) {
+        const defaultCat = await this.prisma.category.findFirst({
+          where: { slug: 'bail-commercial' },
+        });
+        if (defaultCat) categoryId = defaultCat.id;
+      }
+
+      // Validate category exists
+      const category = categoryId
+        ? await this.prisma.category.findUnique({ where: { id: categoryId } })
+        : null;
+      if (categoryId && !category) {
+        throw new NotFoundException('Catégorie non trouvée');
+      }
+
+      // SECURITY: Premium category access control
+      if (category?.isPremium && !isPremium) {
+        throw new ForbiddenException(
+          'Cette catégorie est réservée aux abonnés Premium',
+        );
+      }
+
+      sessionCategoryName = category?.name ?? 'Bail commercial';
+
+      // Select questions: prioritize unseen, randomize
+      questionIds = await this.selectQuestions(
+        user.id,
+        categoryId,
+        QUESTIONS_PER_SESSION,
       );
     }
 
-    // Select questions: prioritize unseen, randomize
-    const questionIds = await this.selectQuestions(
-      user.id,
-      categoryId,
-      QUESTIONS_PER_SESSION,
-    );
-
     if (questionIds.length === 0) {
       throw new BadRequestException(
-        'Aucune question disponible pour cette catégorie',
+        'Aucune question disponible pour cette sélection',
       );
     }
 
@@ -147,13 +179,15 @@ export class QuizService {
       data: {
         userId: user.id,
         categoryId,
+        packId,
         mode,
         totalQuestions: questionIds.length,
         livesRemaining: MAX_LIVES,
         comboCount: 0,
         currentQuestionIdx: 0,
         questionOrder: questionIds,
-        questionServedAt: null, // Timer starts when frontend signals ready
+        questionServedAt: null,
+        durationOverride,
         status: 'IN_PROGRESS',
       },
     });
@@ -178,7 +212,7 @@ export class QuizService {
       totalQuestions: questionIds.length,
       lives: MAX_LIVES,
       mode,
-      categoryName: category?.name ?? 'Bail commercial',
+      categoryName: sessionCategoryName,
     };
   }
 

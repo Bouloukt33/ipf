@@ -19,7 +19,7 @@ import {
 } from '@nestjs/swagger';
 import { PacksService } from './packs.service';
 import { CreatePackDto, UpdatePackDto, AddQuestionsDto } from './dto/packs.dto';
-import { AuthGuard, PermissionsGuard, Permissions } from '../auth';
+import { AuthGuard, PermissionsGuard, Permissions, CurrentUser } from '../auth';
 
 @ApiTags('Packs')
 @Controller('packs')
@@ -34,16 +34,20 @@ export class PacksController {
   @ApiQuery({ name: 'includeInactive', required: false, type: Boolean })
   @ApiResponse({ status: 200, description: 'Liste des packs' })
   async findAll(
+    @CurrentUser() user: any,
     @Query('categoryId') categoryId?: string,
     @Query('type') type?: string,
     @Query('isFree') isFree?: string,
     @Query('includeInactive') includeInactive?: string,
   ) {
+    const isAdmin = user?.role === 'ADMIN';
     return this.packsService.findAll({
       categoryId,
       type,
       isFree: isFree !== undefined ? isFree === 'true' : undefined,
       includeInactive: includeInactive === 'true',
+      userId: user?.id,
+      isAdmin: isAdmin,
     });
   }
 

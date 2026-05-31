@@ -9,10 +9,10 @@ interface SidebarState {
 
 export const useSidebarStore = create<SidebarState>()(
   persist(
-    (set) => ({
+    (set: any) => ({
       collapsed: false,
-      toggle: () => set((state) => ({ collapsed: !state.collapsed })),
-      setCollapsed: (collapsed) => set({ collapsed }),
+      toggle: () => set((state: SidebarState) => ({ collapsed: !state.collapsed })),
+      setCollapsed: (collapsed: boolean) => set({ collapsed }),
     }),
     {
       name: 'sidebar-storage',

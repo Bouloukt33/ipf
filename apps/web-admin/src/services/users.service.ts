@@ -54,4 +54,7 @@ export const usersService = {
 
   getProspects: (token: string): Promise<{ upsell: any[], coaching: any[] }> =>
     apiRequest('/admin/subscriptions/prospects', token),
+
+  search: (token: string, query: string): Promise<any[]> =>
+    apiRequest(`/admin/users/search?q=${encodeURIComponent(query)}`, token),
 };

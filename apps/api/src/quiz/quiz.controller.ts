@@ -33,7 +33,7 @@ export class QuizController {
   @ApiOperation({
     summary: 'Démarrer une session',
     description:
-      'Crée une session de 10 questions. Retourne la première question et le sessionId.',
+      'Crée une session de questions à partir d\'une catégorie ou d\'un pack.',
   })
   @ApiBody({
     schema: {
@@ -41,7 +41,11 @@ export class QuizController {
       properties: {
         categoryId: {
           type: 'string',
-          description: 'ID catégorie (défaut: Bail commercial)',
+          description: 'ID catégorie',
+        },
+        packId: {
+          type: 'string',
+          description: 'ID d\'un pack spécifique',
         },
         mode: {
           type: 'string',
@@ -54,9 +58,9 @@ export class QuizController {
   @ApiResponse({ status: 201, description: 'Session créée avec première question' })
   async startSession(
     @CurrentUser('userId') userId: string,
-    @Body() body: { categoryId?: string; mode?: QuizMode },
+    @Body() body: { categoryId?: string; packId?: string; mode?: QuizMode },
   ) {
-    return this.quizService.startSession(userId, body.categoryId, body.mode);
+    return this.quizService.startSession(userId, body.categoryId, body.packId, body.mode);
   }
 
   @Post('answer')

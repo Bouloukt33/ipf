@@ -50,10 +50,20 @@ export class AdminController {
       search,
       professionalStatus,
       ageRange,
-      page:  page  ? parseInt(page)  : 1,
+      page: page ? parseInt(page) : 1,
       limit: limit ? parseInt(limit) : 20,
     });
-  }
+    }
+
+    @Get('users/search')
+    @Permissions('read:admin')
+    @ApiOperation({ summary: 'Recherche utilisateur', description: 'Recherche rapide d\'un utilisateur par email ou nom pour assignation de pack' })
+    @ApiQuery({ name: 'q', required: true })
+    @ApiResponse({ status: 200 })
+    async searchUsers(@Query('q') query: string) {
+    return this.adminService.searchUsers(query);
+    }
+
 
   @Get('users/:id')
   @Permissions('read:admin')

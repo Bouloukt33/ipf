@@ -99,7 +99,7 @@ export function AdminDashboardPage() {
                   axisLine={false} 
                   tickLine={false} 
                   tick={{fill: '#5a7a99', fontSize: 10}}
-                  tickFormatter={(val) => val.split('-').slice(1).reverse().join('/')}
+                  tickFormatter={(val: string) => val.split('-').slice(1).reverse().join('/')}
                 />
                 <YAxis axisLine={false} tickLine={false} tick={{fill: '#5a7a99', fontSize: 12}} />
                 <Tooltip 
@@ -161,7 +161,9 @@ export function AdminDashboardPage() {
                 <div>
                   <p className="text-[14px] font-bold text-[#172E42]">
                     {session.user.profile?.displayName || 'Utilisateur'} 
-                    <span className="font-semibold text-[#5a7a99] ml-1">a terminé un quiz</span>
+                    <span className="font-semibold text-[#5a7a99] ml-1">
+                      {session.pack ? `a joué le pack ${session.pack.name}` : 'a terminé un quiz'}
+                    </span>
                   </p>
                   <p className="text-[12px] font-bold text-[#D27A2D]">Score: {session.score}% • {session.xpEarned} XP</p>
                 </div>
