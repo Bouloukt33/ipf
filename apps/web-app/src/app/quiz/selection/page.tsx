@@ -100,14 +100,21 @@ function SelectionContent() {
     }
 
     function handlePackClick(pack: any) {
+        console.log('[Selection] Selected pack:', pack.id)
         setSelected({ type: 'pack', id: pack.id })
     }
 
     function handleStart() {
-        if (selected === null) return
+        console.log('[Selection] handleStart triggered', selected)
+        if (!selected) return
+        
         setLoading(true)
-        const param = selected.type === 'category' ? `categoryId=${selected.id}` : `packId=${selected.id}`
-        router.push(`/quiz/play?${param}`)
+        const url = selected.type === 'category' 
+            ? `/quiz/play?categoryId=${selected.id}` 
+            : `/quiz/play?packId=${selected.id}`
+            
+        console.log('[Selection] Redirecting to:', url)
+        router.push(url)
     }
 
     const freeCategories = categories.filter(c => !c.isPremium)
@@ -149,33 +156,44 @@ function SelectionContent() {
                                     {assignedPacks.map((pack) => {
                                         const isSelected = selected?.type === 'pack' && selected.id === pack.id
                                         return (
-                                            <button
+                                            <div
                                                 key={pack.id}
                                                 onClick={() => handlePackClick(pack)}
                                                 className={`
-                                                    relative text-left bg-navy border-[3px] rounded-2xl p-8
+                                                    relative text-left bg-navy border-[3px] rounded-2xl p-8 cursor-pointer
                                                     transition-all duration-300 ease-out
                                                     ${isSelected
-                                                        ? 'border-primary -translate-y-1 shadow-primary'
+                                                        ? 'border-primary -translate-y-1 shadow-primary scale-[1.02]'
                                                         : 'border-navy hover:border-primary hover:-translate-y-1'
                                                     }
                                                 `}
                                             >
                                                 <div className="absolute top-6 right-6">
-                                                    <div className="w-8 h-8 rounded-lg bg-orange-500 flex items-center justify-center text-white">
+                                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white ${isSelected ? 'bg-primary' : 'bg-orange-500'}`}>
                                                         <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
                                                             <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
                                                         </svg>
                                                     </div>
                                                 </div>
                                                 <p className="text-xl font-black text-white mb-2 pr-10">{pack.name}</p>
-                                                <p className="text-xs font-bold text-white/50 uppercase mb-4 tracking-tighter">
+                                                <p className="text-xs font-bold text-white/50 uppercase mb-6 tracking-tighter">
                                                     {pack.category?.name || 'Spécial'} • {pack.targetQuestionCount || 'Max'} Questions
                                                 </p>
-                                                <span className="inline-block px-3 py-1 bg-white/10 text-white text-[10px] font-black rounded-full uppercase">
-                                                    Sur-mesure
-                                                </span>
-                                            </button>
+                                                
+                                                {isSelected && (
+                                                    <button 
+                                                        onClick={(e) => { e.stopPropagation(); handleStart(); }}
+                                                        className="w-full py-3 bg-primary text-white font-black text-sm rounded-xl animate-fade-in shadow-lg"
+                                                    >
+                                                        DÉMARRER MAINTENANT
+                                                    </button>
+                                                )}
+                                                {!isSelected && (
+                                                    <span className="inline-block px-3 py-1 bg-white/10 text-white text-[10px] font-black rounded-full uppercase">
+                                                        Sur-mesure
+                                                    </span>
+                                                )}
+                                            </div>
                                         )
                                     })}
                                 </div>
@@ -193,14 +211,14 @@ function SelectionContent() {
                                     const isSelected = selected?.type === 'category' && selected.id === cat.id
                                     const isLocked = cat.isPremium && !isPremium
                                     return (
-                                        <button
+                                        <div
                                             key={cat.id}
                                             onClick={() => handleCategoryClick(cat)}
                                             className={`
-                                                relative text-left bg-white border-[3px] rounded-2xl p-8
+                                                relative text-left bg-white border-[3px] rounded-2xl p-8 cursor-pointer
                                                 transition-all duration-300 ease-out
                                                 ${isSelected
-                                                    ? 'border-primary bg-primary/10 -translate-y-1 shadow-primary'
+                                                    ? 'border-primary bg-primary/10 -translate-y-1 shadow-primary scale-[1.02]'
                                                     : isLocked
                                                         ? 'bg-white/50 border-dashed border-navy/20 hover:border-primary/40 hover:bg-primary/5'
                                                         : 'border-navy hover:border-primary hover:bg-primary/10 hover:-translate-y-1'
@@ -222,10 +240,20 @@ function SelectionContent() {
                                             <p className={`text-xl font-extrabold mb-3 pr-10 ${isLocked ? 'text-navy/60' : 'text-navy'}`}>
                                                 {cat.name}
                                             </p>
+                                            
+                                            {isSelected && !isLocked && (
+                                                <button 
+                                                    onClick={(e) => { e.stopPropagation(); handleStart(); }}
+                                                    className="w-full py-3 bg-primary text-white font-black text-sm rounded-xl animate-fade-in shadow-lg mb-4"
+                                                >
+                                                    DÉMARRER LE QUIZ
+                                                </button>
+                                            )}
+
                                             <span className={`inline-block px-2 py-1 text-xs font-bold rounded-full ${cat.isPremium ? 'bg-primary/10 text-primary' : 'bg-green-100 text-green-700'}`}>
                                                 {cat.isPremium ? 'Premium' : 'Gratuit'}
                                             </span>
-                                        </button>
+                                        </div>
                                     )
                                 })}
                             </div>
@@ -234,7 +262,7 @@ function SelectionContent() {
 
                     {/* Unlock CTA for free users */}
                     {!isPremium && premiumCategories.length > 0 && (
-                        <div className="text-center mt-12 mb-10">
+                        <div className="text-center mt-12 mb-10 pb-20">
                             <button
                                 onClick={() => router.push('/subscription')}
                                 className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-orange text-white font-bold rounded-xl hover:-translate-y-0.5 transition-all shadow-lg hover:shadow-primary"
@@ -248,38 +276,6 @@ function SelectionContent() {
                     )}
                 </>
             )}
-
-            {/* CTA */}
-            <div className="border-t-2 border-navy/10 pt-8 flex justify-center">
-                <button
-                    onClick={handleStart}
-                    disabled={selected === null || loading}
-                    className="
-                        inline-flex items-center gap-3 px-12 py-5
-                        bg-gradient-primary text-white text-xl font-extrabold rounded-2xl
-                        transition-all duration-300
-                        hover:-translate-y-1 hover:shadow-primary-lg active:-translate-y-0.5
-                        disabled:opacity-40 disabled:cursor-not-allowed disabled:translate-y-0 disabled:shadow-none
-                    "
-                >
-                    {loading ? (
-                        <>
-                            <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                            </svg>
-                            Création de la session...
-                        </>
-                    ) : (
-                        <>
-                            <svg width="22" height="22" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
-                            </svg>
-                            Commencer le Quiz
-                        </>
-                    )}
-                </button>
-            </div>
 
         </main>
     )

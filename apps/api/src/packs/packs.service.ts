@@ -24,7 +24,6 @@ export class PacksService {
         const user = await this.prisma.user.findUnique({
           where: { auth0Id: filters.auth0Id }
         });
-        console.log('[PacksService] User for visibility check:', user?.email, 'Internal ID:', user?.id);
         if (user) {
           where.OR = [
             { visibility: 'PUBLIC' },
@@ -37,8 +36,6 @@ export class PacksService {
         where.visibility = 'PUBLIC';
       }
     }
-
-    console.log('[PacksService] Final WHERE clause:', JSON.stringify(where));
 
     return this.prisma.pack.findMany({
       where,
@@ -102,7 +99,6 @@ export class PacksService {
           }
         },
         questions: {
-          where: { isActive: true },
           include: { theme: true },
           orderBy: { level: 'asc' },
         },
@@ -155,7 +151,9 @@ export class PacksService {
 
   async create(data: CreatePackDto) {
     const { questionIds, ...packData } = data;
-    const pack = await this.prisma.pack.create({
+    console.log('[PacksService] Creating pack with questions:', questionIds?.length);
+
+    return this.prisma.pack.create({
       data: {
         categoryId: packData.categoryId,
         name: packData.name,
@@ -169,24 +167,20 @@ export class PacksService {
         assignedUserId: packData.assignedUserId ?? null,
         durationOverride: packData.durationOverride ?? null,
         targetQuestionCount: packData.targetQuestionCount ?? null,
+        questions: questionIds && questionIds.length > 0 ? {
+          connect: questionIds.map(id => ({ id }))
+        } : undefined,
       },
-      include: { category: true },
+      include: { category: true, _count: { select: { questions: true } } },
     });
-
-    if (questionIds && questionIds.length > 0) {
-      await this.prisma.question.updateMany({
-        where: { id: { in: questionIds } },
-        data: { packId: pack.id },
-      });
-    }
-
-    return pack;
   }
 
   async update(id: string, data: UpdatePackDto) {
     const { questionIds, ...updateData } = data;
     await this.findOne(id);
     
+    console.log('[PacksService] Updating pack questions, count:', questionIds?.length);
+
     const payload: Record<string, any> = {};
     if (updateData.name !== undefined) payload.name = updateData.name;
     if (updateData.slug !== undefined) payload.slug = updateData.slug;
@@ -202,29 +196,18 @@ export class PacksService {
     if (updateData.durationOverride !== undefined) payload.durationOverride = updateData.durationOverride;
     if (updateData.targetQuestionCount !== undefined) payload.targetQuestionCount = updateData.targetQuestionCount;
 
-    const pack = await this.prisma.pack.update({
-      where: { id },
-      data: payload,
-      include: { category: true },
-    });
-
+    // Gestion des questions via relation set (écrase les anciennes)
     if (questionIds !== undefined) {
-      // Dissocier les anciennes questions (optionnel, selon le besoin)
-      await this.prisma.question.updateMany({
-        where: { packId: id },
-        data: { packId: null },
-      });
-      
-      // Associer les nouvelles
-      if (questionIds.length > 0) {
-        await this.prisma.question.updateMany({
-          where: { id: { in: questionIds } },
-          data: { packId: id },
-        });
-      }
+      payload.questions = {
+        set: questionIds.map(qid => ({ id: qid }))
+      };
     }
 
-    return pack;
+    return this.prisma.pack.update({
+      where: { id },
+      data: payload,
+      include: { category: true, _count: { select: { questions: true } } },
+    });
   }
 
   async delete(id: string) {
@@ -242,24 +225,26 @@ export class PacksService {
 
   async addQuestions(packId: string, questionIds: string[]) {
     await this.findOne(packId);
-    await this.prisma.question.updateMany({
-      where: { id: { in: questionIds } },
-      data: { packId },
+    return this.prisma.pack.update({
+      where: { id: packId },
+      data: {
+        questions: {
+          connect: questionIds.map(id => ({ id }))
+        }
+      },
+      include: { _count: { select: { questions: true } } }
     });
-    return this.findOne(packId);
   }
 
   async removeQuestion(packId: string, questionId: string) {
     await this.findOne(packId);
-    const question = await this.prisma.question.findUnique({
-      where: { id: questionId },
+    return this.prisma.pack.update({
+      where: { id: packId },
+      data: {
+        questions: {
+          disconnect: { id: questionId }
+        }
+      }
     });
-    if (!question) throw new NotFoundException('Question non trouvée');
-
-    await this.prisma.question.update({
-      where: { id: questionId },
-      data: { packId: null },
-    });
-    return { success: true };
   }
 }

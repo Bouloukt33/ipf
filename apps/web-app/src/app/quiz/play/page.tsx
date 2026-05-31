@@ -20,6 +20,8 @@ function QuizPlayContent() {
   const categoryId = searchParams.get('categoryId') ?? undefined;
   const packId = searchParams.get('packId') ?? undefined;
 
+  console.log('[QuizPlay] Render params:', { categoryId, packId });
+
   const {
     state,
     startSession,

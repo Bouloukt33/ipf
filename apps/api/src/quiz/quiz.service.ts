@@ -115,7 +115,13 @@ export class QuizService {
     if (packId) {
       const pack = await this.prisma.pack.findUnique({
         where: { id: packId },
-        include: { category: true, questions: { where: { isActive: true }, select: { id: true } } }
+        include: { 
+          category: true, 
+          questions: { 
+            // On prend toutes les questions du pack, le filtre isActive est géré par l'admin à la création
+            select: { id: true } 
+          } 
+        }
       });
 
       if (!pack) throw new NotFoundException('Pack non trouvé');

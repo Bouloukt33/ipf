@@ -8,6 +8,7 @@ import {
   Param,
   Query,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -19,32 +20,32 @@ import {
 } from '@nestjs/swagger';
 import { PacksService } from './packs.service';
 import { CreatePackDto, UpdatePackDto, AddQuestionsDto } from './dto/packs.dto';
-import { AuthGuard, PermissionsGuard, Permissions, CurrentUser } from '../auth';
+import { AuthGuard, PermissionsGuard, Permissions } from '../auth';
 
 @ApiTags('Packs')
 @Controller('packs')
+@UseGuards(AuthGuard, PermissionsGuard)
+@ApiBearerAuth()
 export class PacksController {
   constructor(private packsService: PacksService) {}
 
   @Get()
-  @UseGuards(AuthGuard)
-  @ApiOperation({ summary: 'Lister les packs', description: 'Route publique — filtrages par catégorie, type, gratuité' })
+  @ApiOperation({ summary: 'Lister les packs', description: 'Filtres par catégorie, type, gratuité. Admin voit tout, User voit public + assigné.' })
   @ApiQuery({ name: 'categoryId', required: false })
   @ApiQuery({ name: 'type', required: false, enum: ['STANDARD', 'VISITEUR', 'PREMIUM'] })
   @ApiQuery({ name: 'isFree', required: false, type: Boolean })
   @ApiQuery({ name: 'includeInactive', required: false, type: Boolean })
   @ApiResponse({ status: 200, description: 'Liste des packs' })
   async findAll(
-    @CurrentUser() user: any,
+    @Request() req: any,
     @Query('categoryId') categoryId?: string,
     @Query('type') type?: string,
     @Query('isFree') isFree?: string,
     @Query('includeInactive') includeInactive?: string,
   ) {
-    console.log('[PacksController] User from token:', JSON.stringify(user));
-    const roles = user?.roles || [];
-    const isAdmin = roles.some((r: string) => r.toLowerCase() === 'admin');
-    console.log('[PacksController] isAdmin:', isAdmin, 'userId:', user?.userId);
+    const user = req.user;
+    const roles = (user?.roles || []).map((r: string) => r.toLowerCase());
+    const isAdmin = roles.includes('admin');
     
     return this.packsService.findAll({
       categoryId,
@@ -52,7 +53,7 @@ export class PacksController {
       isFree: isFree !== undefined ? isFree === 'true' : undefined,
       includeInactive: includeInactive === 'true',
       auth0Id: user?.userId,
-      isAdmin: isAdmin,
+      isAdmin,
     });
   }
 
