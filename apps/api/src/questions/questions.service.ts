@@ -4,6 +4,8 @@ import { PrismaService } from '../prisma';
 export interface CreateQuestionDto {
   categoryId: string;
   themeId?: string;
+  packId?: string;
+  videoId?: string;
   text: string;
   optionA: string;
   optionB: string;
@@ -11,7 +13,9 @@ export interface CreateQuestionDto {
   optionD: string;
   correctAnswer: string;
   level?: number;
+  timeToRead?: number;
   isPremium?: boolean;
+  status?: 'ACTIVE' | 'SUSPENDED' | 'ARCHIVED';
 }
 
 export interface UpdateQuestionDto extends Partial<CreateQuestionDto> {
@@ -22,12 +26,23 @@ export interface UpdateQuestionDto extends Partial<CreateQuestionDto> {
 export class QuestionsService {
   constructor(private prisma: PrismaService) {}
 
+  private generateCodification(): string {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = 'Q';
+    for (let i = 0; i < 6; i++) {
+      result += chars[Math.floor(Math.random() * chars.length)];
+    }
+    return result;
+  }
+
   async findAll(filters?: {
     categoryId?: string;
     themeId?: string;
     level?: number;
     isPremium?: boolean;
     isActive?: boolean;
+    search?: string;
+    status?: string;
     page?: number;
     limit?: number;
   }) {
@@ -41,13 +56,20 @@ export class QuestionsService {
     if (filters?.level) where.level = filters.level;
     if (filters?.isPremium !== undefined) where.isPremium = filters.isPremium;
     if (filters?.isActive !== undefined) where.isActive = filters.isActive;
+    if (filters?.status) where.status = filters.status;
+    if (filters?.search) {
+      where.OR = [
+        { text: { contains: filters.search, mode: 'insensitive' } },
+        { codification: { contains: filters.search, mode: 'insensitive' } },
+      ];
+    }
 
     const [questions, total] = await Promise.all([
       this.prisma.question.findMany({
         where,
         skip,
         take: limit,
-        include: { category: true, theme: true, pedagogicalContent: true },
+        include: { category: true, theme: true, pack: true, video: true, pedagogicalContent: true },
         orderBy: { createdAt: 'desc' },
       }),
       this.prisma.question.count({ where }),
@@ -70,6 +92,8 @@ export class QuestionsService {
       include: {
         category: true,
         theme: true,
+        pack: true,
+        video: true,
         pedagogicalContent: true,
         questionStats: true,
       },
@@ -80,13 +104,18 @@ export class QuestionsService {
   }
 
   async create(data: CreateQuestionDto) {
+    const codification = this.generateCodification();
+    const status = data.status || 'ACTIVE';
     return this.prisma.question.create({
       data: {
         ...data,
         level: data.level || 1,
         isPremium: data.isPremium || false,
+        codification,
+        status,
+        isActive: status === 'ACTIVE',
       },
-      include: { category: true, theme: true },
+      include: { category: true, theme: true, pack: true, video: true },
     });
   }
 
@@ -96,7 +125,7 @@ export class QuestionsService {
     return this.prisma.question.update({
       where: { id },
       data,
-      include: { category: true, theme: true },
+      include: { category: true, theme: true, pack: true, video: true },
     });
   }
 
@@ -107,9 +136,33 @@ export class QuestionsService {
 
   async toggleActive(id: string) {
     const question = await this.findOne(id);
+    const newIsActive = !question.isActive;
+    const newStatus = newIsActive ? 'ACTIVE' : 'SUSPENDED';
     return this.prisma.question.update({
       where: { id },
-      data: { isActive: !question.isActive },
+      data: { isActive: newIsActive, status: newStatus },
     });
+  }
+
+  async updateStatus(id: string, status: 'ACTIVE' | 'SUSPENDED' | 'ARCHIVED') {
+    await this.findOne(id);
+    return this.prisma.question.update({
+      where: { id },
+      data: {
+        status,
+        isActive: status === 'ACTIVE',
+      },
+    });
+  }
+
+  async getStats() {
+    const [total, active, suspended, archived, premium] = await Promise.all([
+      this.prisma.question.count(),
+      this.prisma.question.count({ where: { status: 'ACTIVE' } }),
+      this.prisma.question.count({ where: { status: 'SUSPENDED' } }),
+      this.prisma.question.count({ where: { status: 'ARCHIVED' } }),
+      this.prisma.question.count({ where: { isPremium: true } }),
+    ]);
+    return { total, active, suspended, archived, premium };
   }
 }

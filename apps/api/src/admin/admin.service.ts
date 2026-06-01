@@ -77,31 +77,13 @@ export class AdminService {
   }
 
   async getQuestionStats() {
-    const [byCategory, byLevel, premiumCount] = await Promise.all([
-      this.prisma.question.groupBy({
-        by: ['categoryId'],
-        _count: true,
-      }),
-      this.prisma.question.groupBy({
-        by: ['level'],
-        _count: true,
-      }),
+    const [total, active, suspended, archived, premium] = await Promise.all([
+      this.prisma.question.count(),
+      this.prisma.question.count({ where: { status: 'ACTIVE' } }),
+      this.prisma.question.count({ where: { status: 'SUSPENDED' } }),
+      this.prisma.question.count({ where: { status: 'ARCHIVED' } }),
       this.prisma.question.count({ where: { isPremium: true } }),
     ]);
-
-    const categories = await this.prisma.category.findMany({
-      select: { id: true, name: true },
-    });
-
-    const categoryMap = new Map(categories.map((c) => [c.id, c.name]));
-
-    return {
-      byCategory: byCategory.map((item) => ({
-        category: categoryMap.get(item.categoryId) || 'Unknown',
-        count: item._count,
-      })),
-      byLevel,
-      premiumCount,
-    };
+    return { total, active, suspended, archived, premium };
   }
 }

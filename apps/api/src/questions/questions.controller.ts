@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Put,
+  Patch,
   Delete,
   Body,
   Param,
@@ -30,6 +31,8 @@ export class QuestionsController {
   @ApiQuery({ name: 'level', required: false, type: Number, description: 'Filtrer par niveau (1-5)' })
   @ApiQuery({ name: 'isPremium', required: false, type: Boolean, description: 'Filtrer par statut premium' })
   @ApiQuery({ name: 'isActive', required: false, type: Boolean, description: 'Filtrer par statut actif' })
+  @ApiQuery({ name: 'search', required: false, type: String, description: 'Recherche textuelle (texte ou codification)' })
+  @ApiQuery({ name: 'status', required: false, type: String, description: 'Filtrer par statut (ACTIVE, SUSPENDED, ARCHIVED)' })
   @ApiQuery({ name: 'page', required: false, type: Number, description: 'Numéro de page (défaut: 1)' })
   @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Éléments par page (défaut: 20)' })
   @ApiResponse({ status: 200, description: 'Liste des questions avec pagination' })
@@ -40,6 +43,8 @@ export class QuestionsController {
     @Query('level') level?: string,
     @Query('isPremium') isPremium?: string,
     @Query('isActive') isActive?: string,
+    @Query('search') search?: string,
+    @Query('status') status?: string,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
   ) {
@@ -49,6 +54,8 @@ export class QuestionsController {
       level: level ? parseInt(level) : undefined,
       isPremium: isPremium ? isPremium === 'true' : undefined,
       isActive: isActive ? isActive === 'true' : undefined,
+      search,
+      status,
       page: page ? parseInt(page) : 1,
       limit: limit ? parseInt(limit) : 20,
     });
@@ -115,5 +122,18 @@ export class QuestionsController {
   @ApiResponse({ status: 404, description: 'Question non trouvée' })
   async toggleActive(@Param('id') id: string) {
     return this.questionsService.toggleActive(id);
+  }
+
+  @Patch(':id/status')
+  @UseGuards(PermissionsGuard)
+  @Permissions('write:questions')
+  @ApiOperation({ summary: 'Mettre à jour le statut d\'une question', description: 'Change le statut (ACTIVE/SUSPENDED/ARCHIVED) d\'une question (Admin uniquement)' })
+  @ApiParam({ name: 'id', description: 'ID de la question' })
+  @ApiResponse({ status: 200, description: 'Statut mis à jour' })
+  @ApiResponse({ status: 401, description: 'Non autorisé' })
+  @ApiResponse({ status: 403, description: 'Permission insuffisante' })
+  @ApiResponse({ status: 404, description: 'Question non trouvée' })
+  async updateStatus(@Param('id') id: string, @Body() body: { status: string }) {
+    return this.questionsService.updateStatus(id, body.status as 'ACTIVE' | 'SUSPENDED' | 'ARCHIVED');
   }
 }

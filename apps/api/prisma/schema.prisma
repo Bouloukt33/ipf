@@ -137,6 +137,12 @@ model Theme {
   @@map("themes")
 }
 
+enum QuestionStatus {
+  ACTIVE
+  SUSPENDED
+  ARCHIVED
+}
+
 model Question {
   id                 String              @id @default(cuid())
   categoryId         String              @map("category_id")
@@ -152,6 +158,8 @@ model Question {
   timeToRead         Int?                @map("time_to_read")
   isPremium          Boolean             @default(false) @map("is_premium")
   isActive           Boolean             @default(true) @map("is_active")
+  codification       String?             @map("codification")
+  status             QuestionStatus      @default(ACTIVE)
   sourceFile         String?             @map("source_file")
   sourceId           String?             @map("source_id")
   createdAt          DateTime            @default(now()) @map("created_at")
