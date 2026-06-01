@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { WelcomeRegister } from "../components/welcome/WelcomeRegister";
-import { ProfileForm } from "../components/welcome/ProfileForm";
+import { WelcomeRegister } from "../../components/welcome/WelcomeRegister";
+import { ProfileForm } from "../../components/welcome/ProfileForm";
 
 export default function RegisterPage() {
     const [showProfile, setShowProfile] = useState(false);

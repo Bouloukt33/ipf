@@ -1,3 +1,6 @@
+import Link from 'next/link';
+import { Star, Check } from 'lucide-react';
+
 const pricingPlans = [
     {
         name: 'Apprenti',
@@ -16,12 +19,12 @@ const pricingPlans = [
         name: 'Compagnon',
         price: '49€',
         period: '/mois',
-        badge: '⭐ POPULAIRE',
+        badge: 'Populaire',
         features: [
             'Tout Apprenti +',
             'Vidéos explicatives complètes',
             '3 thématiques vidéo',
-            'Explications détaillées'
+            'Explications détaillées',
         ],
         featured: true,
     },
@@ -34,7 +37,7 @@ const pricingPlans = [
             'Coaching IA personnalisé',
             'Coach virtuel 24/7',
             'Plan sur-mesure',
-            'Outils avancés'
+            'Outils avancés',
         ],
         featured: false,
     },
@@ -43,8 +46,7 @@ const pricingPlans = [
 export default function Pricing() {
     return (
         <section id="tarifs" className="py-24 px-6 bg-gray-50 relative overflow-hidden">
-            {/* Background elements */}
-            <div className="absolute inset-0">
+            <div className="absolute inset-0 pointer-events-none">
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[200px]"></div>
             </div>
 
@@ -62,13 +64,16 @@ export default function Pricing() {
                     {pricingPlans.map((plan, index) => (
                         <div
                             key={plan.name}
-                            className={`flex-1 max-w-sm bg-white border-2 rounded-2xl p-8 text-center transition-all duration-500 relative hover:-translate-y-3 hover:shadow-card ${
-                                plan.featured ? 'border-primary md:scale-105 shadow-card' : 'border-gray-200 hover:border-primary/50'
+                            className={`flex-1 max-w-sm bg-white border-2 rounded-2xl p-8 text-center transition-shadow duration-200 relative animate-fade-in-up opacity-0 ${
+                                plan.featured
+                                    ? 'border-primary md:scale-105 shadow-card'
+                                    : 'border-gray-200 hover:shadow-card'
                             }`}
                             style={{ animationDelay: `${index * 150}ms` }}
                         >
                             {plan.badge && (
-                                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-primary text-white px-6 py-2 rounded-full text-sm font-black shadow-primary">
+                                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-primary text-white px-5 py-1.5 rounded-full text-sm font-bold shadow-primary flex items-center gap-1.5">
+                                    <Star className="w-3.5 h-3.5 fill-white" />
                                     {plan.badge}
                                 </div>
                             )}
@@ -84,21 +89,24 @@ export default function Pricing() {
                                 <span className="text-lg text-charcoal/60 font-semibold">{plan.period}</span>
                             </div>
 
-                            <ul className="space-y-4 my-8 text-left">
+                            <ul className="space-y-3.5 my-8 text-left">
                                 {plan.features.map((feature, featureIndex) => (
                                     <li
                                         key={featureIndex}
-                                        className="flex items-start text-charcoal/80 text-sm font-medium"
+                                        className="flex items-start gap-2.5 text-charcoal/80 text-sm font-medium"
                                     >
-                                        <span className="text-primary font-black mr-3 text-lg">✓</span>
+                                        <Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" strokeWidth={2.5} />
                                         <span>{feature}</span>
                                     </li>
                                 ))}
                             </ul>
 
-                            <button className="btn-shine w-full px-6 py-4 bg-gradient-primary text-white border-none rounded-xl font-bold cursor-pointer transition-all duration-300 mt-6 shadow-primary hover:scale-105 hover:shadow-primary-lg">
+                            <Link
+                                href="/auth/login"
+                                className="block w-full px-6 py-4 bg-gradient-primary text-white rounded-xl font-bold transition-opacity duration-200 mt-6 shadow-primary hover:opacity-90 no-underline text-center"
+                            >
                                 Commencer
-                            </button>
+                            </Link>
                         </div>
                     ))}
                 </div>
