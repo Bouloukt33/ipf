@@ -18,6 +18,9 @@ function QuizPlayContent() {
   const router = useRouter();
   const { user, isLoading: authLoading } = useUser();
   const categoryId = searchParams.get('categoryId') ?? undefined;
+  const packId = searchParams.get('packId') ?? undefined;
+
+  console.log('[QuizPlay] Render params:', { categoryId, packId });
 
   const {
     state,
@@ -50,9 +53,9 @@ function QuizPlayContent() {
   // Start session on mount (only if authenticated)
   useEffect(() => {
     if (state.phase === 'idle' && user && !authLoading) {
-      startSession(categoryId);
+      startSession({ categoryId, packId });
     }
-  }, [state.phase, categoryId, startSession, user, authLoading]);
+  }, [state.phase, categoryId, packId, startSession, user, authLoading]);
 
   // Redirect on completion/gameover
   useEffect(() => {
@@ -111,7 +114,7 @@ function QuizPlayContent() {
               Retour
             </button>
             <button
-              onClick={() => startSession(categoryId)}
+              onClick={() => startSession({ categoryId, packId })}
               className="px-8 py-3 bg-gradient-primary text-white font-bold rounded-xl hover:-translate-y-0.5 transition-all"
             >
               Réessayer
@@ -171,7 +174,12 @@ function QuizPlayContent() {
 
       {/* Timer */}
       <div className="mb-6">
-        <Timer duration={5} isRunning={isTimerRunning} onTimeout={handleTimeout} />
+        <Timer 
+          key={state.question.id}
+          duration={state.durationOverride || 5} 
+          isRunning={isTimerRunning} 
+          onTimeout={handleTimeout} 
+        />
       </div>
 
       {/* Category Badge */}

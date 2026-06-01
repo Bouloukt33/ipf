@@ -68,19 +68,19 @@ export default function Features() {
                         return (
                             <div
                                 key={feature.title}
-                                className="group relative bg-white p-8 rounded-2xl border border-gray-100 shadow-soft hover:shadow-card hover:border-primary/30 transition-all duration-500 hover:-translate-y-2"
+                                className="group relative bg-white p-8 rounded-2xl border border-gray-100 shadow-soft hover:shadow-card hover:border-primary/20 transition-all duration-200 animate-fade-in-up opacity-0"
                                 style={{ animationDelay: `${index * 100}ms` }}
                             >
                                 {/* Icon container */}
                                 <div className="relative mb-6">
-                                    <div className="w-16 h-16 bg-gradient-primary rounded-xl flex items-center justify-center shadow-primary group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
+                                    <div className="w-16 h-16 bg-gradient-primary rounded-xl flex items-center justify-center shadow-primary">
                                         <Icon className="w-8 h-8 text-white" strokeWidth={2.5} />
                                     </div>
                                 </div>
 
                                 {/* Content */}
                                 <div className="relative space-y-3">
-                                    <h3 className="text-2xl font-bold text-navy group-hover:text-primary transition-colors duration-300">
+                                    <h3 className="text-2xl font-bold text-navy">
                                         {feature.title}
                                     </h3>
                                     <p className="text-charcoal/60 leading-relaxed text-sm font-medium">
@@ -88,8 +88,6 @@ export default function Features() {
                                     </p>
                                 </div>
 
-                                {/* Bottom accent line */}
-                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-primary rounded-b-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                             </div>
                         );
                     })}

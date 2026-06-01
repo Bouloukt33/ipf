@@ -97,6 +97,31 @@ export class UsersService {
         });
     }
 
+    async deleteUser(id: string) {
+        await this.findOne(id);
+        await this.prisma.user.delete({ where: { id } });
+        return { deleted: true, id };
+    }
+
+    async updateUserProfile(
+        id: string,
+        data: {
+            displayName?:        string;
+            ageRange?:           string;
+            professionalStatus?: string;
+        },
+    ) {
+        await this.findOne(id);
+        return this.prisma.userProfile.update({
+            where: { userId: id },
+            data: {
+                ...(data.displayName        !== undefined && { displayName:        data.displayName }),
+                ...(data.ageRange           !== undefined && { ageRange:           data.ageRange as any }),
+                ...(data.professionalStatus !== undefined && { professionalStatus: data.professionalStatus as any }),
+            },
+        });
+    }
+
     async getStats() {
         const [totalUsers, activeUsers, admins, moderators] = await Promise.all([
             this.prisma.user.count(),

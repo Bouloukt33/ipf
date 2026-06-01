@@ -1,4 +1,4 @@
-import { UserSidebar } from '@/components/user/sidebar/Sidebar';
+import { UserSidebar } from "@/components/user/UserSidebar";
 
 export default async function UserLayout({ children }: { children: React.ReactNode }) {
     return (

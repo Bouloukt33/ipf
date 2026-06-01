@@ -14,7 +14,8 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       'http://localhost:3001', // web-app (Next.js)
-      'http://localhost:5173', // web-admin (Vite)
+      'http://localhost:3002', // web-admin (Docker)
+      'http://localhost:5173', // web-admin (Vite local)
     ],
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],

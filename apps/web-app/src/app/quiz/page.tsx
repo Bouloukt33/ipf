@@ -5,7 +5,7 @@ import QuizReadyState from '@/components/quiz/QuizReadyState'
 import { api } from '@/lib/api'
 import { useUser } from '@auth0/nextjs-auth0/client'
 import { useEffect, useState } from 'react'
-import FloatingBackground from '../components/FloatingBackground'
+import FloatingBackground from '../../components/FloatingBackground'
 
 export default function QuizPage() {
     const [profileComplete, setProfileComplete] = useState<boolean | null>(null)
@@ -15,8 +15,8 @@ export default function QuizPage() {
         if (!user) return
         api.profile
             .get()
-            .then(({ profile: p }) => {
-                setProfileComplete(!!(p?.ageRange && p?.professionalStatus && p?.jobProfileId))
+            .then((profile) => {
+                setProfileComplete(!!(profile?.ageRange && profile?.professionalStatus && profile?.jobProfileId))
             })
             .catch(() => setProfileComplete(false))
     }, [user])
