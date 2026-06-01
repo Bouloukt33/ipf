@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma';
 
 @Injectable()
@@ -103,5 +103,84 @@ export class AdminService {
       byLevel,
       premiumCount,
     };
+  }
+
+  async getPlans() {
+    return this.prisma.plan.findMany({
+      orderBy: { order: 'asc' },
+      include: { _count: { select: { subscriptions: true } } },
+    });
+  }
+
+  async createPlan(data: {
+    name: string;
+    slug: string;
+    description?: string;
+    price: number;
+    currency?: string;
+    intervalMonths?: number;
+    features?: string[];
+    isActive?: boolean;
+    order?: number;
+  }) {
+    return this.prisma.plan.create({
+      data: {
+        name: data.name,
+        slug: data.slug,
+        description: data.description,
+        price: data.price,
+        currency: data.currency ?? 'EUR',
+        intervalMonths: data.intervalMonths ?? 1,
+        features: data.features ?? [],
+        isActive: data.isActive ?? true,
+        order: data.order ?? 0,
+      },
+      include: { _count: { select: { subscriptions: true } } },
+    });
+  }
+
+  async updatePlan(
+    id: string,
+    data: {
+      name?: string;
+      slug?: string;
+      description?: string;
+      price?: number;
+      currency?: string;
+      intervalMonths?: number;
+      features?: string[];
+      isActive?: boolean;
+      order?: number;
+    },
+  ) {
+    const existing = await this.prisma.plan.findUnique({ where: { id } });
+    if (!existing) {
+      throw new NotFoundException(`Plan with id ${id} not found`);
+    }
+
+    const updateData: Record<string, unknown> = {};
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.slug !== undefined) updateData.slug = data.slug;
+    if (data.description !== undefined) updateData.description = data.description;
+    if (data.price !== undefined) updateData.price = data.price;
+    if (data.currency !== undefined) updateData.currency = data.currency;
+    if (data.intervalMonths !== undefined) updateData.intervalMonths = data.intervalMonths;
+    if (data.features !== undefined) updateData.features = data.features;
+    if (data.isActive !== undefined) updateData.isActive = data.isActive;
+    if (data.order !== undefined) updateData.order = data.order;
+
+    return this.prisma.plan.update({
+      where: { id },
+      data: updateData,
+      include: { _count: { select: { subscriptions: true } } },
+    });
+  }
+
+  async deletePlan(id: string) {
+    const existing = await this.prisma.plan.findUnique({ where: { id } });
+    if (!existing) {
+      throw new NotFoundException(`Plan with id ${id} not found`);
+    }
+    return this.prisma.plan.delete({ where: { id } });
   }
 }

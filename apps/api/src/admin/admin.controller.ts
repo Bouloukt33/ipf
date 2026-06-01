@@ -1,7 +1,31 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { AdminService } from './admin.service';
 import { AuthGuard, PermissionsGuard, Permissions } from '../auth';
+
+class CreatePlanDto {
+  name: string;
+  slug: string;
+  description?: string;
+  price: number;
+  currency?: string;
+  intervalMonths?: number;
+  features?: string[];
+  isActive?: boolean;
+  order?: number;
+}
+
+class UpdatePlanDto {
+  name?: string;
+  slug?: string;
+  description?: string;
+  price?: number;
+  currency?: string;
+  intervalMonths?: number;
+  features?: string[];
+  isActive?: boolean;
+  order?: number;
+}
 
 @ApiTags('Administration')
 @ApiBearerAuth()
@@ -12,31 +36,35 @@ export class AdminController {
 
   @Get('dashboard')
   @Permissions('read:admin')
-  @ApiOperation({ summary: 'Dashboard admin', description: 'Récupère les statistiques globales pour le tableau de bord administrateur' })
-  @ApiResponse({ status: 200, description: 'Statistiques du dashboard retournées' })
-  @ApiResponse({ status: 401, description: 'Non autorisé' })
-  @ApiResponse({ status: 403, description: 'Permission insuffisante - Accès admin requis' })
-  async getDashboardStats() {
-    return this.adminService.getDashboardStats();
-  }
+  async getDashboardStats() { return this.adminService.getDashboardStats(); }
 
   @Get('activity')
   @Permissions('read:admin')
-  @ApiOperation({ summary: 'Activité récente', description: 'Récupère les dernières activités sur la plateforme (connexions, parties, etc.)' })
-  @ApiResponse({ status: 200, description: 'Liste des activités récentes' })
-  @ApiResponse({ status: 401, description: 'Non autorisé' })
-  @ApiResponse({ status: 403, description: 'Permission insuffisante - Accès admin requis' })
-  async getRecentActivity() {
-    return this.adminService.getRecentActivity();
-  }
+  async getRecentActivity() { return this.adminService.getRecentActivity(); }
 
   @Get('questions/stats')
   @Permissions('read:admin')
-  @ApiOperation({ summary: 'Statistiques des questions', description: 'Récupère les statistiques détaillées sur les questions (par catégorie, taux de réussite, etc.)' })
-  @ApiResponse({ status: 200, description: 'Statistiques des questions retournées' })
-  @ApiResponse({ status: 401, description: 'Non autorisé' })
-  @ApiResponse({ status: 403, description: 'Permission insuffisante - Accès admin requis' })
-  async getQuestionStats() {
-    return this.adminService.getQuestionStats();
-  }
+  async getQuestionStats() { return this.adminService.getQuestionStats(); }
+
+  @Get('plans')
+  @Permissions('read:admin')
+  @ApiOperation({ summary: 'Lister les plans tarifaires' })
+  async getPlans() { return this.adminService.getPlans(); }
+
+  @Post('plans')
+  @Permissions('write:admin')
+  @ApiOperation({ summary: 'Creer un plan tarifaire' })
+  async createPlan(@Body() data: CreatePlanDto) { return this.adminService.createPlan(data); }
+
+  @Put('plans/:id')
+  @Permissions('write:admin')
+  @ApiOperation({ summary: 'Modifier un plan tarifaire' })
+  @ApiParam({ name: 'id' })
+  async updatePlan(@Param('id') id: string, @Body() data: UpdatePlanDto) { return this.adminService.updatePlan(id, data); }
+
+  @Delete('plans/:id')
+  @Permissions('write:admin')
+  @ApiOperation({ summary: 'Supprimer un plan tarifaire' })
+  @ApiParam({ name: 'id' })
+  async deletePlan(@Param('id') id: string) { return this.adminService.deletePlan(id); }
 }
