@@ -6,90 +6,14 @@
   text-align: left;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
-}
-
-/* Animations modernes pour Hero v2 */
+/* Animations modernes pour le Dashboard */
 
 @keyframes float-gentle {
   0%, 100% {
     transform: translateY(0px);
   }
   50% {
-    transform: translateY(-15px);
-  }
-}
-
-@keyframes float-particle {
-  0%, 100% {
-    transform: translate(0, 0) scale(1);
-    opacity: 0.4;
-  }
-  50% {
-    transform: translate(20px, -20px) scale(1.2);
-    opacity: 0.8;
-  }
-}
-
-@keyframes spin-slow {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes pulse-slow {
-  0%, 100% {
-    opacity: 0.3;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.5;
-    transform: scale(1.05);
-  }
-}
-
-@keyframes gradient-x {
-  0%, 100% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
+    transform: translateY(-10px);
   }
 }
 
@@ -97,49 +21,42 @@
   animation: float-gentle 4s ease-in-out infinite;
 }
 
-.animate-float-particle {
-  animation: float-particle 5s ease-in-out infinite;
+/* Glass morphism panels */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-.animate-spin-slow {
-  animation: spin-slow 30s linear infinite;
-}
-
-.animate-pulse-slow {
-  animation: pulse-slow 3s ease-in-out infinite;
-}
-
-.animate-gradient-x {
-  background-size: 200% auto;
-  animation: gradient-x 3s ease infinite;
-}
-
-/* Smooth transitions */
-* {
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Glass morphism utilities */
-.glass {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Custom scrollbar for the page */
+/* Custom scrollbar pour le Dashboard (Thème clair/IPF) */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0F1419;
+  background: #f1f1f1;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #D27A2D, #F39C6B);
+  background: #D27A2D;
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #F39C6B, #D27A2D);
+  background: #b5681f;
+}
+
+/* Shadow utilities */
+.shadow-soft {
+  box-shadow: 0 10px 40px -10px rgba(23, 46, 66, 0.1);
+}
+
+.shadow-card {
+  box-shadow: 0 20px 60px -15px rgba(23, 46, 66, 0.12);
+}
+
+/* Global utility for cards */
+.admin-card {
+  @apply bg-white rounded-[32px] p-8 border border-gray-100 shadow-soft transition-all hover:shadow-card hover:-translate-y-1;
 }

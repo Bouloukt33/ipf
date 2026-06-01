@@ -5,7 +5,7 @@ interface ISidebarItemProps {
     href: string;
     label: string;
     icon: React.ReactNode;
-    iconBg: string;
+    iconBg: string | undefined;
     isActive: boolean;
     collapsed: boolean;
     tooltip: string;
@@ -13,6 +13,9 @@ interface ISidebarItemProps {
 
 export function SidebarItem({ href, label, icon, iconBg, isActive, collapsed, tooltip }: ISidebarItemProps) {
     const [hovered, setHovered] = useState(false);
+
+    const borderColor = isActive ? 'rgba(210,122,45,0.4)' : 'transparent';
+    const borderWidth = collapsed ? 3 : 2;
 
     return (
         <Link
@@ -27,8 +30,13 @@ export function SidebarItem({ href, label, icon, iconBg, isActive, collapsed, to
                 justifyContent: collapsed ? 'center' : 'flex-start',
                 borderRadius: 12,
                 textDecoration: 'none',
-                border: collapsed ? '3px solid' : '2px solid',
-                borderColor: isActive ? 'rgba(210,122,45,0.4)' : 'transparent',
+                // Use separate border properties — no mixing shorthand + borderColor
+                borderStyle: 'solid',
+                borderWidth: borderWidth,
+                borderTopColor: borderColor,
+                borderRightColor: borderColor,
+                borderBottomColor: borderColor,
+                borderLeftColor: borderColor,
 
                 background: collapsed
                     ? 'transparent'
@@ -38,13 +46,13 @@ export function SidebarItem({ href, label, icon, iconBg, isActive, collapsed, to
                             ? 'rgba(255,255,255,0.07)'
                             : 'transparent',
 
-                transition: 'background 0.15s, gap 0.3s ease, padding 0.3s ease, justify-content 0.3s ease',
+                transition: 'background 0.15s, gap 0.3s ease, padding 0.3s ease',
                 position: 'relative',
                 cursor: 'pointer',
                 overflow: 'visible',
             }}
         >
-            {/* Icon — always visible, fixed size */}
+            {/* Icon */}
             <div style={{
                 width: 38,
                 height: 38,
@@ -59,7 +67,7 @@ export function SidebarItem({ href, label, icon, iconBg, isActive, collapsed, to
                 {icon}
             </div>
 
-            {/* Label — collapses to 0 width instantly, expands after sidebar opens */}
+            {/* Label */}
             <div style={{
                 overflow: 'hidden',
                 maxWidth: collapsed ? 0 : 160,
@@ -83,7 +91,7 @@ export function SidebarItem({ href, label, icon, iconBg, isActive, collapsed, to
                 </span>
             </div>
 
-            {/* Tooltip — position:fixed so it escapes sidebar overflow */}
+            {/* Tooltip */}
             {collapsed && hovered && (
                 <span style={{
                     position: 'fixed',

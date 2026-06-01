@@ -25,7 +25,7 @@ export class CreateQuestionDto {
   @ApiProperty({ description: 'Réponse correcte (A, B, C ou D)', example: 'A' })
   correctAnswer: string;
 
-  @ApiPropertyOptional({ description: 'Niveau de difficulté (1-5)', example: 2, minimum: 1, maximum: 5 })
+  @ApiPropertyOptional({ description: 'Niveau de difficulté (1-5)', example: 2, minimum: 1, maximum: 4 })
   level?: number;
 
   @ApiPropertyOptional({ description: 'Question premium', example: false, default: false })
@@ -57,7 +57,7 @@ export class UpdateQuestionDto {
   @ApiPropertyOptional({ description: 'Réponse correcte (A, B, C ou D)' })
   correctAnswer?: string;
 
-  @ApiPropertyOptional({ description: 'Niveau de difficulté (1-5)', minimum: 1, maximum: 5 })
+  @ApiPropertyOptional({ description: 'Niveau de difficulté (1-5)', minimum: 1, maximum: 4 })
   level?: number;
 
   @ApiPropertyOptional({ description: 'Question premium' })

@@ -47,6 +47,7 @@ async function request<T>(
 
 export interface StartSessionPayload {
   categoryId?: string;
+  packId?: string;
   mode?: 'PRACTICE' | 'DAILY';
 }
 
@@ -121,6 +122,49 @@ export interface CategoryData {
   slug: string;
   isPremium: boolean;
 }
+
+export type PackType = 'STANDARD' | 'VISITEUR' | 'PREMIUM';
+
+export interface PackData {
+  id: string;
+  categoryId: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  type: PackType;
+  isFree: boolean;
+  price: string | null;
+  isActive: boolean;
+  order: number;
+  createdAt: string;
+  updatedAt: string;
+  category: CategoryData;
+  _count?: { questions: number };
+}
+
+export interface PackWithQuestions extends PackData {
+  questions: Array<{
+    id: string;
+    text: string;
+    level: number;
+    isPremium: boolean;
+    isActive: boolean;
+    theme: { id: string; name: string; slug: string } | null;
+  }>;
+}
+
+export interface CreatePackPayload {
+  categoryId: string;
+  name: string;
+  slug: string;
+  description?: string;
+  type?: PackType;
+  isFree?: boolean;
+  price?: number;
+  order?: number;
+}
+
+export type UpdatePackPayload = Partial<CreatePackPayload> & { isActive?: boolean };
 
 export interface JobProfileData {
   id: string;
@@ -265,5 +309,46 @@ export const api = {
 
   categories: {
     list: () => request<CategoryData[]>('/categories'),
+  },
+
+  packs: {
+    list: (params?: { categoryId?: string; type?: PackType; isFree?: boolean }) => {
+      const qs = params
+        ? '?' + new URLSearchParams(
+            Object.entries(params)
+              .filter(([, v]) => v !== undefined)
+              .map(([k, v]) => [k, String(v)]),
+          ).toString()
+        : '';
+      return request<PackData[]>(`/packs${qs}`);
+    },
+
+    get: (id: string) => request<PackWithQuestions>(`/packs/${id}`),
+
+    bySlug: (categorySlug: string, packSlug: string) =>
+      request<PackWithQuestions>(`/packs/slug/${categorySlug}/${packSlug}`),
+
+    create: (data: CreatePackPayload) =>
+      request<PackData>('/packs', { method: 'POST', body: JSON.stringify(data) }),
+
+    update: (id: string, data: UpdatePackPayload) =>
+      request<PackData>(`/packs/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+
+    delete: (id: string) =>
+      request<{ id: string }>(`/packs/${id}`, { method: 'DELETE' }),
+
+    toggleActive: (id: string) =>
+      request<PackData>(`/packs/${id}/toggle-active`, { method: 'POST' }),
+
+    addQuestions: (id: string, questionIds: string[]) =>
+      request<PackWithQuestions>(`/packs/${id}/questions`, {
+        method: 'POST',
+        body: JSON.stringify({ questionIds }),
+      }),
+
+    removeQuestion: (id: string, questionId: string) =>
+      request<{ success: boolean }>(`/packs/${id}/questions/${questionId}`, {
+        method: 'DELETE',
+      }),
   },
 };

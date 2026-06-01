@@ -32,6 +32,5 @@ export default async function PostLoginPage() {
     }
 
     if (isNewUser) redirect('/quiz/onboarding');
-    if (role === 'ADMIN' || role === 'MODERATOR') redirect('/dashboard/admin');
     redirect('/dashboard'); 
 }
