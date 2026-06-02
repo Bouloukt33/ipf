@@ -88,3 +88,34 @@ export function useAdminPlans() {
 
   return { plans, isLoading, refresh, createPlan, updatePlan, deletePlan };
 }
+
+export function useAdminEmails() {
+  const { getAccessTokenSilently, isAuthenticated } = useAuth0();
+  const [templates, setTemplates] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const loadTemplates = useCallback(async () => {
+    if (!isAuthenticated) return;
+    setIsLoading(true);
+    try {
+      const token = await getAccessTokenSilently({
+        authorizationParams: {
+          audience: ENV.auth0Audience,
+          scope: AUTH0_SCOPE,
+        },
+      });
+      const data = await apiRequest<any[]>('/admin/email/templates', token);
+      setTemplates(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isAuthenticated, getAccessTokenSilently]);
+
+  useEffect(() => {
+    loadTemplates();
+  }, [loadTemplates]);
+
+  return { templates, isLoading };
+}

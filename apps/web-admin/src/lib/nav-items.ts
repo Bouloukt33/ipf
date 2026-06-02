@@ -1,4 +1,4 @@
-import { Home, CircleGauge, Package, Users, CreditCard, Target, Mail, BookOpen } from 'lucide-react';
+import { Home, CircleGauge, Package, Users, CreditCard, Mail, BookOpen } from 'lucide-react';
 
 export const adminNavItems = [
     {
@@ -42,13 +42,6 @@ export const adminNavItems = [
         icon: CreditCard,
         iconBg: 'rgba(28,176,246,0.15)',
         iconColor: '#1CB0F6',
-    },
-    {
-        label: 'Prospects',
-        href: '/admin/prospects',
-        icon: Target,
-        iconBg: 'rgba(124,58,237,0.15)',
-        iconColor: '#7C3AED',
     },
     {
         label: 'Plans',

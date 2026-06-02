@@ -5,6 +5,12 @@ import type { IPlan, IPlanFormData } from '../hooks/useAdminMarketing';
 import { PlanModal } from '../components/admin/PlanModal';
 import { Toast, useToast } from '../components/admin/Toast';
 
+function parseFeatures(features: string[] | null | unknown): string[] {
+  if (!features) return [];
+  if (Array.isArray(features)) return features;
+  try { return JSON.parse(features as string); } catch { return []; }
+}
+
 export function AdminPlansPage() {
   const { plans, isLoading, createPlan, updatePlan, deletePlan } = useAdminPlans();
   const { toast, show, hide } = useToast();
@@ -131,6 +137,20 @@ export function AdminPlansPage() {
                     <p className="text-[13px] font-semibold text-[#5a7a99] line-clamp-2">{plan.description}</p>
                   )}
                 </div>
+                <div className="flex gap-1.5 ml-3 flex-shrink-0">
+                  <button
+                    onClick={() => openEdit(plan)}
+                    className="w-8 h-8 rounded-[10px] flex items-center justify-center border border-gray-200 bg-white hover:bg-gray-50 transition-colors cursor-pointer"
+                  >
+                    <Settings size={13} color="#172E42" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(plan)}
+                    className="w-8 h-8 rounded-[10px] flex items-center justify-center border border-red-100 bg-red-50 hover:bg-red-100 transition-colors cursor-pointer"
+                  >
+                    <Trash2 size={13} color="#EF4444" />
+                  </button>
+                </div>
               </div>
 
               {/* Price */}
@@ -141,43 +161,26 @@ export function AdminPlansPage() {
               </div>
 
               {/* Features */}
-              {(plan.features ?? []).length > 0 && (
+              {parseFeatures(plan.features).length > 0 && (
                 <ul className="flex flex-col gap-1.5 mb-4">
-                  {(plan.features ?? []).slice(0, 5).map((f, i) => (
+                  {parseFeatures(plan.features).slice(0, 5).map((f, i) => (
                     <li key={i} className="flex items-center gap-2">
                       <Check size={14} color="#10B981" className="flex-shrink-0" />
                       <span className="text-[13px] font-semibold text-[#172E42]">{f}</span>
                     </li>
                   ))}
-                  {(plan.features ?? []).length > 5 && (
+                  {parseFeatures(plan.features).length > 5 && (
                     <li className="text-[12px] font-bold text-[#5a7a99] pl-5">
-                      +{(plan.features ?? []).length - 5} autres...
+                      +{parseFeatures(plan.features).length - 5} autres...
                     </li>
                   )}
                 </ul>
               )}
 
               {/* Subscribers count */}
-              <div className="flex items-center gap-1.5 mb-4 text-[13px] font-semibold text-[#5a7a99]">
+              <div className="flex items-center gap-1.5 text-[13px] font-semibold text-[#5a7a99]">
                 <Users size={14} />
                 <span>{plan._count.subscriptions} abonne{plan._count.subscriptions !== 1 ? 's' : ''}</span>
-              </div>
-
-              {/* Actions */}
-              <div className="flex gap-2 pt-3 border-t border-gray-100">
-                <button
-                  onClick={() => openEdit(plan)}
-                  className="flex items-center gap-1.5 flex-1 h-9 justify-center rounded-[10px] border border-gray-200 font-extrabold text-[13px] text-[#172E42] bg-white hover:bg-gray-50 transition-colors cursor-pointer"
-                >
-                  <Settings size={14} />
-                  Modifier
-                </button>
-                <button
-                  onClick={() => handleDelete(plan)}
-                  className="w-9 h-9 rounded-[10px] flex items-center justify-center border border-red-100 bg-red-50 hover:bg-red-100 transition-colors cursor-pointer"
-                >
-                  <Trash2 size={14} color="#EF4444" />
-                </button>
               </div>
             </div>
           ))}

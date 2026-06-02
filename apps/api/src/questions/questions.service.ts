@@ -109,6 +109,9 @@ export class QuestionsService {
     return this.prisma.question.create({
       data: {
         ...data,
+        themeId:  data.themeId  || null,
+        packId:   data.packId   || null,
+        videoId:  data.videoId  || null,
         level: data.level || 1,
         isPremium: data.isPremium || false,
         codification,
@@ -124,7 +127,12 @@ export class QuestionsService {
 
     return this.prisma.question.update({
       where: { id },
-      data,
+      data: {
+        ...data,
+        themeId: data.themeId  !== undefined ? (data.themeId  || null) : undefined,
+        packId:  data.packId   !== undefined ? (data.packId   || null) : undefined,
+        videoId: data.videoId  !== undefined ? (data.videoId  || null) : undefined,
+      },
       include: { category: true, theme: true, pack: true, video: true },
     });
   }

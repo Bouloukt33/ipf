@@ -836,6 +836,12 @@ export class AdminService {
     });
   }
 
+  async deleteCategory(id: string) {
+    const cat = await this.prisma.category.findUnique({ where: { id } });
+    if (!cat) throw new NotFoundException('Catégorie non trouvée');
+    return this.prisma.category.delete({ where: { id } });
+  }
+
   async searchUsers(query: string) {
     return this.prisma.user.findMany({
       where: {

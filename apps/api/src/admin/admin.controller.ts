@@ -255,6 +255,14 @@ export class AdminController {
     return this.adminService.toggleCategoryActive(id);
   }
 
+  @Delete('categories/:id')
+  @Permissions('write:questions')
+  @ApiOperation({ summary: 'Supprimer un type de bail (Admin)' })
+  @ApiParam({ name: 'id' })
+  async deleteCategory(@Param('id') id: string) {
+    return this.adminService.deleteCategory(id);
+  }
+
   @Get('questions/stats')
   @Permissions('read:admin')
   @ApiOperation({ summary: 'Statistiques des questions', description: 'Récupère les statistiques détaillées sur les questions (par catégorie, taux de réussite, etc.)' })

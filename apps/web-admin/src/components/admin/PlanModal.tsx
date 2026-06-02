@@ -2,6 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { X, Plus, Trash2 } from 'lucide-react';
 import type { IPlan, IPlanFormData } from '../../hooks/useAdminMarketing';
 
+function parseFeatures(features: string[] | null | unknown): string[] {
+  if (!features) return [];
+  if (Array.isArray(features)) return features;
+  try { return JSON.parse(features as string); } catch { return []; }
+}
+
 interface PlanModalProps {
   isOpen: boolean;
   plan: IPlan | null;
@@ -35,7 +41,7 @@ export function PlanModal({ isOpen, plan, onClose, onSave }: PlanModalProps) {
           description: plan.description ?? '',
           price: plan.price,
           intervalMonths: plan.intervalMonths,
-          features: plan.features ?? [],
+          features: parseFeatures(plan.features),
           isActive: plan.isActive,
           order: plan.order,
         });
@@ -206,12 +212,12 @@ export function PlanModal({ isOpen, plan, onClose, onSave }: PlanModalProps) {
             <button
               type="button"
               onClick={() => setForm((p) => ({ ...p, isActive: !p.isActive }))}
-              className="relative w-12 h-6 rounded-full transition-colors"
+              className="relative w-12 h-6 rounded-full transition-colors overflow-hidden flex-shrink-0"
               style={{ background: form.isActive ? '#D27A2D' : '#d1d5db' }}
             >
               <span
-                className="absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform"
-                style={{ transform: form.isActive ? 'translateX(24px)' : 'translateX(2px)' }}
+                className="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform"
+                style={{ transform: form.isActive ? 'translateX(24px)' : 'translateX(0)' }}
               />
             </button>
           </div>
