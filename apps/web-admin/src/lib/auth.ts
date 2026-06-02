@@ -3,7 +3,7 @@ import { ENV } from './env';
 
 interface TokenPayload {
   permissions?: string[];
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export function getRolesFromToken(token: string): string[] {

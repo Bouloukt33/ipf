@@ -6,7 +6,7 @@ export function CollapseButton({ collapsed, onClick }: { collapsed: boolean; onC
     return (
         <button
             onClick={onClick}
-            aria-label="Réduire/agrandir"
+            aria-label="Reduire/agrandir"
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
             style={{

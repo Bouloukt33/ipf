@@ -123,12 +123,12 @@ export function Sidebar({ items, logoAlt = 'IPF Admin' }: SidebarProps) {
 
                 <SidebarItem
                     href="#"
-                    label="Déconnexion"
+                    label="Deconnexion"
                     icon={<LogOut size={22} color="rgba(255,255,255,0.55)" />}
                     iconBg="rgba(255,255,255,0.05)"
                     isActive={false}
                     collapsed={collapsed}
-                    tooltip="Déconnexion"
+                    tooltip="Deconnexion"
                     onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
                 />
             </aside>

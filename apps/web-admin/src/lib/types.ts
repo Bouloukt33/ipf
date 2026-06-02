@@ -24,7 +24,7 @@ export interface ICategory {
     createdAt: string;
     updatedAt: string;
     themes?: ITheme[];
-};
+}
 
 export interface ITheme {
     id: string;
@@ -141,11 +141,11 @@ export const DIFFICULTY_LABELS: Record<number, string> = {
     1: 'Facile',
     2: 'Moyen',
     3: 'Difficile',
-    4: 'Étude de cas',
+    4: 'Etude de cas',
 };
 
 export const STATUS_LABELS: Record<QuestionStatus, string> = {
     ACTIVE: 'Actif',
     SUSPENDED: 'Suspendu',
-    ARCHIVED: 'Archivé',
+    ARCHIVED: 'Archive',
 };
