@@ -12,7 +12,7 @@ interface PlanModalProps {
   isOpen: boolean;
   plan: IPlan | null;
   onClose: () => void;
-  onSave: (data: IPlanFormData) => void;
+  onSave: (data: IPlanFormData) => Promise<void>;
 }
 
 const EMPTY_FORM: IPlanFormData = {
@@ -64,10 +64,10 @@ export function PlanModal({ isOpen, plan, onClose, onSave }: PlanModalProps) {
     return Object.keys(errs).length === 0;
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!validate()) return;
-    onSave(form);
+    await onSave(form);
     onClose();
   }
 
