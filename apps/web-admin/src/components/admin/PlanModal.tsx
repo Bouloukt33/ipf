@@ -12,7 +12,7 @@ interface PlanModalProps {
   isOpen: boolean;
   plan: IPlan | null;
   onClose: () => void;
-  onSave: (data: IPlanFormData) => void;
+  onSave: (data: IPlanFormData) => Promise<void>;
 }
 
 const EMPTY_FORM: IPlanFormData = {
