@@ -1,0 +1,62 @@
+/* Réinitialisation des styles par défaut de Vite qui cassent le layout full-width */
+#root {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+
+/* Animations modernes pour le Dashboard */
+
+@keyframes float-gentle {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float-gentle {
+  animation: float-gentle 4s ease-in-out infinite;
+}
+
+/* Glass morphism panels */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Custom scrollbar pour le Dashboard (Thème clair/IPF) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #D27A2D;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #b5681f;
+}
+
+/* Shadow utilities */
+.shadow-soft {
+  box-shadow: 0 10px 40px -10px rgba(23, 46, 66, 0.1);
+}
+
+.shadow-card {
+  box-shadow: 0 20px 60px -15px rgba(23, 46, 66, 0.12);
+}
+
+/* Global utility for cards */
+.admin-card {
+  @apply bg-white rounded-[32px] p-8 border border-gray-100 shadow-soft transition-all hover:shadow-card hover:-translate-y-1;
+}

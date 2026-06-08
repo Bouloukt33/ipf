@@ -1,0 +1,86 @@
+# =============================================================================
+# Docker Compose — Infrastructure de dev (API uniquement)
+# =============================================================================
+#
+# Ce fichier lance UNIQUEMENT l'infrastructure locale (Postgres + Redis).
+# Pour lancer tout le projet (API + Web App + Infra), utilisez le
+# docker-compose.yml à la racine du monorepo :
+#
+#   cd ../../ && docker compose --profile app up -d
+#
+# Usage local :
+#   docker compose up -d                          → Postgres + Redis
+#   docker compose --profile tools up -d           → + pgAdmin + Redis Commander
+#   docker compose down                            → Tout arrêter
+#   docker compose down -v                         → Tout supprimer (reset data)
+# =============================================================================
+
+services:
+  # Base de données PostgreSQL
+  postgres:
+    image: postgres:16-alpine
+    container_name: ipf-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-ipf_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dev_password_123}
+      POSTGRES_DB: ${POSTGRES_DB:-ipf_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ipf_admin -d ipf_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Cache Redis
+  redis:
+    image: redis:7-alpine
+    container_name: ipf-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Interface admin pour PostgreSQL (optionnel)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: ipf-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@ipf.local
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    profiles:
+      - tools  # Activé seulement avec: docker-compose --profile tools up
+
+  # Interface admin pour Redis (optionnel)
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: ipf-redis-commander
+    restart: unless-stopped
+    environment:
+      REDIS_HOSTS: local:redis:6379
+    ports:
+      - "8081:8081"
+    depends_on:
+      - redis
+    profiles:
+      - tools  # Activé seulement avec: docker-compose --profile tools up
+
+volumes:
+  postgres_data:
+    name: ipf-postgres-data
+  redis_data:
+    name: ipf-redis-data

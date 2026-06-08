@@ -1,0 +1,30 @@
+# =============================================================================
+# Dockerfile.dev - Web App Next.js (IPF - 5 Secondes Chrono)
+# Mode développement avec hot-reload
+# =============================================================================
+
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Installer les dépendances système utiles pour le dev
+RUN apk add --no-cache libc6-compat
+
+# Copier les fichiers de dépendances
+COPY package.json package-lock.json* ./
+
+# Installer toutes les dépendances (dev incluses)
+RUN npm ci
+
+# Le code source est monté via volume dans docker-compose
+# On ne COPY pas le code ici
+
+EXPOSE 3001
+
+ENV NODE_ENV=development
+ENV PORT=3001
+ENV HOSTNAME="0.0.0.0"
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# next dev démarre le serveur de développement avec hot-reload
+CMD ["npm", "run", "dev"]

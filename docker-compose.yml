@@ -1,0 +1,199 @@
+# =============================================================================
+# Docker Compose — IPF Monorepo (5 Secondes Chrono)
+# =============================================================================
+#
+# Utilisation :
+#   Développement (infra seule) :  docker compose up -d
+#   Tout lancer :                  docker compose --profile app up -d
+#   Avec outils admin :            docker compose --profile app --profile tools up -d
+#   Arrêter :                      docker compose down
+#   Tout nettoyer :                docker compose down -v
+#
+# =============================================================================
+
+services:
+  # ===========================================================================
+  # INFRASTRUCTURE
+  # ===========================================================================
+
+  # Base de données PostgreSQL
+  postgres:
+    image: postgres:16-alpine
+    container_name: ipf-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-ipf_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dev_password_123}
+      POSTGRES_DB: ${POSTGRES_DB:-ipf_db}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ipf_admin} -d ${POSTGRES_DB:-ipf_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ipf-network
+
+  # Cache Redis
+  redis:
+    image: redis:7-alpine
+    container_name: ipf-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ipf-network
+
+  # ===========================================================================
+  # APPLICATIONS (profil "app" — docker compose --profile app up)
+  # ===========================================================================
+
+  # API NestJS
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    container_name: ipf-api
+    restart: unless-stopped
+    ports:
+      - "${API_PORT:-3000}:3000"
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-ipf_admin}:${POSTGRES_PASSWORD:-dev_password_123}@postgres:5432/${POSTGRES_DB:-ipf_db}?schema=public
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      AUTH0_DOMAIN: ${AUTH0_DOMAIN}
+      AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
+      AUTH0_CLIENT_ID: ${AUTH0_CLIENT_ID}
+      AUTH0_CONNECTION: ${AUTH0_CONNECTION:-Username-Password-Authentication}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    profiles:
+      - app
+    networks:
+      - ipf-network
+    volumes:
+      - ./contenu_5_secondes_chrono:/app/contenu_5_secondes_chrono
+
+  # Web App Next.js
+  web-app:
+    build:
+      context: ./apps/web-app
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000}
+    container_name: ipf-web-app
+    restart: unless-stopped
+    ports:
+      - "${WEB_APP_PORT:-3001}:3001"
+    environment:
+      NODE_ENV: development
+      AUTH0_DOMAIN: ${AUTH0_DOMAIN}
+      AUTH0_CLIENT_ID: ${AUTH0_CLIENT_ID}
+      AUTH0_CLIENT_SECRET: ${AUTH0_CLIENT_SECRET}
+      AUTH0_SECRET: ${AUTH0_SECRET}
+      AUTH0_BASE_URL: ${AUTH0_BASE_URL:-http://localhost:3001}
+      AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
+      AUTH0_ISSUER_BASE_URL: ${AUTH0_ISSUER_BASE_URL}
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:3001}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000}
+      API_INTERNAL_URL: http://api:3000
+    depends_on:
+      - api
+    profiles:
+      - app
+    networks:
+      - ipf-network
+
+  # Web Admin React/Vite
+  web-admin:
+    build:
+      context: ./apps/web-admin
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000}
+        VITE_AUTH0_DOMAIN: ${AUTH0_DOMAIN}
+        VITE_AUTH0_CLIENT_ID: ${AUTH0_CLIENT_ID}
+        VITE_AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
+    container_name: ipf-web-admin
+    restart: unless-stopped
+    ports:
+      - "${WEB_ADMIN_PORT:-3002}:80"
+    environment:
+      VITE_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000}
+      VITE_AUTH0_DOMAIN: ${AUTH0_DOMAIN}
+      VITE_AUTH0_CLIENT_ID: ${AUTH0_CLIENT_ID}
+      VITE_AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
+    depends_on:
+      - api
+    profiles:
+      - app
+      - admin
+    networks:
+      - ipf-network
+
+  # ===========================================================================
+  # OUTILS DE DEV (profil "tools" — docker compose --profile tools up)
+  # ===========================================================================
+
+  # pgAdmin — Interface web pour PostgreSQL
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: ipf-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@ipf.local}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin123}
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    depends_on:
+      - postgres
+    profiles:
+      - tools
+    networks:
+      - ipf-network
+
+  # Redis Commander — Interface web pour Redis
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: ipf-redis-commander
+    restart: unless-stopped
+    environment:
+      REDIS_HOSTS: local:redis:6379
+    ports:
+      - "${REDIS_COMMANDER_PORT:-8081}:8081"
+    depends_on:
+      - redis
+    profiles:
+      - tools
+    networks:
+      - ipf-network
+
+# =============================================================================
+# VOLUMES & NETWORKS
+# =============================================================================
+
+volumes:
+  postgres_data:
+    name: ipf-postgres-data
+  redis_data:
+    name: ipf-redis-data
+
+networks:
+  ipf-network:
+    name: ipf-network
+    driver: bridge

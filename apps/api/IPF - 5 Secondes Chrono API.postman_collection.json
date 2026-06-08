@@ -1,0 +1,938 @@
+{
+	"info": {
+		"_postman_id": "0e2ba80e-cdf3-4201-a08b-50372318b55f",
+		"name": "IPF - 5 Secondes Chrono API",
+		"description": "Collection Postman pour tester l'API du projet IPF avec Auth0",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25539234"
+	},
+	"item": [
+		{
+			"name": "🔐 Auth",
+			"item": [
+				{
+					"name": "Get Access Token (M2M)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('access_token', jsonData.access_token);",
+									"    console.log('Token saved:', jsonData.access_token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"client_id\": \"{{auth0_client_id}}\",\n  \"client_secret\": \"{{auth0_client_secret}}\",\n  \"audience\": \"{{auth0_audience}}\",\n  \"grant_type\": \"client_credentials\"\n}"
+						},
+						"url": {
+							"raw": "https://{{auth0_domain}}/oauth/token",
+							"protocol": "https",
+							"host": [
+								"{{auth0_domain}}"
+							],
+							"path": [
+								"oauth",
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Health Check (Public)",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}",
+							"host": [
+								"{{base_url}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Protected Route Test",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/protected",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"protected"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register / Sync User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"displayName\": \"Mon Pseudo\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login (Sync User)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.user) {",
+									"        pm.collectionVariables.set('user_id', jsonData.user.id);",
+									"        console.log('User ID saved:', jsonData.user.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Info (Me)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/auth/me",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Auth Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/auth/check",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"check"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/auth/logout",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Account ⚠️",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/auth/account",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"account"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get-dev-token",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/auth/dev-token",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"auth",
+								"dev-token"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "👤 Profile",
+			"item": [
+				{
+					"name": "Get My Profile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/profile",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"profile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Profile",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"displayName\": \"John Doe\",\n  \"avatarUrl\": \"https://example.com/avatar.jpg\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/profile",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"profile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Stats",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/profile/stats",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"profile",
+								"stats"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "🎮 Quiz",
+			"item": [
+				{
+					"name": "Start Quiz Session",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('session_id', jsonData.session.id);",
+									"    pm.collectionVariables.set('question_id', jsonData.questions[0].id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"mode\": \"PRACTICE\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/quiz/start",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"quiz",
+								"start"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Submit Answer",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"sessionId\": \"{{session_id}}\",\n  \"questionId\": \"{{question_id}}\",\n  \"answer\": \"A\",\n  \"responseTimeMs\": 3500\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/quiz/answer",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"quiz",
+								"answer"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Complete Session",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/quiz/{{session_id}}/complete",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"quiz",
+								"{{session_id}}",
+								"complete"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Quiz History",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/quiz/history?limit=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"quiz",
+								"history"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "❓ Questions",
+			"item": [
+				{
+					"name": "Get All Questions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/questions?page=1&limit=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"questions"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								},
+								{
+									"key": "categoryId",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "level",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "isPremium",
+									"value": "false",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Question by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/questions/{{question_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"questions",
+								"{{question_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Question (Admin/Moderator)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"categoryId\": \"clx1234567890\",\n  \"text\": \"Quelle est la durée maximale d'un bail commercial ?\",\n  \"optionA\": \"6 ans\",\n  \"optionB\": \"9 ans\",\n  \"optionC\": \"12 ans\",\n  \"optionD\": \"15 ans\",\n  \"correctAnswer\": \"B\",\n  \"level\": 1,\n  \"isPremium\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/questions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"questions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Question (Admin/Moderator)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"text\": \"Question mise à jour\",\n  \"level\": 2\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/questions/{{question_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"questions",
+								"{{question_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Question (Admin/Moderator)",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/questions/{{question_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"questions",
+								"{{question_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Toggle Question Active",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/questions/{{question_id}}/toggle-active",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"questions",
+								"{{question_id}}",
+								"toggle-active"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "📚 Categories",
+			"item": [
+				{
+					"name": "Get All Categories (Public)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImY4bV9sbUhFc0xVMEZoWlVpSi00USJ9.eyJodHRwczovL2lwZi5jb20vcm9sZXMiOltdLCJodHRwczovL2lwZi5jb20vZW1haWwiOiJ0ZXN0QGlwZi5sb2NhbCIsImlzcyI6Imh0dHBzOi8vaXBmLTVzZWNvbmRlcy1kZXYuZXUuYXV0aDAuY29tLyIsInN1YiI6ImF1dGgwfDY5NmZkNDYzMWRlMmI0ODVhYmRmNGFmMiIsImF1ZCI6WyJodHRwczovL2FwaS5pcGYubG9jYWwiLCJodHRwczovL2lwZi01c2Vjb25kZXMtZGV2LmV1LmF1dGgwLmNvbS91c2VyaW5mbyJdLCJpYXQiOjE3Njg5Mzc0MTAsImV4cCI6MTc2OTAyMzgxMCwic2NvcGUiOiJvcGVuaWQgcHJvZmlsZSBlbWFpbCIsImd0eSI6InBhc3N3b3JkIiwiYXpwIjoibXhTWjdBdVVGMWFoaHN2YVJQamd6ZEp4M2t6NEU1aWsiLCJwZXJtaXNzaW9ucyI6W119.Xr2S6qze1BrxHpQ-56uqOV2-srmT132fr1bjCQZ0WbT4DwnOd6ENig8cEs2YlhyFrWZ2ttpyKJBINahkCSViY4zD3I-eZERWYvIweUFmvO8vT-1ONk3wbHvXXfG5VFzgCkiK9HYSNEr1f5UXR2PmnfQC-yLtmlY0IOaA-1dkJSPISTv-F7eFl0eohgXTcdsDwRgADfJHNoD9K_EF7LYtm0lEUiKp-DSY919IS5UPPdKZ33lqCfXjQv1KH37j9q9LuhEXmfMkobiqUGgrNu1VPbChbAgrNpM0AQgafngYEatXVySFXQan4yYc90zYXX1jnbTh9TYJXinx8Emqr-yM9w",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/categories",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"categories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Category by ID",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/categories/{{category_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"categories",
+								"{{category_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Category by Slug",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/categories/slug/baux-commerciaux",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"categories",
+								"slug",
+								"baux-commerciaux"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Category Themes",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/categories/{{category_id}}/themes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"categories",
+								"{{category_id}}",
+								"themes"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "👥 Users (Admin)",
+			"item": [
+				{
+					"name": "Get All Users",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users?page=1&limit=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								},
+								{
+									"key": "role",
+									"value": "USER",
+									"disabled": true
+								},
+								{
+									"key": "isActive",
+									"value": "true",
+									"disabled": true
+								},
+								{
+									"key": "search",
+									"value": "john",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Stats",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users/stats",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"stats"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"{{user_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update User Role",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"role\": \"MODERATOR\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/users/{{user_id}}/role",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"{{user_id}}",
+								"role"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Toggle User Active",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users/{{user_id}}/toggle-active",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"{{user_id}}",
+								"toggle-active"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Ban User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users/{{user_id}}/ban",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"{{user_id}}",
+								"ban"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "📊 Admin Dashboard",
+			"item": [
+				{
+					"name": "Get Dashboard Stats",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/admin/dashboard",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"admin",
+								"dashboard"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Recent Activity",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/admin/activity",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"admin",
+								"activity"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Questions Stats",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/admin/questions/stats",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"admin",
+								"questions",
+								"stats"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{access_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000/api",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "auth0_domain",
+			"value": "ipf-5secondes-dev.eu.auth0.com",
+			"type": "string"
+		},
+		{
+			"key": "auth0_client_id",
+			"value": "VOTRE_CLIENT_ID",
+			"type": "string"
+		},
+		{
+			"key": "auth0_client_secret",
+			"value": "VOTRE_CLIENT_SECRET",
+			"type": "string"
+		},
+		{
+			"key": "auth0_audience",
+			"value": "https://api.ipf.local",
+			"type": "string"
+		},
+		{
+			"key": "user_id",
+			"value": ""
+		}
+	]
+}
