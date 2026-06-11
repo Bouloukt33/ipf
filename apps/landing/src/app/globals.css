@@ -27,6 +27,24 @@ body {
     transform: scale(0.91) translateY(4px) !important;
 }
 
+/* Badge populaire — pulse */
+.badge-pulse {
+    animation: badge-pulse 2s ease-in-out infinite;
+}
+@keyframes badge-pulse {
+    0%, 100% { transform: translateX(-50%) scale(1); }
+    50% { transform: translateX(-50%) scale(1.06); }
+}
+
+/* Featured pricing card — bordure animée */
+.featured-card {
+    animation: featured-glow 3s ease-in-out infinite;
+}
+@keyframes featured-glow {
+    0%, 100% { border-color: #D27A2D; }
+    50% { border-color: #e8924a; }
+}
+
 .gradient-text-animate {
     background: linear-gradient(135deg, #D27A2D, #e8924a, #D27A2D);
     background-size: 200% auto;
