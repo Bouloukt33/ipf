@@ -1,8 +1,21 @@
+import Navbar from '@/components/Navbar';
+import Hero from '@/components/Hero';
+import Stats from '@/components/Stats';
+import Features from '@/components/Features';
+import Pricing from '@/components/Pricing';
+import CtaBanner from '@/components/CtaBanner';
+import Footer from '@/components/Footer';
+
 export default function Home() {
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24">
-      <h1 className="text-4xl font-bold">IPF Landing Page</h1>
-      <p className="mt-4 text-lg">Welcome to IPF</p>
-    </main>
-  )
+    return (
+        <div className="min-h-screen font-nunito overflow-x-hidden">
+            <Navbar />
+            <Hero />
+            <Stats />
+            <Features />
+            <Pricing />
+            <CtaBanner />
+            <Footer />
+        </div>
+    );
 }
