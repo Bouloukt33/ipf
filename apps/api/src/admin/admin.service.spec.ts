@@ -99,35 +99,23 @@ describe('AdminService', () => {
   });
 
   describe('getQuestionStats', () => {
-    it('should return questions statistics by category and level', async () => {
-      const mockByCategory = [
-        { categoryId: 'cat-1', _count: 100 },
-        { categoryId: 'cat-2', _count: 150 },
-      ];
-
-      const mockByLevel = [
-        { level: 1, _count: 80 },
-        { level: 2, _count: 120 },
-      ];
-
-      const mockCategories = [
-        { id: 'cat-1', name: 'Category 1' },
-        { id: 'cat-2', name: 'Category 2' },
-      ];
-
-      mockPrismaService.question.groupBy
-        .mockResolvedValueOnce(mockByCategory)
-        .mockResolvedValueOnce(mockByLevel);
-
-      mockPrismaService.question.count.mockResolvedValue(50);
-      mockPrismaService.category.findMany.mockResolvedValue(mockCategories);
+    it('should return questions statistics by status', async () => {
+      mockPrismaService.question.count
+        .mockResolvedValueOnce(500) // total
+        .mockResolvedValueOnce(400) // active
+        .mockResolvedValueOnce(50)  // suspended
+        .mockResolvedValueOnce(50)  // archived
+        .mockResolvedValueOnce(100); // premium
 
       const result = await service.getQuestionStats();
 
-      expect(result.byCategory).toHaveLength(2);
-      expect(result.byCategory[0].category).toBe('Category 1');
-      expect(result.byLevel).toEqual(mockByLevel);
-      expect(result.premiumCount).toBe(50);
+      expect(result).toEqual({
+        total: 500,
+        active: 400,
+        suspended: 50,
+        archived: 50,
+        premium: 100,
+      });
     });
   });
 });
