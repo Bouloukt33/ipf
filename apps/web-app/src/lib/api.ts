@@ -301,6 +301,26 @@ export const api = {
       }),
   },
 
+  payment: {
+    checkout: (planSlug: string) =>
+      request<{
+        simulationMode: boolean;
+        success?: boolean;
+        checkoutUrl?: string;
+        plan?: { name: string; slug: string };
+        subscription?: { startDate: string; endDate: string; status: string };
+      }>('/payment/checkout', {
+        method: 'POST',
+        body: JSON.stringify({ planSlug }),
+      }),
+    cancel: () =>
+      request<{ success: boolean; message: string }>('/payment/cancel', {
+        method: 'POST',
+      }),
+    getMode: () =>
+      request<{ simulationMode: boolean }>('/payment/mode'),
+  },
+
   reference: {
     jobProfiles: () => request<JobSectorData[]>('/reference/job-profiles'),
     ageRanges: () => request<LabelValue[]>('/reference/age-ranges'),
