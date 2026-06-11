@@ -30,13 +30,13 @@ export default function Navbar() {
                 <div className="flex items-center gap-3">
                     <a
                         href={`${APP_URL}/auth/login`}
-                        className="hidden md:block text-sm font-bold text-navy/70 hover:text-primary transition-colors no-underline btn-press"
+                        className="hidden md:block text-sm font-bold text-navy/70 hover:text-primary transition-colors no-underline"
                     >
                         Se connecter
                     </a>
                     <a
                         href={`${APP_URL}/auth/login`}
-                        className="px-5 py-2.5 bg-gradient-primary text-white rounded-xl font-black text-sm hover:opacity-90 no-underline btn-press"
+                        className="px-5 py-2.5 bg-gradient-primary text-white rounded-xl font-black text-sm no-underline btn-3d-primary"
                     >
                         Commencer
                     </a>

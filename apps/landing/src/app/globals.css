@@ -20,11 +20,24 @@ body {
     color: #172E42;
 }
 
-.btn-press {
-    transition: transform 60ms ease !important;
+/* Bouton primaire 3D style Duolingo (orange) */
+.btn-3d-primary {
+    box-shadow: 0 5px 0 0 #9a5920 !important;
+    transition: transform 80ms ease, box-shadow 80ms ease !important;
 }
-.btn-press:active {
-    transform: scale(0.91) translateY(4px) !important;
+.btn-3d-primary:active {
+    transform: translateY(5px) !important;
+    box-shadow: none !important;
+}
+
+/* Bouton secondaire 3D (outline/gris) */
+.btn-3d-secondary {
+    box-shadow: 0 5px 0 0 #c4c9d0 !important;
+    transition: transform 80ms ease, box-shadow 80ms ease !important;
+}
+.btn-3d-secondary:active {
+    transform: translateY(5px) !important;
+    box-shadow: none !important;
 }
 
 /* Badge populaire — pulse */

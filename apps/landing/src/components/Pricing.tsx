@@ -129,10 +129,10 @@ function PricingCard({ plan, index }: { plan: typeof plans[0]; index: number }) 
 
             <a
                 href={`${APP_URL}/auth/login`}
-                className={`block w-full py-3.5 rounded-xl font-black text-center no-underline btn-press ${
+                className={`block w-full py-3.5 rounded-xl font-black text-center no-underline ${
                     plan.featured
-                        ? 'bg-gradient-primary text-white'
-                        : 'bg-gray-100 text-navy hover:bg-gray-200 transition-colors'
+                        ? 'bg-gradient-primary text-white btn-3d-primary'
+                        : 'bg-gray-100 text-navy btn-3d-secondary'
                 }`}
             >
                 Commencer

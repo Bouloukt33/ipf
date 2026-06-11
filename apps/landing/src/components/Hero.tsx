@@ -113,13 +113,13 @@ export default function Hero() {
                         <div className="flex flex-col sm:flex-row gap-4">
                             <a
                                 href={`${APP_URL}/auth/login`}
-                                className="px-8 py-4 bg-gradient-primary text-white rounded-2xl font-black text-lg text-center no-underline btn-press"
+                                className="px-8 py-4 bg-gradient-primary text-white rounded-2xl font-black text-lg text-center no-underline btn-3d-primary"
                             >
                                 Commencer gratuitement
                             </a>
                             <a
                                 href={`${APP_URL}/auth/login`}
-                                className="px-8 py-4 border-2 border-navy/15 text-navy/70 rounded-2xl font-bold text-lg hover:border-primary hover:text-primary transition-colors text-center no-underline btn-press"
+                                className="px-8 py-4 border-2 border-navy/15 text-navy/70 rounded-2xl font-bold text-lg hover:border-primary hover:text-primary transition-colors text-center no-underline btn-3d-secondary"
                             >
                                 J'ai déjà un compte
                             </a>

@@ -34,13 +34,13 @@ export default function CtaBanner() {
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <a
                         href={`${APP_URL}/auth/login`}
-                        className="px-10 py-4 bg-gradient-primary text-white rounded-2xl font-black text-lg no-underline btn-press"
+                        className="px-10 py-4 bg-gradient-primary text-white rounded-2xl font-black text-lg no-underline btn-3d-primary"
                     >
                         Commencer gratuitement
                     </a>
                     <a
                         href={`${APP_URL}/auth/login`}
-                        className="px-10 py-4 bg-white/10 text-white border border-white/20 rounded-2xl font-bold text-lg hover:bg-white/20 transition-colors no-underline btn-press"
+                        className="px-10 py-4 bg-white/10 text-white border border-white/20 rounded-2xl font-bold text-lg no-underline btn-3d-secondary"
                     >
                         J'ai déjà un compte
                     </a>
