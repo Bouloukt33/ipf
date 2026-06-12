@@ -9,9 +9,10 @@ interface ISidebarItemProps {
     isActive: boolean;
     collapsed: boolean;
     tooltip: string;
+    prefetch?: boolean;
 }
 
-export function SidebarItem({ href, label, icon, iconBg, isActive, collapsed, tooltip }: ISidebarItemProps) {
+export function SidebarItem({ href, label, icon, iconBg, isActive, collapsed, tooltip, prefetch }: ISidebarItemProps) {
     const [hovered, setHovered] = useState(false);
 
     const borderColor = isActive ? 'rgba(210,122,45,0.4)' : 'transparent';
@@ -20,6 +21,7 @@ export function SidebarItem({ href, label, icon, iconBg, isActive, collapsed, to
     return (
         <Link
             href={href}
+            prefetch={prefetch}
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
             style={{

@@ -136,6 +136,7 @@ export function Sidebar({ items, logoSrc = '/images/logo_dark.png', logoAlt = '5
                     isActive={false}
                     collapsed={collapsed}
                     tooltip="Déconnexion"
+                    prefetch={false}
                 />
             </aside>
 
