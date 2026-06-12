@@ -58,9 +58,11 @@ export class ProfileService {
         });
 
         return sectors.map((s) => ({
-            sector: s.name,
-            slug:   s.slug,
-            profiles: s.jobProfiles,
+            id:          s.id,
+            name:        s.name,
+            slug:        s.slug,
+            order:       s.order,
+            jobProfiles: s.jobProfiles,
         }));
     }
 

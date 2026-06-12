@@ -60,6 +60,7 @@ export default function OnboardingPage() {
 
   // Load reference data once user is available
   useEffect(() => {
+    
     if (!user) return;
     Promise.all([
       api.reference.ageRanges(),
@@ -67,6 +68,7 @@ export default function OnboardingPage() {
       api.reference.jobProfiles(),
     ])
       .then(([ages, stats, jobs]) => {
+        
         setAgeRanges(ages);
         setStatuses(stats);
         setSectors(jobs);
@@ -274,7 +276,7 @@ export default function OnboardingPage() {
                 </button>
                 {selectedSector === sector.id && (
                   <div className="mt-2 ml-3 space-y-2 animate-fade-in-up">
-                    {sector.jobProfiles.map((job) => (
+                    {sector.jobProfiles?.map((job) => (
                       <button
                         key={job.id}
                         onClick={() => setJobProfileId(job.id)}
