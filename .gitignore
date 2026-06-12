@@ -42,3 +42,4 @@ apps/*/pnpm-lock.yaml
 
 CLAUDE.md
 .claude/
+.claudeignore
