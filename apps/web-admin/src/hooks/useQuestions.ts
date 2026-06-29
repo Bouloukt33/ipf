@@ -90,7 +90,7 @@ export function useQuestions(): UseQuestionsReturn {
         if (!isAuthenticated) return;
         try {
             const token = await getToken();
-            const cats = await categoriesService.getCategories(token);
+            const cats = await categoriesService.getAll(token);
             setCategories(cats);
         } catch (err) {
             console.error('Failed to load categories:', err);
