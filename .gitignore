@@ -43,3 +43,11 @@ apps/*/pnpm-lock.yaml
 CLAUDE.md
 .claude/
 .claudeignore
+
+# Docker override local (dev perso, ne pas commiter)
+docker-compose.override.yml
+
+# Rapport LaTeX (non versionné dans le dépôt projet)
+rapport/
+
+rapport.zip
