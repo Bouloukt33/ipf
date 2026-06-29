@@ -348,14 +348,14 @@ export class AdminService {
   }
 
   async getQuestionStats() {
-    const [total, active, suspended, archived, premium] = await Promise.all([
+    const [total, active, suspended, archived, premiumCount] = await Promise.all([
       this.prisma.question.count(),
       this.prisma.question.count({ where: { status: 'ACTIVE' } }),
       this.prisma.question.count({ where: { status: 'SUSPENDED' } }),
       this.prisma.question.count({ where: { status: 'ARCHIVED' } }),
       this.prisma.question.count({ where: { isPremium: true } }),
     ]);
-    return { total, active, suspended, archived, premium };
+    return { total, active, suspended, archived, premiumCount };
   }
 
   // ── Subscriptions ─────────────────────────────────────────────────────────────
