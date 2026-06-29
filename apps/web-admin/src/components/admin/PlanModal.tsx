@@ -59,7 +59,7 @@ export function PlanModal({ isOpen, plan, onClose, onSave }: PlanModalProps) {
     const errs: Record<string, string> = {};
     if (!form.name.trim()) errs.name = 'Le nom est requis';
     if (!form.slug.trim()) errs.slug = 'Le slug est requis';
-    if (form.price <= 0) errs.price = 'Le prix doit etre superieur a 0';
+    if (form.price <= 0) errs.price = 'Le prix doit être supérieur à 0';
     setErrors(errs);
     return Object.keys(errs).length === 0;
   }
