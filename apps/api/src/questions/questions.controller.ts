@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { QuestionsService } from './questions.service';
-import { CreateQuestionDto, UpdateQuestionDto } from './dto/questions.dto';
+import { CreateQuestionDto, UpdateQuestionDto, UpdateStatusDto } from './dto/questions.dto';
 import { AuthGuard, PermissionsGuard, Permissions } from '../auth';
 
 @ApiTags('Questions')
@@ -133,7 +133,7 @@ export class QuestionsController {
   @ApiResponse({ status: 401, description: 'Non autorisé' })
   @ApiResponse({ status: 403, description: 'Permission insuffisante' })
   @ApiResponse({ status: 404, description: 'Question non trouvée' })
-  async updateStatus(@Param('id') id: string, @Body() body: { status: string }) {
-    return this.questionsService.updateStatus(id, body.status as 'ACTIVE' | 'SUSPENDED' | 'ARCHIVED');
+  async updateStatus(@Param('id') id: string, @Body() body: UpdateStatusDto) {
+    return this.questionsService.updateStatus(id, body.status);
   }
 }

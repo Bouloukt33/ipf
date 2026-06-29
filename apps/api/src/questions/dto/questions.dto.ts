@@ -151,3 +151,9 @@ export class UpdateQuestionDto {
   @IsEnum(['ACTIVE', 'SUSPENDED', 'ARCHIVED'])
   status?: 'ACTIVE' | 'SUSPENDED' | 'ARCHIVED';
 }
+
+export class UpdateStatusDto {
+  @ApiProperty({ description: 'Nouveau statut', enum: ['ACTIVE', 'SUSPENDED', 'ARCHIVED'] })
+  @IsEnum(['ACTIVE', 'SUSPENDED', 'ARCHIVED'])
+  status: 'ACTIVE' | 'SUSPENDED' | 'ARCHIVED';
+}
