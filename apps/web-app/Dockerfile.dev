@@ -12,8 +12,10 @@ RUN apk add --no-cache libc6-compat
 
 COPY package.json package-lock.json ./
 COPY apps/web-app/package.json apps/web-app/
+# Dépendance workspace @ipf/shared (source complète : son prepare la builde)
+COPY packages/shared packages/shared/
 
-RUN npm ci --workspace=web-app
+RUN npm ci --workspace=web-app --workspace=@ipf/shared
 
 EXPOSE 3001
 

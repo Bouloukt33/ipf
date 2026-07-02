@@ -24,12 +24,15 @@ ENV VITE_AUTH0_AUDIENCE=$VITE_AUTH0_AUDIENCE
 
 COPY package.json package-lock.json ./
 COPY apps/web-admin/package.json apps/web-admin/
+# Dépendance workspace @ipf/shared (source complète : son prepare la builde)
+COPY packages/shared packages/shared/
 
-RUN npm ci --workspace=web-admin
+RUN npm ci --workspace=web-admin --workspace=@ipf/shared
 
 COPY apps/web-admin apps/web-admin
 
-RUN npm run build --workspace=web-admin
+RUN npm run build --workspace=@ipf/shared && \
+    npm run build --workspace=web-admin
 
 # ---------------------------------------------------------------------------
 # Stage 2 : Serve avec Nginx

@@ -15,8 +15,10 @@ RUN apk add --no-cache libc6-compat
 
 COPY package.json package-lock.json ./
 COPY apps/web-app/package.json apps/web-app/
+# Dépendance workspace @ipf/shared (source complète : son prepare la builde)
+COPY packages/shared packages/shared/
 
-RUN npm ci --workspace=web-app
+RUN npm ci --workspace=web-app --workspace=@ipf/shared
 
 COPY apps/web-app apps/web-app
 
@@ -24,7 +26,8 @@ ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN npm run build --workspace=web-app
+RUN npm run build --workspace=@ipf/shared && \
+    npm run build --workspace=web-app
 
 # ---------------------------------------------------------------------------
 # Stage 2 : Image de production
