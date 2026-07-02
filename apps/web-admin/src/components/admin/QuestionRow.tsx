@@ -20,6 +20,7 @@ import {
 interface QuestionRowProps {
     question:   IQuestion;
     packs:      IPack[];
+    number:     number;
     isEven:     boolean;
     onEdit:     (question: IQuestion) => void;
     onDelete:   (id: string) => void;
@@ -48,7 +49,7 @@ const STATUS_DOTS: Record<QuestionStatus, string> = {
 };
 
 export function QuestionRow({
-    question, isEven, onEdit, onDelete, onSuspend, onArchive, onRestore, packs,
+    question, number, isEven, onEdit, onDelete, onSuspend, onArchive, onRestore, packs,
 }: QuestionRowProps) {
     const packName = question.packId
         ? (packs.find((p) => p.id === question.packId)?.name ?? question.packId)
@@ -71,6 +72,13 @@ export function QuestionRow({
       `}
             onClick={() => onEdit(question)}
         >
+            {/* Numéro */}
+            <td className="px-4 py-3 whitespace-nowrap text-right">
+                <span className="font-mono text-[12px] font-bold text-[#5a7a99]">
+                    {number}
+                </span>
+            </td>
+
             {/* Code */}
             <td className="px-4 py-3 whitespace-nowrap">
                 <span className="font-mono text-[12px] font-extrabold text-[#D27A2D] bg-[rgba(210,122,45,0.1)] px-2 py-0.5 rounded-md">

@@ -16,6 +16,7 @@ interface UseQuestionsReturn {
     error: string | null;
     currentPage: number;
     totalPages: number;
+    pageSize: number;
     categories: ICategory[];
     total: number;
     setPage: (page: number) => void;
@@ -155,6 +156,7 @@ export function useQuestions(): UseQuestionsReturn {
         filters,
         isLoading,
         error,
+        pageSize: ITEMS_PER_PAGE,
         currentPage,
         totalPages,
         total,

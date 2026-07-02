@@ -33,8 +33,7 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      # Un seul npm ci à la racine installe tous les workspaces
-      # (le postinstall de l'API génère le client Prisma)
+
       - name: Install dependencies
         run: npm ci
 
