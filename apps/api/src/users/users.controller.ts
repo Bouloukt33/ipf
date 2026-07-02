@@ -20,6 +20,7 @@ import {
   ApiBody,
 } from '@nestjs/swagger';
 import { UsersService } from './users.service';
+import { CreateUserDto } from './dto/users.dto';
 import { AuthGuard, PermissionsGuard, Permissions } from '../auth';
 import { UserRole } from '@prisma/client';
 
@@ -86,6 +87,22 @@ export class UsersController {
       page: page ? parseInt(page) : 1,
       limit: limit ? parseInt(limit) : 20,
     });
+  }
+
+  @Post()
+  @Permissions('manage:users')
+  @ApiOperation({
+    summary: 'Créer un utilisateur',
+    description:
+      'Crée un compte (Auth0 + base) pour un utilisateur. Un email lui est envoyé pour définir son mot de passe (Admin uniquement)',
+  })
+  @ApiResponse({ status: 201, description: 'Utilisateur créé' })
+  @ApiResponse({ status: 400, description: 'Données invalides' })
+  @ApiResponse({ status: 401, description: 'Non autorisé' })
+  @ApiResponse({ status: 403, description: 'Permission insuffisante' })
+  @ApiResponse({ status: 409, description: 'Email déjà utilisé' })
+  async create(@Body() dto: CreateUserDto) {
+    return this.usersService.createUser(dto);
   }
 
   @Get('stats')

@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Put,
+  Patch,
   Delete,
   Body,
   Param,
@@ -18,7 +19,12 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 import { QuestionsService } from './questions.service';
-import { CreateQuestionDto, UpdateQuestionDto } from './dto/questions.dto';
+import {
+  CreateQuestionDto,
+  UpdateQuestionDto,
+  UpdateQuestionStatusDto,
+  ImportQuestionsDto,
+} from './dto/questions.dto';
 import { AuthGuard, PermissionsGuard, Permissions } from '../auth';
 
 @ApiTags('Questions')
@@ -64,6 +70,17 @@ export class QuestionsController {
     description: 'Filtrer par statut actif',
   })
   @ApiQuery({
+    name: 'status',
+    required: false,
+    enum: ['ACTIVE', 'SUSPENDED', 'ARCHIVED'],
+    description: 'Filtrer par statut',
+  })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    description: 'Recherche dans le texte ou la codification',
+  })
+  @ApiQuery({
     name: 'page',
     required: false,
     type: Number,
@@ -86,6 +103,8 @@ export class QuestionsController {
     @Query('level') level?: string,
     @Query('isPremium') isPremium?: string,
     @Query('isActive') isActive?: string,
+    @Query('status') status?: string,
+    @Query('search') search?: string,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
   ) {
@@ -95,6 +114,8 @@ export class QuestionsController {
       level: level ? parseInt(level) : undefined,
       isPremium: isPremium ? isPremium === 'true' : undefined,
       isActive: isActive ? isActive === 'true' : undefined,
+      status,
+      search,
       page: page ? parseInt(page) : 1,
       limit: limit ? parseInt(limit) : 20,
     });
@@ -176,5 +197,47 @@ export class QuestionsController {
   @ApiResponse({ status: 404, description: 'Question non trouvée' })
   async toggleActive(@Param('id') id: string) {
     return this.questionsService.toggleActive(id);
+  }
+
+  @Patch(':id/status')
+  @UseGuards(PermissionsGuard)
+  @Permissions('write:questions')
+  @ApiOperation({
+    summary: "Changer le statut d'une question",
+    description:
+      'Passe une question à ACTIVE, SUSPENDED ou ARCHIVED (Admin uniquement)',
+  })
+  @ApiParam({ name: 'id', description: 'ID de la question' })
+  @ApiResponse({ status: 200, description: 'Statut modifié' })
+  @ApiResponse({ status: 400, description: 'Statut invalide' })
+  @ApiResponse({ status: 401, description: 'Non autorisé' })
+  @ApiResponse({ status: 403, description: 'Permission insuffisante' })
+  @ApiResponse({ status: 404, description: 'Question non trouvée' })
+  async updateStatus(
+    @Param('id') id: string,
+    @Body() data: UpdateQuestionStatusDto,
+  ) {
+    return this.questionsService.updateStatus(id, data.status);
+  }
+
+  @Post('import')
+  @UseGuards(PermissionsGuard)
+  @Permissions('write:questions')
+  @ApiOperation({
+    summary: 'Importer des questions depuis un CSV',
+    description:
+      'Importe en masse des questions depuis un contenu CSV ' +
+      '(format : voir docs/import-questions-csv.md). Les lignes valides ' +
+      'sont créées, les lignes en erreur sont rapportées (Admin uniquement)',
+  })
+  @ApiResponse({
+    status: 201,
+    description: "Rapport d'import { imported, total, errors[] }",
+  })
+  @ApiResponse({ status: 400, description: 'CSV invalide' })
+  @ApiResponse({ status: 401, description: 'Non autorisé' })
+  @ApiResponse({ status: 403, description: 'Permission insuffisante' })
+  async importCsv(@Body() data: ImportQuestionsDto) {
+    return this.questionsService.importCsv(data.csv);
   }
 }

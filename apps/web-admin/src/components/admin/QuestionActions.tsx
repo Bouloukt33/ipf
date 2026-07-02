@@ -1,11 +1,44 @@
+import { useRef, useState } from 'react';
+import { Upload, Download } from 'lucide-react';
 import type { IQuestionStats } from '../../lib/types';
 
 interface QuestionActionsProps {
     stats: IQuestionStats | null;
     onCreateNew: () => void;
+    onImportCsv: (file: File) => Promise<void>;
 }
 
-export function QuestionActions({ stats, onCreateNew }: QuestionActionsProps) {
+const CSV_TEMPLATE =
+    'categorie;niveau;question;optionA;optionB;optionC;optionD;bonneReponse;premium\n' +
+    "bail-commercial;1;Quelle est la durée minimale d'un bail commercial ?;9 ans;3 ans;6 ans;1 an;A;non\n";
+
+export function QuestionActions({ stats, onCreateNew, onImportCsv }: QuestionActionsProps) {
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [isImporting, setIsImporting] = useState(false);
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        e.target.value = ''; // permet de réimporter le même fichier
+        if (!file) return;
+        setIsImporting(true);
+        try {
+            await onImportCsv(file);
+        } finally {
+            setIsImporting(false);
+        }
+    };
+
+    const downloadTemplate = () => {
+        // BOM en tête pour qu'Excel ouvre le fichier en UTF-8
+        const blob = new Blob(['\uFEFF' + CSV_TEMPLATE], { type: 'text/csv;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'modele-import-questions.csv';
+        link.click();
+        URL.revokeObjectURL(url);
+    };
+
     return (
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
             {/* Stats pills */}
@@ -40,19 +73,51 @@ export function QuestionActions({ stats, onCreateNew }: QuestionActionsProps) {
             )}
 
             {/* CTA */}
-            <button
-                onClick={onCreateNew}
-                className="h-[42px] px-5 rounded-[12px] border-none
-          bg-gradient-to-br from-[#D27A2D] to-[#F59E0B]
-          font-extrabold text-[13px] text-white cursor-pointer font-nunito
-          flex items-center gap-2 transition-all hover:shadow-lg hover:shadow-[rgba(210,122,45,0.3)]
-          hover:-translate-y-px"
-            >
-                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                </svg>
-                Nouvelle question
-            </button>
+            <div className="flex items-center gap-2">
+                <button
+                    onClick={downloadTemplate}
+                    title="Télécharger le modèle CSV"
+                    className="h-[42px] px-4 rounded-[12px] border-2 border-gray-200 bg-white
+                      font-extrabold text-[13px] text-[#5a7a99] cursor-pointer font-nunito
+                      flex items-center gap-2 transition-all hover:border-[#D27A2D] hover:text-[#D27A2D]"
+                >
+                    <Download size={15} />
+                    Modèle
+                </button>
+                <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isImporting}
+                    className="h-[42px] px-5 rounded-[12px] border-2 border-[#172E42] bg-white
+                      font-extrabold text-[13px] text-[#172E42] cursor-pointer font-nunito
+                      flex items-center gap-2 transition-all hover:bg-[#172E42] hover:text-white
+                      disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    {isImporting
+                        ? <div className="w-4 h-4 border-2 border-gray-300 border-t-[#172E42] rounded-full animate-spin" />
+                        : <Upload size={15} />}
+                    Importer CSV
+                </button>
+                <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".csv,text/csv"
+                    className="hidden"
+                    onChange={handleFileChange}
+                />
+                <button
+                    onClick={onCreateNew}
+                    className="h-[42px] px-5 rounded-[12px] border-none
+                      bg-gradient-to-br from-[#D27A2D] to-[#F59E0B]
+                      font-extrabold text-[13px] text-white cursor-pointer font-nunito
+                      flex items-center gap-2 transition-all hover:shadow-lg hover:shadow-[rgba(210,122,45,0.3)]
+                      hover:-translate-y-px"
+                >
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Nouvelle question
+                </button>
+            </div>
         </div>
     );
 }
