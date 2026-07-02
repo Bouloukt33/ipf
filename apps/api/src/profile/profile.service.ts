@@ -50,9 +50,15 @@ export class ProfileService {
   }
 
   async getJobProfiles() {
-    const sectors = await this.prisma.jobSector.findMany({
+    // Contrat consommé par l'onboarding web-app (JobSectorData) :
+    // [{ id, name, slug, order, jobProfiles: [{ id, name, slug }] }]
+    return this.prisma.jobSector.findMany({
       orderBy: { order: 'asc' },
-      include: {
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        order: true,
         jobProfiles: {
           where: { isActive: true },
           orderBy: { order: 'asc' },
@@ -60,12 +66,6 @@ export class ProfileService {
         },
       },
     });
-
-    return sectors.map((s) => ({
-      sector: s.name,
-      slug: s.slug,
-      profiles: s.jobProfiles,
-    }));
   }
 
   async updateProfile(

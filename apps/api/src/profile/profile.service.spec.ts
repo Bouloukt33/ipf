@@ -14,6 +14,9 @@ describe('ProfileService', () => {
     userProfile: {
       upsert: jest.fn(),
     },
+    jobSector: {
+      findMany: jest.fn(),
+    },
   };
 
   beforeEach(async () => {
@@ -33,6 +36,44 @@ describe('ProfileService', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('getJobProfiles', () => {
+    it('should return sectors matching the onboarding contract (id/name/slug/jobProfiles)', async () => {
+      // Contrat consommé par apps/web-app (JobSectorData) — le renommer casse
+      // silencieusement l'étape "profil métier" de l'onboarding.
+      const mockSectors = [
+        {
+          id: 'sector-1',
+          name: 'Immobilier — Transaction',
+          slug: 'immo-transaction',
+          order: 1,
+          jobProfiles: [
+            { id: 'job-1', name: 'Agent immobilier', slug: 'agent-immo' },
+          ],
+        },
+      ];
+      mockPrismaService.jobSector.findMany.mockResolvedValue(mockSectors);
+
+      const result = await service.getJobProfiles();
+
+      expect(result).toEqual(mockSectors);
+      expect(result[0]).toHaveProperty('id');
+      expect(result[0]).toHaveProperty('name');
+      expect(result[0].jobProfiles[0]).toHaveProperty('id');
+      expect(prisma.jobSector.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          orderBy: { order: 'asc' },
+          select: expect.objectContaining({
+            id: true,
+            name: true,
+            jobProfiles: expect.objectContaining({
+              where: { isActive: true },
+            }),
+          }),
+        }),
+      );
+    });
   });
 
   describe('getProfile', () => {
