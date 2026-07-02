@@ -17,19 +17,22 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 import { QuizService } from './quiz.service';
-import { AuthGuard, PermissionsGuard, Permissions, CurrentUser } from '../auth';
+import { AuthGuard, CurrentUser } from '../auth';
 import { QuizMode } from '@prisma/client';
 
 @ApiTags('Quiz')
 @ApiBearerAuth()
 @Controller('quiz')
+// Modèle d'autorisation : authentification seule, comme profile/progression/
+// leaderboard. Les tiers (premium…) sont appliqués en base via Subscription
+// dans le service, et l'ownership des sessions via auth0Id. Les permissions
+// Auth0 (@Permissions) sont réservées aux endpoints admin/écriture — un
+// nouvel inscrit n'a aucun rôle Auth0, son token sort avec permissions: [].
 @UseGuards(AuthGuard)
 export class QuizController {
   constructor(private quizService: QuizService) {}
 
   @Post('start')
-  @UseGuards(PermissionsGuard)
-  @Permissions('read:quiz')
   @ApiOperation({
     summary: 'Démarrer une session',
     description:
@@ -72,8 +75,6 @@ export class QuizController {
   }
 
   @Post('answer')
-  @UseGuards(PermissionsGuard)
-  @Permissions('read:quiz')
   @ApiOperation({
     summary: 'Soumettre une réponse',
     description:
@@ -119,8 +120,6 @@ export class QuizController {
   }
 
   @Post(':sessionId/ready')
-  @UseGuards(PermissionsGuard)
-  @Permissions('read:quiz')
   @ApiOperation({
     summary: 'Signal question prête',
     description:
@@ -136,8 +135,6 @@ export class QuizController {
   }
 
   @Post(':sessionId/complete')
-  @UseGuards(PermissionsGuard)
-  @Permissions('read:quiz')
   @ApiOperation({
     summary: 'Terminer une session',
     description:
@@ -156,8 +153,6 @@ export class QuizController {
   }
 
   @Get(':sessionId/review')
-  @UseGuards(PermissionsGuard)
-  @Permissions('read:quiz')
   @ApiOperation({
     summary: 'Revoir les réponses',
     description:
@@ -176,8 +171,6 @@ export class QuizController {
   }
 
   @Get(':sessionId/current')
-  @UseGuards(PermissionsGuard)
-  @Permissions('read:quiz')
   @ApiOperation({
     summary: 'Question courante',
     description:
@@ -196,8 +189,6 @@ export class QuizController {
   }
 
   @Get('history')
-  @UseGuards(PermissionsGuard)
-  @Permissions('read:quiz')
   @ApiOperation({
     summary: 'Historique des parties',
     description: "Récupère l'historique des sessions de quiz de l'utilisateur",
