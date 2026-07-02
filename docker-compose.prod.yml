@@ -1,32 +1,25 @@
 # =============================================================================
-# Docker Compose — IPF Monorepo (5 Secondes Chrono)
+# Docker Compose — PRODUCTION (IPF - 5 Secondes Chrono)
 # =============================================================================
 #
-# Utilisation :
-#   Développement (infra seule) :  docker compose up -d
-#   Tout lancer :                  docker compose --profile app up -d
-#   Avec outils admin :            docker compose --profile app --profile tools up -d
-#   Arrêter :                      docker compose down
-#   Tout nettoyer :                docker compose down -v
+#   docker compose -f docker-compose.prod.yml up -d --build
 #
+# Différences avec le docker-compose.yml local :
+#   - NODE_ENV=production partout (Swagger désactivé, logs réduits)
+#   - POSTGRES_PASSWORD obligatoire (pas de mot de passe par défaut)
+#   - Pas de profils dev/tools, pas de port debug
+#   - Postgres/Redis non exposés sur l'hôte (réseau interne uniquement)
 # =============================================================================
 
 services:
-  # ===========================================================================
-  # INFRASTRUCTURE
-  # ===========================================================================
-
-  # Base de données PostgreSQL
   postgres:
     image: postgres:16-alpine
     container_name: ipf-postgres
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-ipf_admin}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dev_password_123}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD est requis en production}
       POSTGRES_DB: ${POSTGRES_DB:-ipf_db}
-    ports:
-      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -37,13 +30,10 @@ services:
     networks:
       - ipf-network
 
-  # Cache Redis
   redis:
     image: redis:7-alpine
     container_name: ipf-redis
     restart: unless-stopped
-    ports:
-      - "${REDIS_PORT:-6379}:6379"
     volumes:
       - redis_data:/data
     healthcheck:
@@ -54,23 +44,18 @@ services:
     networks:
       - ipf-network
 
-  # ===========================================================================
-  # APPLICATIONS (profil "app" — docker compose --profile app up)
-  # ===========================================================================
-
-  # API NestJS
   api:
     build:
-      context: ./apps/api
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apps/api/Dockerfile
     container_name: ipf-api
     restart: unless-stopped
     ports:
       - "${API_PORT:-3000}:3000"
     environment:
-      NODE_ENV: development
+      NODE_ENV: production
       PORT: 3000
-      DATABASE_URL: postgresql://${POSTGRES_USER:-ipf_admin}:${POSTGRES_PASSWORD:-dev_password_123}@postgres:5432/${POSTGRES_DB:-ipf_db}?schema=public
+      DATABASE_URL: postgresql://${POSTGRES_USER:-ipf_admin}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-ipf_db}?schema=public
       REDIS_HOST: redis
       REDIS_PORT: 6379
       AUTH0_DOMAIN: ${AUTH0_DOMAIN}
@@ -82,67 +67,58 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    profiles:
-      - app
     networks:
       - ipf-network
     volumes:
       - ./contenu_5_secondes_chrono:/app/contenu_5_secondes_chrono
 
-  # Web App Next.js
   web-app:
     build:
-      context: ./apps/web-app
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apps/web-app/Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
     container_name: ipf-web-app
     restart: unless-stopped
     ports:
       - "${WEB_APP_PORT:-3001}:3001"
     environment:
-      NODE_ENV: development
+      NODE_ENV: production
       AUTH0_DOMAIN: ${AUTH0_DOMAIN}
       AUTH0_CLIENT_ID: ${AUTH0_CLIENT_ID}
       AUTH0_CLIENT_SECRET: ${AUTH0_CLIENT_SECRET}
       AUTH0_SECRET: ${AUTH0_SECRET}
-      AUTH0_BASE_URL: ${AUTH0_BASE_URL:-http://localhost:3001}
+      AUTH0_BASE_URL: ${AUTH0_BASE_URL}
       AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
       AUTH0_ISSUER_BASE_URL: ${AUTH0_ISSUER_BASE_URL}
-      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:3001}
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000}
+      APP_BASE_URL: ${APP_BASE_URL}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
       API_INTERNAL_URL: http://api:3000
     depends_on:
       - api
-    profiles:
-      - app
     networks:
       - ipf-network
 
-  # Landing Next.js
   landing:
     build:
-      context: ./apps/landing
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apps/landing/Dockerfile
     container_name: ipf-landing
     restart: unless-stopped
     ports:
       - "${LANDING_PORT:-3004}:3004"
     environment:
       NODE_ENV: production
-      NEXT_PUBLIC_APP_URL: ${APP_BASE_URL:-http://localhost:3001}
-    profiles:
-      - app
+      NEXT_PUBLIC_APP_URL: ${APP_BASE_URL}
     networks:
       - ipf-network
 
-  # Web Admin React/Vite
   web-admin:
     build:
-      context: ./apps/web-admin
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apps/web-admin/Dockerfile
       args:
-        VITE_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000}
+        VITE_API_URL: ${NEXT_PUBLIC_API_URL}
         VITE_AUTH0_DOMAIN: ${AUTH0_DOMAIN}
         VITE_AUTH0_CLIENT_ID: ${AUTH0_CLIENT_ID}
         VITE_AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
@@ -150,59 +126,10 @@ services:
     restart: unless-stopped
     ports:
       - "${WEB_ADMIN_PORT:-3002}:80"
-    environment:
-      VITE_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000}
-      VITE_AUTH0_DOMAIN: ${AUTH0_DOMAIN}
-      VITE_AUTH0_CLIENT_ID: ${AUTH0_CLIENT_ID}
-      VITE_AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
     depends_on:
       - api
-    profiles:
-      - app
-      - admin
     networks:
       - ipf-network
-
-  # ===========================================================================
-  # OUTILS DE DEV (profil "tools" — docker compose --profile tools up)
-  # ===========================================================================
-
-  # pgAdmin — Interface web pour PostgreSQL
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: ipf-pgadmin
-    restart: unless-stopped
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@ipf.local}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin123}
-    ports:
-      - "${PGADMIN_PORT:-5050}:80"
-    depends_on:
-      - postgres
-    profiles:
-      - tools
-    networks:
-      - ipf-network
-
-  # Redis Commander — Interface web pour Redis
-  redis-commander:
-    image: rediscommander/redis-commander:latest
-    container_name: ipf-redis-commander
-    restart: unless-stopped
-    environment:
-      REDIS_HOSTS: local:redis:6379
-    ports:
-      - "${REDIS_COMMANDER_PORT:-8081}:8081"
-    depends_on:
-      - redis
-    profiles:
-      - tools
-    networks:
-      - ipf-network
-
-# =============================================================================
-# VOLUMES & NETWORKS
-# =============================================================================
 
 volumes:
   postgres_data:

@@ -1,23 +1,19 @@
 # =============================================================================
 # Dockerfile.dev - Web App Next.js (IPF - 5 Secondes Chrono)
-# Mode développement avec hot-reload
+# Hot-reload — contexte de build = RACINE du monorepo (npm workspaces)
+# Le code source est monté via volume dans docker-compose (voir profil "dev")
 # =============================================================================
 
 FROM node:20-alpine
 
-WORKDIR /app
+WORKDIR /repo
 
-# Installer les dépendances système utiles pour le dev
 RUN apk add --no-cache libc6-compat
 
-# Copier les fichiers de dépendances
-COPY package.json package-lock.json* ./
+COPY package.json package-lock.json ./
+COPY apps/web-app/package.json apps/web-app/
 
-# Installer toutes les dépendances (dev incluses)
-RUN npm ci
-
-# Le code source est monté via volume dans docker-compose
-# On ne COPY pas le code ici
+RUN npm ci --workspace=web-app
 
 EXPOSE 3001
 
@@ -26,5 +22,4 @@ ENV PORT=3001
 ENV HOSTNAME="0.0.0.0"
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# next dev démarre le serveur de développement avec hot-reload
-CMD ["npm", "run", "dev"]
+CMD ["npm", "run", "dev", "--workspace=web-app"]

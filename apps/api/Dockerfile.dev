@@ -1,27 +1,23 @@
 # =============================================================================
 # Dockerfile.dev - API NestJS (IPF - 5 Secondes Chrono)
-# Mode développement avec hot-reload (ts-node / nest start --watch)
+# Hot-reload — contexte de build = RACINE du monorepo (npm workspaces)
+# Le code source est monté via volume dans docker-compose (voir profil "dev")
 # =============================================================================
 
 FROM node:20-alpine
 
-WORKDIR /app
+WORKDIR /repo
 
-# Installer les dépendances système utiles pour le dev
 RUN apk add --no-cache libc6-compat openssl
 
-# Copier les fichiers de dépendances et le schéma Prisma
-COPY package.json package-lock.json* ./
-COPY prisma ./prisma/
+COPY package.json package-lock.json ./
+COPY apps/api/package.json apps/api/
+COPY apps/api/prisma apps/api/prisma/
+COPY apps/api/prisma.config.ts apps/api/
 
-# Installer toutes les dépendances (dev incluses)
-RUN npm ci
-
-# Générer le client Prisma
-RUN npx prisma generate
-
-# Le code source est monté via volume dans docker-compose
-# On ne COPY pas le code ici
+# Installe toutes les deps (dev incluses) ; le postinstall génère le client
+# Prisma dans /repo/node_modules/.prisma/client
+RUN npm ci --workspace=api
 
 EXPOSE 3000
 
@@ -29,4 +25,4 @@ ENV NODE_ENV=development
 ENV PORT=3000
 
 # nest start --watch pour le hot-reload TypeScript
-CMD ["npm", "run", "start:dev"]
+CMD ["npm", "run", "start:dev", "--workspace=api"]
