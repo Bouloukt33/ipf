@@ -8,7 +8,7 @@ Application web responsive de quiz immobilier pour Le Carré PRO.
 
 Plateforme d'apprentissage basée sur les neurosciences pour les professionnels de l'immobilier d'entreprise (baux commerciaux, professionnels, dérogatoires).
 
-## 📁 Structure Monorepo (pnpm workspaces)
+## 📁 Structure Monorepo (npm workspaces)
 
 ```
 ipf/
@@ -58,25 +58,25 @@ ipf/
 ## 🚀 Démarrage
 
 ```bash
-# Installation
-pnpm install
+# Installation (toujours depuis la racine)
+npm install
 
-# Développement
-pnpm dev
+# Développement (api + web-app + admin en parallèle)
+npm run dev
 
 # Build
-pnpm build
+npm run build
 
 # Tests
-pnpm test
+npm test
 ```
 
 ## 📦 Scripts Workspaces
 
 ```bash
-pnpm --filter web-app dev      # Dev web-app
-pnpm --filter web-admin dev    # Dev admin
-pnpm --filter landing dev      # Dev landing
-pnpm --filter api dev          # Dev API
+npm run dev:web        # Dev web-app
+npm run dev:admin      # Dev admin
+npm run dev:landing    # Dev landing
+npm run dev:api        # Dev API
 ```
 

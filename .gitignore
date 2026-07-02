@@ -1,6 +1,5 @@
 # Node
 node_modules/
-.pnpm-store/
 
 # Builds
 dist/
@@ -15,12 +14,11 @@ out/
 vite-cache/
 *.tsbuildinfo
 
-# NestJS
+# Tests
 coverage/
 
 # Logs
 npm-debug.log*
-pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 *.log
@@ -37,8 +35,8 @@ yarn-error.log*
 .idea/
 .vscode/
 
-apps/*/pnpm-lock.yaml
+# Contenu pédagogique (monté via Docker)
 **/contenu_5_secondes_chrono/
 
-CLAUDE.md
-.claude/
+# Claude — fichiers locaux uniquement (settings.local.json), le reste est versionné
+.claude/settings.local.json
