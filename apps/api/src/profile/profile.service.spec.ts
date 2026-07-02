@@ -112,7 +112,9 @@ describe('ProfileService', () => {
       };
 
       mockPrismaService.user.findUnique.mockResolvedValue(mockUser);
-      mockPrismaService.userProfile.upsert.mockResolvedValue(mockUpdatedProfile);
+      mockPrismaService.userProfile.upsert.mockResolvedValue(
+        mockUpdatedProfile,
+      );
 
       const result = await service.updateProfile('auth0|123', updateData);
 

@@ -5,9 +5,10 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    logger: process.env.NODE_ENV === 'production' 
-      ? ['error', 'warn'] 
-      : ['log', 'error', 'warn', 'debug', 'verbose'],
+    logger:
+      process.env.NODE_ENV === 'production'
+        ? ['error', 'warn']
+        : ['log', 'error', 'warn', 'debug', 'verbose'],
   });
 
   // Configuration CORS pour autoriser les requêtes depuis les frontends
@@ -38,7 +39,7 @@ async function bootstrap() {
   if (process.env.NODE_ENV !== 'production') {
     const config = new DocumentBuilder()
       .setTitle('IPF - 5 Secondes Chrono API')
-      .setDescription('Documentation de l\'API du jeu 5 Secondes Chrono')
+      .setDescription("Documentation de l'API du jeu 5 Secondes Chrono")
       .setVersion('1.0')
       .addBearerAuth()
       .build();

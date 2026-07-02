@@ -4,7 +4,6 @@ import { PrismaService } from '../prisma';
 
 describe('AdminService', () => {
   let service: AdminService;
-  let prisma: PrismaService;
 
   const mockPrismaService = {
     user: {
@@ -40,7 +39,6 @@ describe('AdminService', () => {
     }).compile();
 
     service = module.get<AdminService>(AdminService);
-    prisma = module.get<PrismaService>(PrismaService);
   });
 
   afterEach(() => {

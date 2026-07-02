@@ -14,7 +14,7 @@ export function getRolesFromToken(token: string): string[] {
       return rolesClaim.map((role) => String(role).trim().toUpperCase());
     }
     return [];
-  } catch (e) {
+  } catch {
     return [];
   }
 }
@@ -24,7 +24,7 @@ export function getPermissionsFromToken(token: string): string[] {
     const payload = jwtDecode<TokenPayload>(token);
     const permissions = payload.permissions || [];
     return permissions.map((permission) => String(permission).trim());
-  } catch (e) {
+  } catch {
     return [];
   }
 }

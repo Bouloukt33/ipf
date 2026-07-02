@@ -30,9 +30,17 @@ export class PacksController {
   constructor(private packsService: PacksService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Lister les packs', description: 'Filtres par catégorie, type, gratuité. Admin voit tout, User voit public + assigné.' })
+  @ApiOperation({
+    summary: 'Lister les packs',
+    description:
+      'Filtres par catégorie, type, gratuité. Admin voit tout, User voit public + assigné.',
+  })
   @ApiQuery({ name: 'categoryId', required: false })
-  @ApiQuery({ name: 'type', required: false, enum: ['STANDARD', 'VISITEUR', 'PREMIUM'] })
+  @ApiQuery({
+    name: 'type',
+    required: false,
+    enum: ['STANDARD', 'VISITEUR', 'PREMIUM'],
+  })
   @ApiQuery({ name: 'isFree', required: false, type: Boolean })
   @ApiQuery({ name: 'includeInactive', required: false, type: Boolean })
   @ApiResponse({ status: 200, description: 'Liste des packs' })
@@ -46,7 +54,7 @@ export class PacksController {
     const user = req.user;
     const roles = (user?.roles || []).map((r: string) => r.toLowerCase());
     const isAdmin = roles.includes('admin');
-    
+
     return this.packsService.findAll({
       categoryId,
       type,
@@ -59,7 +67,10 @@ export class PacksController {
 
   @Get('slug/:categorySlug/:packSlug')
   @ApiOperation({ summary: 'Obtenir un pack par slug' })
-  @ApiParam({ name: 'categorySlug', description: 'Slug de la catégorie (ex: bail-commercial)' })
+  @ApiParam({
+    name: 'categorySlug',
+    description: 'Slug de la catégorie (ex: bail-commercial)',
+  })
   @ApiParam({ name: 'packSlug', description: 'Slug du pack (PackID)' })
   @ApiResponse({ status: 200, description: 'Pack trouvé avec ses questions' })
   @ApiResponse({ status: 404, description: 'Pack non trouvé' })
@@ -132,7 +143,10 @@ export class PacksController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Associer des questions à un pack (Admin)' })
   @ApiParam({ name: 'id', description: 'ID du pack' })
-  @ApiResponse({ status: 201, description: 'Questions associées, pack retourné complet' })
+  @ApiResponse({
+    status: 201,
+    description: 'Questions associées, pack retourné complet',
+  })
   async addQuestions(@Param('id') id: string, @Body() data: AddQuestionsDto) {
     return this.packsService.addQuestions(id, data.questionIds);
   }

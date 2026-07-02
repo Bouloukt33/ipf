@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
 import { PrismaService } from '../prisma';
-import { NotFoundException } from '@nestjs/common';
 import { UserRole } from '@prisma/client';
 
 describe('UsersService', () => {
@@ -87,7 +86,7 @@ describe('UsersService', () => {
       mockPrismaService.user.findUnique.mockResolvedValue(mockUser);
       mockPrismaService.user.update.mockResolvedValue(mockUpdated);
 
-      const result = await service.updateRole('user-1', 'MODERATOR' as UserRole);
+      const result = await service.updateRole('user-1', 'MODERATOR');
 
       expect(result.role).toBe('MODERATOR');
       expect(prisma.user.update).toHaveBeenCalledWith({

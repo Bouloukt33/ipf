@@ -8,14 +8,21 @@ export class ReferenceController {
   constructor(private profileService: ProfileService) {}
 
   @Get('job-profiles')
-  @ApiOperation({ summary: 'Liste des profils métiers', description: 'Retourne tous les secteurs et profils métiers groupés (public, pas d\'auth requise)' })
+  @ApiOperation({
+    summary: 'Liste des profils métiers',
+    description:
+      "Retourne tous les secteurs et profils métiers groupés (public, pas d'auth requise)",
+  })
   @ApiResponse({ status: 200, description: 'Liste retournée avec succès' })
   async getJobProfiles() {
     return this.profileService.getJobProfiles();
   }
 
   @Get('age-ranges')
-  @ApiOperation({ summary: 'Tranches d\'âge', description: 'Retourne les tranches d\'âge disponibles' })
+  @ApiOperation({
+    summary: "Tranches d'âge",
+    description: "Retourne les tranches d'âge disponibles",
+  })
   @ApiResponse({ status: 200, description: 'Liste retournée' })
   getAgeRanges() {
     return [
@@ -28,7 +35,10 @@ export class ReferenceController {
   }
 
   @Get('professional-statuses')
-  @ApiOperation({ summary: 'Statuts professionnels', description: 'Retourne les statuts professionnels disponibles' })
+  @ApiOperation({
+    summary: 'Statuts professionnels',
+    description: 'Retourne les statuts professionnels disponibles',
+  })
   @ApiResponse({ status: 200, description: 'Liste retournée' })
   getProfessionalStatuses() {
     return [

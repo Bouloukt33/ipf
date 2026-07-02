@@ -12,7 +12,7 @@ describe('AuthController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    
+
     // Configuration identique à main.ts
     app.enableCors({
       origin: ['http://localhost:5173', 'http://localhost:3001'],
@@ -49,15 +49,11 @@ describe('AuthController (e2e)', () => {
 
   describe('Protected Routes - Without Token', () => {
     it('/api/protected (GET) - Should return 401 Unauthorized', () => {
-      return request(app.getHttpServer())
-        .get('/api/protected')
-        .expect(401);
+      return request(app.getHttpServer()).get('/api/protected').expect(401);
     });
 
     it('/api/profile (GET) - Should return 401 Unauthorized', () => {
-      return request(app.getHttpServer())
-        .get('/api/profile')
-        .expect(401);
+      return request(app.getHttpServer()).get('/api/profile').expect(401);
     });
 
     it('/api/admin (GET) - Should return 401 Unauthorized', () => {

@@ -89,7 +89,7 @@ export const PlanCard = memo(function PlanCard({ plan, isActive, onChoose, onCan
                             className="block w-full text-center text-[12px] font-[700] text-white/40 mt-[10px] hover:text-white/70 underline transition-colors duration-200 cursor-pointer bg-transparent border-none"
                             style={{ fontFamily: 'Nunito, sans-serif' }}
                         >
-                            Résilier l'abonnement
+                            Résilier l&apos;abonnement
                         </button>
                     )}
                 </>

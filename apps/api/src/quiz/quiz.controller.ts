@@ -33,7 +33,7 @@ export class QuizController {
   @ApiOperation({
     summary: 'Démarrer une session',
     description:
-      'Crée une session de questions à partir d\'une catégorie ou d\'un pack.',
+      "Crée une session de questions à partir d'une catégorie ou d'un pack.",
   })
   @ApiBody({
     schema: {
@@ -45,7 +45,7 @@ export class QuizController {
         },
         packId: {
           type: 'string',
-          description: 'ID d\'un pack spécifique',
+          description: "ID d'un pack spécifique",
         },
         mode: {
           type: 'string',
@@ -55,12 +55,20 @@ export class QuizController {
       },
     },
   })
-  @ApiResponse({ status: 201, description: 'Session créée avec première question' })
+  @ApiResponse({
+    status: 201,
+    description: 'Session créée avec première question',
+  })
   async startSession(
     @CurrentUser('userId') userId: string,
     @Body() body: { categoryId?: string; packId?: string; mode?: QuizMode },
   ) {
-    return this.quizService.startSession(userId, body.categoryId, body.packId, body.mode);
+    return this.quizService.startSession(
+      userId,
+      body.categoryId,
+      body.packId,
+      body.mode,
+    );
   }
 
   @Post('answer')
@@ -78,12 +86,19 @@ export class QuizController {
       properties: {
         sessionId: { type: 'string' },
         questionId: { type: 'string' },
-        answer: { type: 'string', example: 'A', description: 'A/B/C/D ou SKIP' },
+        answer: {
+          type: 'string',
+          example: 'A',
+          description: 'A/B/C/D ou SKIP',
+        },
         responseTimeMs: { type: 'number', example: 2500 },
       },
     },
   })
-  @ApiResponse({ status: 201, description: 'Réponse validée avec feedback et prochaine question' })
+  @ApiResponse({
+    status: 201,
+    description: 'Réponse validée avec feedback et prochaine question',
+  })
   async submitAnswer(
     @CurrentUser('userId') userId: string,
     @Body()
@@ -129,7 +144,10 @@ export class QuizController {
       'Calcule le score final, XP, level-up, streak et retourne les stats complètes.',
   })
   @ApiParam({ name: 'sessionId', description: 'ID de la session' })
-  @ApiResponse({ status: 201, description: 'Stats finales avec XP, level, mascot range' })
+  @ApiResponse({
+    status: 201,
+    description: 'Stats finales avec XP, level, mascot range',
+  })
   async completeSession(
     @Param('sessionId') sessionId: string,
     @CurrentUser('userId') userId: string,
@@ -146,7 +164,10 @@ export class QuizController {
       "Retourne toutes les questions/réponses d'une session terminée avec feedback pédagogique.",
   })
   @ApiParam({ name: 'sessionId', description: 'ID de la session' })
-  @ApiResponse({ status: 200, description: 'Détail des réponses avec feedback' })
+  @ApiResponse({
+    status: 200,
+    description: 'Détail des réponses avec feedback',
+  })
   async reviewSession(
     @Param('sessionId') sessionId: string,
     @CurrentUser('userId') userId: string,
@@ -163,7 +184,10 @@ export class QuizController {
       'Retourne la question courante (support reconnexion mid-session).',
   })
   @ApiParam({ name: 'sessionId', description: 'ID de la session' })
-  @ApiResponse({ status: 200, description: 'Question courante avec état de la session' })
+  @ApiResponse({
+    status: 200,
+    description: 'Question courante avec état de la session',
+  })
   async getCurrentQuestion(
     @Param('sessionId') sessionId: string,
     @CurrentUser('userId') userId: string,

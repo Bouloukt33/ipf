@@ -1,7 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { QuizService } from './quiz.service';
 import { PrismaService } from '../prisma';
-import { NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import {
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 
 describe('QuizService', () => {
   let service: QuizService;
@@ -70,8 +74,18 @@ describe('QuizService', () => {
 
   describe('startSession', () => {
     it('should create a new quiz session', async () => {
-      const mockUser = { id: 'user-1', auth0Id: 'auth0|123', profile: null, subscription: null };
-      const mockCategory = { id: 'cat-1', name: 'Bail commercial', slug: 'bail-commercial', isPremium: false };
+      const mockUser = {
+        id: 'user-1',
+        auth0Id: 'auth0|123',
+        profile: null,
+        subscription: null,
+      };
+      const mockCategory = {
+        id: 'cat-1',
+        name: 'Bail commercial',
+        slug: 'bail-commercial',
+        isPremium: false,
+      };
       const mockSession = {
         id: 'session-1',
         userId: 'user-1',
@@ -95,7 +109,12 @@ describe('QuizService', () => {
         optionD: 'D',
       });
 
-      const result = await service.startSession('auth0|123', undefined, undefined, 'PRACTICE');
+      const result = await service.startSession(
+        'auth0|123',
+        undefined,
+        undefined,
+        'PRACTICE',
+      );
 
       expect(result.sessionId).toBe('session-1');
       expect(result.totalQuestions).toBe(2);
@@ -123,7 +142,7 @@ describe('QuizService', () => {
 
   describe('submitAnswer', () => {
     const mockUser = { id: 'user-1' };
-    
+
     it('should submit correct answer and award XP', async () => {
       const mockSession = {
         id: 'session-1',
@@ -148,7 +167,13 @@ describe('QuizService', () => {
       mockPrismaService.quizAnswer.create.mockResolvedValue({});
       mockPrismaService.quizSession.update.mockResolvedValue({});
 
-      const result = await service.submitAnswer('auth0|123', 'session-1', 'q1', 'A', 2000);
+      const result = await service.submitAnswer(
+        'auth0|123',
+        'session-1',
+        'q1',
+        'A',
+        2000,
+      );
 
       expect(result.isCorrect).toBe(true);
       expect(result.xpEarned).toBeGreaterThan(0);
@@ -179,14 +204,24 @@ describe('QuizService', () => {
       mockPrismaService.quizAnswer.create.mockResolvedValue({});
       mockPrismaService.quizSession.update.mockResolvedValue({});
 
-      const result = await service.submitAnswer('auth0|123', 'session-1', 'q1', 'B', 3000);
+      const result = await service.submitAnswer(
+        'auth0|123',
+        'session-1',
+        'q1',
+        'B',
+        3000,
+      );
 
       expect(result.isCorrect).toBe(false);
       expect(result.livesRemaining).toBe(4);
     });
 
     it('should throw BadRequestException when session is completed', async () => {
-      const mockSession = { id: 'session-1', userId: 'user-1', status: 'COMPLETED' };
+      const mockSession = {
+        id: 'session-1',
+        userId: 'user-1',
+        status: 'COMPLETED',
+      };
 
       mockPrismaService.user.findUnique.mockResolvedValue(mockUser);
       mockPrismaService.quizSession.findUnique.mockResolvedValue(mockSession);
@@ -197,7 +232,11 @@ describe('QuizService', () => {
     });
 
     it('should throw ForbiddenException when session belongs to another user', async () => {
-      const mockSession = { id: 'session-1', userId: 'other-user', status: 'IN_PROGRESS' };
+      const mockSession = {
+        id: 'session-1',
+        userId: 'other-user',
+        status: 'IN_PROGRESS',
+      };
 
       mockPrismaService.user.findUnique.mockResolvedValue(mockUser);
       mockPrismaService.quizSession.findUnique.mockResolvedValue(mockSession);
@@ -221,10 +260,21 @@ describe('QuizService', () => {
         livesRemaining: 3,
         status: 'IN_PROGRESS',
         user: {
-          profile: { id: 'profile-1', userId: 'user-1', xpTotal: 0, level: 1, streakDays: 0, bestStreak: 0, lastPlayedAt: null },
+          profile: {
+            id: 'profile-1',
+            userId: 'user-1',
+            xpTotal: 0,
+            level: 1,
+            streakDays: 0,
+            bestStreak: 0,
+            lastPlayedAt: null,
+          },
         },
         answers: [
-          ...Array.from({ length: 8 }, () => ({ isCorrect: true, responseTimeMs: 2000 })),
+          ...Array.from({ length: 8 }, () => ({
+            isCorrect: true,
+            responseTimeMs: 2000,
+          })),
           { isCorrect: false, responseTimeMs: 3000 },
           { isCorrect: false, responseTimeMs: 3000 },
         ],
@@ -234,7 +284,11 @@ describe('QuizService', () => {
       mockPrismaService.quizSession.findUnique.mockResolvedValue(mockSession);
       mockPrismaService.quizSession.update.mockResolvedValue(mockSession);
       mockPrismaService.userProfile.update.mockResolvedValue({});
-      mockPrismaService.leaderboard.findFirst.mockResolvedValue({ id: 'lb-1', type: 'GLOBAL', isActive: true });
+      mockPrismaService.leaderboard.findFirst.mockResolvedValue({
+        id: 'lb-1',
+        type: 'GLOBAL',
+        isActive: true,
+      });
       mockPrismaService.leaderboardEntry.upsert.mockResolvedValue({});
 
       const result = await service.completeSession('session-1', 'auth0|123');
