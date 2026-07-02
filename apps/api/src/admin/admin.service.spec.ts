@@ -23,6 +23,9 @@ describe('AdminService', () => {
       count: jest.fn(),
       findMany: jest.fn(),
     },
+    userProfile: {
+      groupBy: jest.fn(),
+    },
   };
 
   beforeEach(async () => {
@@ -58,6 +61,23 @@ describe('AdminService', () => {
         .mockResolvedValueOnce(150); // sessions last 7 days
 
       mockPrismaService.category.count.mockResolvedValue(10);
+
+      // Données des graphiques
+      mockPrismaService.quizSession.findMany.mockResolvedValue([
+        { startedAt: new Date('2026-06-20T10:00:00Z') },
+        { startedAt: new Date('2026-06-20T15:00:00Z') },
+        { startedAt: new Date('2026-06-21T09:00:00Z') },
+      ]);
+      mockPrismaService.userProfile.groupBy.mockResolvedValue([
+        { professionalStatus: 'SALARIE', _count: 60 },
+        { professionalStatus: null, _count: 40 },
+      ]);
+      mockPrismaService.question.groupBy.mockResolvedValue([
+        { categoryId: 'cat-1', _count: 300 },
+      ]);
+      mockPrismaService.category.findMany.mockResolvedValue([
+        { id: 'cat-1', name: 'Bail commercial', color: '#D27A2D' },
+      ]);
 
       const result = await service.getDashboardStats();
 
