@@ -1,6 +1,7 @@
-export type QuestionStatus = 'ACTIVE' | 'SUSPENDED' | 'ARCHIVED';
-
-export type DifficultyLevel = 1 | 2 | 3 | 4;
+// Types canoniques partagés — définis dans packages/shared (@ipf/shared),
+// ré-exportés ici pour ne pas casser les imports existants.
+export type { QuestionStatus, DifficultyLevel } from '@ipf/shared';
+import type { QuestionStatus, DifficultyLevel } from '@ipf/shared';
 
 export type LeaseType =
     | 'COM'
@@ -97,18 +98,7 @@ export const LEASE_TYPE_LABELS: Record<LeaseType, string> = {
     RUR: 'Bail rural',
 };
 
-export const DIFFICULTY_LABELS: Record<DifficultyLevel, string> = {
-    1: 'Facile',
-    2: 'Moyen',
-    3: 'Difficile',
-    4: 'Étude de cas',
-};
-
-export const STATUS_LABELS: Record<QuestionStatus, string> = {
-    ACTIVE: 'Actif',
-    SUSPENDED: 'Suspendu',
-    ARCHIVED: 'Archivé',
-};
+export { DIFFICULTY_LABELS, STATUS_LABELS } from '@ipf/shared';
 
 export const DIFFICULTY_LEVEL_MAP: Record<DifficultyLevel, string> = {
     1: 'F',
