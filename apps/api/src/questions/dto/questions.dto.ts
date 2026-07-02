@@ -4,10 +4,16 @@ export class CreateQuestionDto {
   @ApiProperty({ description: 'ID de la catégorie', example: 'clxxx123...' })
   categoryId: string;
 
-  @ApiPropertyOptional({ description: 'ID du thème (optionnel)', example: 'clxxx456...' })
+  @ApiPropertyOptional({
+    description: 'ID du thème (optionnel)',
+    example: 'clxxx456...',
+  })
   themeId?: string;
 
-  @ApiProperty({ description: 'Texte de la question', example: 'Quelle est la capitale de la France ?' })
+  @ApiProperty({
+    description: 'Texte de la question',
+    example: 'Quelle est la capitale de la France ?',
+  })
   text: string;
 
   @ApiProperty({ description: 'Option A', example: 'Paris' })
@@ -25,10 +31,19 @@ export class CreateQuestionDto {
   @ApiProperty({ description: 'Réponse correcte (A, B, C ou D)', example: 'A' })
   correctAnswer: string;
 
-  @ApiPropertyOptional({ description: 'Niveau de difficulté (1-5)', example: 2, minimum: 1, maximum: 4 })
+  @ApiPropertyOptional({
+    description: 'Niveau de difficulté (1-5)',
+    example: 2,
+    minimum: 1,
+    maximum: 4,
+  })
   level?: number;
 
-  @ApiPropertyOptional({ description: 'Question premium', example: false, default: false })
+  @ApiPropertyOptional({
+    description: 'Question premium',
+    example: false,
+    default: false,
+  })
   isPremium?: boolean;
 }
 
@@ -57,7 +72,11 @@ export class UpdateQuestionDto {
   @ApiPropertyOptional({ description: 'Réponse correcte (A, B, C ou D)' })
   correctAnswer?: string;
 
-  @ApiPropertyOptional({ description: 'Niveau de difficulté (1-5)', minimum: 1, maximum: 4 })
+  @ApiPropertyOptional({
+    description: 'Niveau de difficulté (1-5)',
+    minimum: 1,
+    maximum: 4,
+  })
   level?: number;
 
   @ApiPropertyOptional({ description: 'Question premium' })

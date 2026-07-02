@@ -7,6 +7,6 @@ export class ForgotPasswordDto {
     example: 'utilisateur@example.com',
   })
   @IsEmail({}, { message: 'Veuillez fournir une adresse email valide' })
-  @IsNotEmpty({ message: 'L\'email est requis' })
+  @IsNotEmpty({ message: "L'email est requis" })
   email: string;
 }

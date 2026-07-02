@@ -1,10 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -25,7 +19,7 @@ export class SubscriptionController {
   @Get('plans')
   @ApiOperation({
     summary: 'Liste des plans',
-    description: 'Retourne tous les plans d\'abonnement disponibles',
+    description: "Retourne tous les plans d'abonnement disponibles",
   })
   @ApiResponse({ status: 200, description: 'Liste des plans' })
   async getPlans() {
@@ -35,9 +29,9 @@ export class SubscriptionController {
   @Get('status')
   @ApiOperation({
     summary: 'Statut abonnement',
-    description: 'Retourne le statut d\'abonnement de l\'utilisateur connecté',
+    description: "Retourne le statut d'abonnement de l'utilisateur connecté",
   })
-  @ApiResponse({ status: 200, description: 'Statut de l\'abonnement' })
+  @ApiResponse({ status: 200, description: "Statut de l'abonnement" })
   async getStatus(@CurrentUser('userId') userId: string) {
     return this.subscriptionService.getStatus(userId);
   }
@@ -45,7 +39,7 @@ export class SubscriptionController {
   @Post('subscribe')
   @ApiOperation({
     summary: 'Souscrire à un plan',
-    description: 'Souscrit l\'utilisateur au plan spécifié (paiement simulé)',
+    description: "Souscrit l'utilisateur au plan spécifié (paiement simulé)",
   })
   @ApiBody({
     schema: {

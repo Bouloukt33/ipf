@@ -6,23 +6,27 @@ Application web responsive de quiz immobilier pour Le Carré PRO.
 
 ## 🎯 Concept
 
-Plateforme d'apprentissage basée sur les neurosciences pour les professionnels de l'immobilier d'entreprise (baux commerciaux, professionnels, dérogatoires).
+Plateforme d'apprentissage basée sur les neurosciences pour les professionnels
+de l'immobilier d'entreprise (baux commerciaux, professionnels, dérogatoires).
 
-## 📁 Structure Monorepo (pnpm workspaces)
+## 📁 Structure Monorepo (npm workspaces)
 
 ```
 ipf/
 ├── apps/
-│   ├── web-app/      # Application apprenant (React + Vite)
-│   ├── web-admin/    # Dashboard administrateur (React + Vite)
-│   ├── landing/      # Site vitrine SEO (Next.js SSG)
-│   └── api/          # Backend API (NestJS + Prisma)
+│   ├── web-app/      # Application apprenant (Next.js 15 App Router)
+│   ├── web-admin/    # Dashboard administrateur (React 18 + Vite 7)
+│   ├── landing/      # Site vitrine SEO (Next.js 15, standalone)
+│   └── api/          # Backend API (NestJS 11 + Prisma 7)
 ├── packages/
-│   ├── shared/       # Types TypeScript partagés
-│   ├── ui/           # Design System (Tailwind + Radix UI)
-│   ├── ai-models/    # Modèles IA coaching (Python)
-│   └── testing/      # Utils de test partagés
+│   ├── shared/       # @ipf/shared — types & constantes de domaine partagés
+│   ├── ui/           # (à venir) Design System partagé
+│   ├── testing/      # (à venir) Utils de test partagés
+│   └── ai-models/    # (phase 2) Modèles IA coaching
 ```
+
+**Un seul `package-lock.json`, à la racine.** Toujours lancer `npm install`
+depuis la racine du monorepo — jamais dans une app.
 
 ## 🔐 Rôles Utilisateurs (Auth0 RBAC)
 
@@ -38,14 +42,54 @@ ipf/
 
 | Couche | Technologie |
 |--------|-------------|
-| Frontend Apps | React 18, Vite, TypeScript, Tailwind CSS |
-| Landing | Next.js 14 SSG |
-| State | Zustand, TanStack Query |
-| Backend | NestJS, Prisma, PostgreSQL, Redis |
-| Auth | Auth0 (OAuth2/JWT, RBAC) |
-| Paiements | Stripe |
-| IA | Python FastAPI, TensorFlow |
-| CDN | Cloudflare (vidéos) |
+| Web App (apprenant) | Next.js 15 (App Router), React 18, TypeScript, Tailwind CSS, Zustand |
+| Web Admin | React 18, Vite 7, react-router 7, Recharts, Zustand |
+| Landing | Next.js 15 (standalone) |
+| Backend | NestJS 11, Prisma 7, PostgreSQL 16, Redis 7 |
+| Auth | Auth0 (OAuth2/JWT JWKS RS256, RBAC) |
+| Partagé | @ipf/shared (types & constantes de domaine) |
+| Infra | Docker (multi-stage, contexte racine), GitHub Actions |
+| Paiements | Stripe — **phase 2, non intégré** (champs réservés dans le schéma) |
+| IA coaching | **phase 2, non implémenté** |
+
+## 🚀 Démarrage
+
+```bash
+# Installation (toujours depuis la racine)
+npm install
+
+# Infra (Postgres + Redis) via Docker
+docker compose up -d
+
+# Développement (api + web-app + admin en parallèle)
+npm run dev
+
+# Build / Tests / Lint / Typecheck (tous les workspaces)
+npm run build
+npm test
+npm run lint
+npm run typecheck
+```
+
+Voir [DOCKER.md](DOCKER.md) pour tout lancer en conteneurs
+(`docker compose --profile app up -d --build`).
+
+## 📦 Scripts Workspaces
+
+```bash
+npm run dev:web        # Dev web-app (port 3001)
+npm run dev:admin      # Dev admin (port 5173)
+npm run dev:api        # Dev API (port 3000)
+npm run dev:landing    # Dev landing (port 3000 local)
+
+# Cibler un workspace précis :
+npm run <script> --workspace=<api|web-app|web-admin|landing|@ipf/shared>
+```
+
+## ✅ CI
+
+GitHub Actions sur PR et push (`main`, `develop`) :
+lint → typecheck → tests → builds, puis build des 4 images Docker.
 
 ## 🔀 GitFlow
 
@@ -55,28 +99,9 @@ ipf/
 - `hotfix/*` - Corrections urgentes
 - `release/*` - Préparation versions
 
-## 🚀 Démarrage
+## 📚 Docs
 
-```bash
-# Installation
-pnpm install
-
-# Développement
-pnpm dev
-
-# Build
-pnpm build
-
-# Tests
-pnpm test
-```
-
-## 📦 Scripts Workspaces
-
-```bash
-pnpm --filter web-app dev      # Dev web-app
-pnpm --filter web-admin dev    # Dev admin
-pnpm --filter landing dev      # Dev landing
-pnpm --filter api dev          # Dev API
-```
-
+- [DOCKER.md](DOCKER.md) — builds & environnements Docker
+- [CONFIGURATION.md](CONFIGURATION.md) — variables d'environnement
+- [TODO.md](TODO.md) — état des chantiers en cours
+- `CLAUDE.md` + `.claude/skills/` — conventions de dev (tests, structure, front, perf)

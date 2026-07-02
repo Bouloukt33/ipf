@@ -85,7 +85,7 @@ export function AdminDashboardPage() {
         <div className="bg-white p-8 rounded-[32px] shadow-soft border border-ink-100">
           <h3 className="text-[18px] font-black text-[#172E42] mb-6">Activité (30 derniers jours)</h3>
           <div className="h-[300px] w-full" style={{ minWidth: 0 }}>
-            <ResponsiveContainer width="99%" aspect={2}>
+            <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={stats?.charts.sessionsByDay}>
                 <defs>
                   <linearGradient id="colorSessions" x1="0" y1="0" x2="0" y2="1">

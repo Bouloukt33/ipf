@@ -5,11 +5,10 @@
   "author": "",
   "private": true,
   "license": "UNLICENSED",
-  "prisma": {
-    "seed": "npx tsx prisma/seed.ts"
-  },
   "scripts": {
     "build": "nest build",
+    "postinstall": "prisma generate",
+    "typecheck": "tsc --noEmit",
     "seed": "npx tsx prisma/seed.ts",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",

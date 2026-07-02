@@ -21,6 +21,7 @@ export function AdminQuestionsPage() {
         error,
         currentPage,
         totalPages,
+        pageSize,
         total,
         setPage,
         setFilters,
@@ -113,6 +114,7 @@ export function AdminQuestionsPage() {
 
             <QuestionTable
                 questions={questions}
+                startIndex={(currentPage - 1) * pageSize}
                 isLoading={isLoading}
                 onEdit={openEdit}
                 packs={packs}

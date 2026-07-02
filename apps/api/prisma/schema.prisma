@@ -1,6 +1,8 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../node_modules/.prisma/client"
+  // Racine du monorepo : npm workspaces hoiste @prisma/client dans le
+  // node_modules racine, le client généré doit être à côté.
+  output   = "../../../node_modules/.prisma/client"
 }
 
 datasource db {

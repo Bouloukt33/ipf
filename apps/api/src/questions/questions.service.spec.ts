@@ -179,7 +179,9 @@ describe('QuestionsService', () => {
       const result = await service.delete('q1');
 
       expect(result).toEqual(mockQuestion);
-      expect(prisma.question.delete).toHaveBeenCalledWith({ where: { id: 'q1' } });
+      expect(prisma.question.delete).toHaveBeenCalledWith({
+        where: { id: 'q1' },
+      });
     });
   });
 

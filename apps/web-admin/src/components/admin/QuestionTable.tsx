@@ -4,6 +4,8 @@ import { QuestionRow } from './QuestionRow';
 interface QuestionTableProps {
     packs:      IPack[];
     questions:  IQuestion[];
+    /** Index (0-based) de la première ligne — continuité du numéro à travers la pagination */
+    startIndex: number;
     isLoading:  boolean;
     onEdit:     (question: IQuestion) => void;
     onDelete:   (id: string) => void;
@@ -13,6 +15,7 @@ interface QuestionTableProps {
 }
 
 const COLUMNS = [
+    { key: 'number', label: 'N°', width: 'w-[60px]' },
     { key: 'code', label: 'Code', width: 'w-[130px]' },
     { key: 'text', label: 'Question', width: 'flex-1' },
     { key: 'categoryName', label: 'Catégorie', width: 'w-[150px]' },
@@ -24,8 +27,8 @@ const COLUMNS = [
 ];
 
 export function QuestionTable({
-    questions, isLoading, onEdit, onDelete, onSuspend, onArchive, onRestore, packs,
-}: QuestionTableProps) {    
+    questions, startIndex, isLoading, onEdit, onDelete, onSuspend, onArchive, onRestore, packs,
+}: QuestionTableProps) {
     if (isLoading) {
         return (
             <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
@@ -76,6 +79,7 @@ export function QuestionTable({
                             <QuestionRow
                                 key={question.id}
                                 question={question}
+                                number={startIndex + idx + 1}
                                 isEven={idx % 2 === 0}
                                 onEdit={onEdit}
                                 onDelete={onDelete}

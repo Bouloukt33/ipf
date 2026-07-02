@@ -1,38 +1,52 @@
 # =============================================================================
 # Dockerfile - API NestJS (IPF - 5 Secondes Chrono)
-# Multi-stage build optimisé pour production
+# Multi-stage build — contexte de build = RACINE du monorepo (npm workspaces)
+#   docker build -f apps/api/Dockerfile .
 # =============================================================================
 
 # ---------------------------------------------------------------------------
-# Stage 1 : Installation des dépendances
-# ---------------------------------------------------------------------------
-FROM node:20-alpine AS deps
-
-WORKDIR /app
-
-# Copier uniquement les fichiers de dépendances pour un meilleur cache
-COPY package.json package-lock.json* ./
-COPY prisma ./prisma/
-
-RUN npm ci --omit=dev && \
-    npx prisma generate
-
-# ---------------------------------------------------------------------------
-# Stage 2 : Build de l'application
+# Stage 1 : Build (dépendances complètes + prisma generate + nest build)
 # ---------------------------------------------------------------------------
 FROM node:20-alpine AS builder
 
-WORKDIR /app
+WORKDIR /repo
 
-COPY package.json package-lock.json* ./
-RUN npm ci
+RUN apk add --no-cache libc6-compat openssl
 
-# Copier le code source
-COPY . .
+# Lockfile racine + manifests du workspace (cache Docker optimal)
+COPY package.json package-lock.json ./
+COPY apps/api/package.json apps/api/
+COPY apps/api/prisma apps/api/prisma/
+COPY apps/api/prisma.config.ts apps/api/
 
-# Générer le client Prisma + build NestJS
-RUN npx prisma generate && \
-    npm run build
+# Installe les deps du workspace "api" (le postinstall lance prisma generate
+# → client généré dans /repo/node_modules/.prisma/client)
+RUN npm ci --workspace=api
+
+# Code source + build NestJS
+COPY apps/api apps/api
+RUN npm run build --workspace=api
+
+# ---------------------------------------------------------------------------
+# Stage 2 : Dépendances de production uniquement
+# ---------------------------------------------------------------------------
+FROM node:20-alpine AS deps
+
+WORKDIR /repo
+
+RUN apk add --no-cache openssl
+
+COPY package.json package-lock.json ./
+COPY apps/api/package.json apps/api/
+# Le schéma est requis : l'installation du CLI redéclenche le postinstall
+# du workspace api (prisma generate)
+COPY apps/api/prisma apps/api/prisma/
+
+# npm ci --ignore-scripts : deps de prod sans postinstall.
+# Puis CLI prisma ÉPINGLÉ pour exécuter les migrations au démarrage
+# (fail-fast, pas de npx qui télécharge à chaud).
+RUN npm ci --workspace=api --omit=dev --ignore-scripts && \
+    npm install --no-save prisma@7.8.0
 
 # ---------------------------------------------------------------------------
 # Stage 3 : Image de production
@@ -41,33 +55,34 @@ FROM node:20-alpine AS runner
 
 WORKDIR /app
 
+RUN apk add --no-cache openssl
+
 # Sécurité : utilisateur non-root
 RUN addgroup --system --gid 1001 nestjs && \
     adduser --system --uid 1001 nestjs
 
-# Copier les dépendances de production
-COPY --from=deps /app/node_modules ./node_modules
+# Dépendances de production + client Prisma généré
+COPY --from=deps /repo/node_modules ./node_modules
+COPY --from=builder /repo/node_modules/.prisma ./node_modules/.prisma
 
-# Copier le build
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/package.json ./
+# Build NestJS + schéma/migrations Prisma (nécessaires au démarrage)
+COPY --from=builder /repo/apps/api/dist ./dist
+COPY apps/api/prisma ./prisma
+COPY apps/api/package.json ./
 
-# Copier Prisma (nécessaire pour les migrations en runtime)
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+# Config Prisma runtime : objet simple, l'env vient de Docker (pas de dotenv)
+RUN printf 'module.exports = { schema: "prisma/schema.prisma", migrations: { path: "prisma/migrations" }, datasource: { url: process.env.DATABASE_URL } };\n' > prisma.config.js && \
+    chown nestjs:nestjs prisma.config.js
 
-# Config Prisma pour les migrations en runtime (sans dotenv car l'env vient de Docker)
-RUN echo 'const { defineConfig } = require("prisma/config"); module.exports = defineConfig({ schema: "prisma/schema.prisma", migrations: { path: "prisma/migrations" }, datasource: { url: process.env.DATABASE_URL } });' > prisma.config.js && chown nestjs:nestjs prisma.config.js
-
-# Script d'entrypoint (migrations auto au démarrage)
-COPY docker-entrypoint.sh ./
+# Entrypoint : migrations puis démarrage (échec migration = échec conteneur)
+COPY apps/api/docker-entrypoint.sh ./
 RUN chmod +x docker-entrypoint.sh
 
 USER nestjs
 
 EXPOSE 3000
 
-ENV NODE_ENV=development
+ENV NODE_ENV=production
 ENV PORT=3000
 
 CMD ["./docker-entrypoint.sh"]
