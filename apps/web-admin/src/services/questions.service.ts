@@ -7,6 +7,12 @@ export interface IPaginatedQuestions {
     totalPages: number;
 }
 
+export interface IImportReport {
+    imported: number;
+    total: number;
+    errors: { line: number; message: string }[];
+}
+
 export const questionsService = {
     getAll: (
         token: string,
@@ -45,6 +51,9 @@ export const questionsService = {
 
     updateStatus: (token: string, id: string, status: string): Promise<IQuestion> =>
         apiRequest(`/questions/${id}/status`, token, { method: 'PATCH', body: JSON.stringify({ status }) }),
+
+    importCsv: (token: string, csv: string): Promise<IImportReport> =>
+        apiRequest('/questions/import', token, { method: 'POST', body: JSON.stringify({ csv }) }),
 
     getStats: (token: string): Promise<IQuestionStats> =>
         apiRequest<any>('/admin/questions/stats', token).then(stats => ({

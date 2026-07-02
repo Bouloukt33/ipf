@@ -49,6 +49,7 @@ export class PacksService {
         isFree: true,
         price: true,
         isActive: true,
+        status: true,
         order: true,
         visibility: true,
         assignedUserId: true,
@@ -83,6 +84,7 @@ export class PacksService {
         isFree: true,
         price: true,
         isActive: true,
+        status: true,
         order: true,
         visibility: true,
         assignedUserId: true,
@@ -128,6 +130,7 @@ export class PacksService {
         isFree: true,
         price: true,
         isActive: true,
+        status: true,
         order: true,
         visibility: true,
         assignedUserId: true,
@@ -149,12 +152,41 @@ export class PacksService {
     return pack;
   }
 
+  /**
+   * Statut à 3 états (point client n°8) : `isActive` reste le miroir
+   * booléen filtré par les endpoints publics — seul un pack ACTIVE est
+   * visible/jouable, SUSPENDED et DISABLED sont masqués.
+   */
+  private resolveStatus(data: { status?: string; isActive?: boolean }): {
+    status: 'ACTIVE' | 'SUSPENDED' | 'DISABLED';
+    isActive: boolean;
+  } | null {
+    if (data.status !== undefined) {
+      return {
+        status: data.status as 'ACTIVE' | 'SUSPENDED' | 'DISABLED',
+        isActive: data.status === 'ACTIVE',
+      };
+    }
+    if (data.isActive !== undefined) {
+      return {
+        status: data.isActive ? 'ACTIVE' : 'DISABLED',
+        isActive: data.isActive,
+      };
+    }
+    return null;
+  }
+
   async create(data: CreatePackDto) {
     const { questionIds, ...packData } = data;
     console.log(
       '[PacksService] Creating pack with questions:',
       questionIds?.length,
     );
+
+    const resolved = this.resolveStatus(packData) ?? {
+      status: 'ACTIVE' as const,
+      isActive: true,
+    };
 
     return this.prisma.pack.create({
       data: {
@@ -166,6 +198,8 @@ export class PacksService {
         isFree: packData.isFree ?? false,
         price: packData.price ? packData.price : null,
         order: packData.order ?? 0,
+        status: resolved.status,
+        isActive: resolved.isActive,
         visibility: packData.visibility ?? 'PUBLIC',
         assignedUserId: packData.assignedUserId ?? null,
         durationOverride: packData.durationOverride ?? null,
@@ -199,8 +233,11 @@ export class PacksService {
     if (updateData.isFree !== undefined) payload.isFree = updateData.isFree;
     if (updateData.price !== undefined) payload.price = updateData.price;
     if (updateData.order !== undefined) payload.order = updateData.order;
-    if (updateData.isActive !== undefined)
-      payload.isActive = updateData.isActive;
+    const resolved = this.resolveStatus(updateData);
+    if (resolved) {
+      payload.status = resolved.status;
+      payload.isActive = resolved.isActive;
+    }
     if (updateData.categoryId !== undefined)
       payload.categoryId = updateData.categoryId;
     if (updateData.visibility !== undefined)
@@ -233,9 +270,10 @@ export class PacksService {
 
   async toggleActive(id: string) {
     const pack = await this.findOne(id);
+    const isActive = !pack.isActive;
     return this.prisma.pack.update({
       where: { id },
-      data: { isActive: !pack.isActive },
+      data: { isActive, status: isActive ? 'ACTIVE' : 'DISABLED' },
     });
   }
 

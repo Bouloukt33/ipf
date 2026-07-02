@@ -7,6 +7,7 @@ import { packsService } from '../services/packs.service';
 import { ENV } from '../lib/env';
 import { AUTH0_SCOPE } from '../lib/auth0';
 import type { IPack, IPackFormData } from '../lib/types';
+import { PACK_STATUS_LABELS } from '../lib/types';
 
 export function AdminPacksPage() {
   const { getAccessTokenSilently } = useAuth0();
@@ -129,10 +130,18 @@ export function AdminPacksPage() {
                   </div>
                 </td>
                 <td className="px-6 py-5">
-                  <div className="flex items-center gap-2">
-                    <span className={`w-2.5 h-2.5 rounded-full ${pack.isActive ? 'bg-[#10B981] shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'bg-red-400'}`} />
-                    <span className="text-[12px] font-black text-navy uppercase tracking-wider">{pack.isActive ? 'Actif' : 'Masqué'}</span>
-                  </div>
+                  {(() => {
+                    const status = pack.status || (pack.isActive ? 'ACTIVE' : 'DISABLED');
+                    const dotClass = status === 'ACTIVE'
+                      ? 'bg-[#10B981] shadow-[0_0_10px_rgba(16,185,129,0.5)]'
+                      : status === 'SUSPENDED' ? 'bg-orange-400' : 'bg-red-400';
+                    return (
+                      <div className="flex items-center gap-2">
+                        <span className={`w-2.5 h-2.5 rounded-full ${dotClass}`} />
+                        <span className="text-[12px] font-black text-navy uppercase tracking-wider">{PACK_STATUS_LABELS[status]}</span>
+                      </div>
+                    );
+                  })()}
                 </td>
                 <td className="px-6 py-5 text-right">
                   <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">

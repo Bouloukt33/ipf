@@ -1,7 +1,7 @@
 // Types canoniques partagés — définis dans packages/shared (@ipf/shared),
 // ré-exportés ici pour ne pas casser les imports existants.
-export type { QuestionStatus, DifficultyLevel } from '@ipf/shared';
-import type { QuestionStatus, DifficultyLevel } from '@ipf/shared';
+export type { QuestionStatus, DifficultyLevel, PackStatus } from '@ipf/shared';
+import type { QuestionStatus, DifficultyLevel, PackStatus } from '@ipf/shared';
 
 export type LeaseType =
     | 'COM'
@@ -42,6 +42,7 @@ export interface IPack {
     slug: string;
     description?: string | null;
     isActive: boolean;
+    status: PackStatus;
     categoryId: string;
     category?: ICategory | null;
     visibility: 'PUBLIC' | 'PRIVATE';
@@ -63,6 +64,7 @@ export interface IPackFormData {
     description?: string;
     categoryId: string;
     isActive: boolean;
+    status: PackStatus;
     visibility: 'PUBLIC' | 'PRIVATE';
     assignedUserId?: string | null;
     durationOverride?: number | null;
@@ -138,4 +140,4 @@ export interface IQuestionStats {
     premium: number;
 }
 
-export { DIFFICULTY_LABELS, STATUS_LABELS } from '@ipf/shared';
+export { DIFFICULTY_LABELS, STATUS_LABELS, PACK_STATUS_LABELS } from '@ipf/shared';

@@ -70,6 +70,16 @@ export class CreatePackDto {
   @IsBoolean()
   isActive?: boolean;
 
+  @ApiPropertyOptional({
+    enum: ['ACTIVE', 'SUSPENDED', 'DISABLED'],
+    default: 'ACTIVE',
+    description:
+      'Statut du pack : ACTIVE = visible et jouable, SUSPENDED = suspendu temporairement, DISABLED = désactivé',
+  })
+  @IsOptional()
+  @IsEnum(['ACTIVE', 'SUSPENDED', 'DISABLED'])
+  status?: 'ACTIVE' | 'SUSPENDED' | 'DISABLED';
+
   @ApiPropertyOptional({ enum: ['PUBLIC', 'PRIVATE'], default: 'PUBLIC' })
   @IsOptional()
   @IsEnum(['PUBLIC', 'PRIVATE'])
@@ -161,6 +171,15 @@ export class UpdatePackDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @ApiPropertyOptional({
+    enum: ['ACTIVE', 'SUSPENDED', 'DISABLED'],
+    description:
+      'Statut du pack : ACTIVE = visible et jouable, SUSPENDED = suspendu temporairement, DISABLED = désactivé',
+  })
+  @IsOptional()
+  @IsEnum(['ACTIVE', 'SUSPENDED', 'DISABLED'])
+  status?: 'ACTIVE' | 'SUSPENDED' | 'DISABLED';
 
   @ApiPropertyOptional({ enum: ['PUBLIC', 'PRIVATE'] })
   @IsOptional()

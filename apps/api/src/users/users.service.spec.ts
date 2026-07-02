@@ -1,7 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigService } from '@nestjs/config';
 import { UsersService } from './users.service';
 import { PrismaService } from '../prisma';
 import { UserRole } from '@prisma/client';
+import { ConflictException, BadRequestException } from '@nestjs/common';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -13,7 +15,19 @@ describe('UsersService', () => {
       count: jest.fn(),
       findUnique: jest.fn(),
       update: jest.fn(),
+      create: jest.fn(),
     },
+  };
+
+  const mockConfigService = {
+    // AUTH0_DOMAIN / AUTH0_CLIENT_ID / AUTH0_CONNECTION
+    get: jest.fn((key: string) => {
+      const values: Record<string, string> = {
+        AUTH0_DOMAIN: 'test.eu.auth0.com',
+        AUTH0_CLIENT_ID: 'client-123',
+      };
+      return values[key];
+    }),
   };
 
   beforeEach(async () => {
@@ -24,6 +38,10 @@ describe('UsersService', () => {
           provide: PrismaService,
           useValue: mockPrismaService,
         },
+        {
+          provide: ConfigService,
+          useValue: mockConfigService,
+        },
       ],
     }).compile();
 
@@ -33,6 +51,7 @@ describe('UsersService', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('findAll', () => {
@@ -112,6 +131,88 @@ describe('UsersService', () => {
       const result = await service.ban('user-1');
 
       expect(result.isActive).toBe(false);
+    });
+  });
+
+  describe('createUser', () => {
+    const mockFetch = (responses: Array<{ ok: boolean; body?: unknown }>) => {
+      const fn = jest.fn();
+      for (const r of responses) {
+        fn.mockResolvedValueOnce({
+          ok: r.ok,
+          status: r.ok ? 200 : 400,
+          json: () => Promise.resolve(r.body ?? {}),
+        });
+      }
+      jest.spyOn(global, 'fetch').mockImplementation(fn);
+      return fn;
+    };
+
+    it('should create the Auth0 account then provision the local user', async () => {
+      mockPrismaService.user.findUnique.mockResolvedValue(null);
+      const fetchMock = mockFetch([
+        { ok: true, body: { _id: 'abc123' } }, // signup
+        { ok: true }, // change_password (email mot de passe)
+      ]);
+      const mockCreated = {
+        id: 'user-1',
+        auth0Id: 'auth0|abc123',
+        email: 'new@test.com',
+        role: 'USER' as UserRole,
+        profile: { displayName: 'Nouveau' },
+      };
+      mockPrismaService.user.create.mockResolvedValue(mockCreated);
+
+      const result = await service.createUser({
+        email: 'New@Test.com',
+        displayName: 'Nouveau',
+      });
+
+      expect(result.user).toEqual(mockCreated);
+      // email normalisé en minuscules
+      expect(prisma.user.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            auth0Id: 'auth0|abc123',
+            email: 'new@test.com',
+            role: 'USER',
+          }),
+        }),
+      );
+      // signup Auth0 + email « définir votre mot de passe »
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      expect(fetchMock.mock.calls[0][0]).toContain('/dbconnections/signup');
+      expect(fetchMock.mock.calls[1][0]).toContain(
+        '/dbconnections/change_password',
+      );
+    });
+
+    it('should throw ConflictException when email already exists locally', async () => {
+      mockPrismaService.user.findUnique.mockResolvedValue({ id: 'user-1' });
+
+      await expect(
+        service.createUser({ email: 'taken@test.com' }),
+      ).rejects.toThrow(ConflictException);
+      expect(prisma.user.create).not.toHaveBeenCalled();
+    });
+
+    it('should throw ConflictException when Auth0 already knows the email', async () => {
+      mockPrismaService.user.findUnique.mockResolvedValue(null);
+      mockFetch([{ ok: false, body: { code: 'invalid_signup' } }]);
+
+      await expect(
+        service.createUser({ email: 'auth0@test.com' }),
+      ).rejects.toThrow(ConflictException);
+      expect(prisma.user.create).not.toHaveBeenCalled();
+    });
+
+    it('should throw BadRequestException on other Auth0 signup failures', async () => {
+      mockPrismaService.user.findUnique.mockResolvedValue(null);
+      mockFetch([{ ok: false, body: { code: 'server_error' } }]);
+
+      await expect(
+        service.createUser({ email: 'fail@test.com' }),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 
