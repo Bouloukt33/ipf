@@ -92,9 +92,8 @@ temp/
 ehthumbs.db
 Thumbs.db
 
-# Prisma
-# Keep migrations but ignore generated client
-prisma/migrations/*/migration.sql
+# Prisma — les migrations DOIVENT être versionnées (elles rejouent au boot
+# Docker) ; le client généré vit dans le node_modules racine, rien à ignorer ici.
 
 # Redis dumps
 dump.rdb
