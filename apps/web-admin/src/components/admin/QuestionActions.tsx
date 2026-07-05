@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { Upload, Download } from 'lucide-react';
 import type { IQuestionStats } from '../../lib/types';
+import { downloadCsvTemplate } from '../../lib/csv-template';
 import { InfoTip } from './InfoTip';
 
 /** Aide au survol du bouton d'import — reflète docs/import-questions-csv.md. */
@@ -29,10 +30,6 @@ interface QuestionActionsProps {
     onImportCsv: (file: File) => Promise<void>;
 }
 
-const CSV_TEMPLATE =
-    'categorie;niveau;question;optionA;optionB;optionC;optionD;bonneReponse;premium\n' +
-    "bail-commercial;1;Quelle est la durée minimale d'un bail commercial ?;9 ans;3 ans;6 ans;1 an;A;non\n";
-
 export function QuestionActions({ stats, onCreateNew, onImportCsv }: QuestionActionsProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isImporting, setIsImporting] = useState(false);
@@ -47,17 +44,6 @@ export function QuestionActions({ stats, onCreateNew, onImportCsv }: QuestionAct
         } finally {
             setIsImporting(false);
         }
-    };
-
-    const downloadTemplate = () => {
-        // BOM en tête pour qu'Excel ouvre le fichier en UTF-8
-        const blob = new Blob(['\uFEFF' + CSV_TEMPLATE], { type: 'text/csv;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'modele-import-questions.csv';
-        link.click();
-        URL.revokeObjectURL(url);
     };
 
     return (
@@ -109,7 +95,7 @@ export function QuestionActions({ stats, onCreateNew, onImportCsv }: QuestionAct
             {/* CTA */}
             <div className="flex items-center gap-2">
                 <button
-                    onClick={downloadTemplate}
+                    onClick={downloadCsvTemplate}
                     title="Télécharger un CSV pré-rempli, prêt pour Excel"
                     className="h-[42px] px-4 rounded-[12px] border-2 border-gray-200 bg-white
                       font-extrabold text-[13px] text-[#5a7a99] cursor-pointer font-nunito
