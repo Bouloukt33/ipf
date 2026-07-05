@@ -181,6 +181,7 @@ export function QuestionRow({
                                 <div className="absolute right-0 top-9 z-20 bg-white border border-[rgba(210,122,45,0.18)] rounded-xl shadow-lg py-1.5 min-w-[160px]">
                                     {question.status !== 'ACTIVE' && (
                                         <button
+                                            title="La question redevient jouable dans les quiz"
                                             onClick={() => { setMenuOpen(false); onRestore(question.id); }}
                                             className="w-full px-4 py-2 text-left text-[13px] font-bold text-[#10B981] hover:bg-[rgba(16,185,129,0.06)] transition-colors flex items-center gap-2.5"
                                         >
@@ -190,6 +191,7 @@ export function QuestionRow({
                                     )}
                                     {question.status !== 'SUSPENDED' && (
                                         <button
+                                            title="Retire temporairement la question des quiz — réactivable à tout moment"
                                             onClick={() => { setMenuOpen(false); onSuspend(question.id); }}
                                             className="w-full px-4 py-2 text-left text-[13px] font-bold text-[#F59E0B] hover:bg-[rgba(245,158,11,0.06)] transition-colors flex items-center gap-2.5"
                                         >
@@ -199,6 +201,7 @@ export function QuestionRow({
                                     )}
                                     {question.status !== 'ARCHIVED' && (
                                         <button
+                                            title="Sort définitivement la question des quiz — conservée pour l'historique"
                                             onClick={() => { setMenuOpen(false); onArchive(question.id); }}
                                             className="w-full px-4 py-2 text-left text-[13px] font-bold text-[#6B7280] hover:bg-[rgba(107,114,128,0.06)] transition-colors flex items-center gap-2.5"
                                         >
@@ -208,6 +211,7 @@ export function QuestionRow({
                                     )}
                                     <div className="my-1 h-px bg-[rgba(210,122,45,0.1)]" />
                                     <button
+                                        title="Suppression définitive et irréversible"
                                         onClick={handleDelete}
                                         className="w-full px-4 py-2 text-left text-[13px] font-bold text-[#EF4444] hover:bg-[rgba(239,68,68,0.06)] transition-colors flex items-center gap-2.5"
                                     >

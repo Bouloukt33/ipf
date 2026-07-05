@@ -1,6 +1,27 @@
 import { useRef, useState } from 'react';
 import { Upload, Download } from 'lucide-react';
 import type { IQuestionStats } from '../../lib/types';
+import { InfoTip } from './InfoTip';
+
+/** Aide au survol du bouton d'import — reflète docs/import-questions-csv.md. */
+export function CsvFormatHelp() {
+    return (
+        <>
+            <p className="font-extrabold mb-1.5">Format du fichier CSV</p>
+            <code className="block bg-white/10 rounded-lg px-2 py-1.5 text-[11px] mb-2 break-words">
+                categorie;niveau;question;optionA;optionB;optionC;optionD;bonneReponse;premium
+            </code>
+            <ul className="list-disc pl-4 space-y-0.5">
+                <li>En-tête obligatoire, séparateur <b>;</b> ou <b>,</b>, encodage UTF-8 (Excel ok)</li>
+                <li><b>categorie</b> : slug ou nom exact (ex. bail-commercial)</li>
+                <li><b>niveau</b> : 1 à 4 — <b>bonneReponse</b> : A, B, C ou D</li>
+                <li><b>premium</b> : oui/non (optionnel, défaut non)</li>
+                <li>Taille max ~2 Mo ; les lignes invalides sont ignorées et rapportées</li>
+            </ul>
+            <p className="mt-2 text-white/70">Astuce : partez du bouton « Modèle » pour un fichier prêt à remplir.</p>
+        </>
+    );
+}
 
 interface QuestionActionsProps {
     stats: IQuestionStats | null;
@@ -69,6 +90,19 @@ export function QuestionActions({ stats, onCreateNew, onImportCsv }: QuestionAct
                         value={stats.premium}
                         color="text-[#7C3AED] bg-[rgba(124,58,237,0.1)]"
                     />
+                    <InfoTip
+                        label="Signification des statuts"
+                        side="bottom"
+                        widthClass="w-72"
+                        content={
+                            <ul className="space-y-1">
+                                <li><b>Actifs</b> : questions jouables dans les quiz.</li>
+                                <li><b>Suspendus</b> : retirées temporairement, réactivables.</li>
+                                <li><b>Archivés</b> : sorties définitivement des quiz, gardées pour l'historique.</li>
+                                <li><b>Premium</b> : réservées aux abonnés payants.</li>
+                            </ul>
+                        }
+                    />
                 </div>
             )}
 
@@ -76,7 +110,7 @@ export function QuestionActions({ stats, onCreateNew, onImportCsv }: QuestionAct
             <div className="flex items-center gap-2">
                 <button
                     onClick={downloadTemplate}
-                    title="Télécharger le modèle CSV"
+                    title="Télécharger un CSV pré-rempli, prêt pour Excel"
                     className="h-[42px] px-4 rounded-[12px] border-2 border-gray-200 bg-white
                       font-extrabold text-[13px] text-[#5a7a99] cursor-pointer font-nunito
                       flex items-center gap-2 transition-all hover:border-[#D27A2D] hover:text-[#D27A2D]"
@@ -97,6 +131,12 @@ export function QuestionActions({ stats, onCreateNew, onImportCsv }: QuestionAct
                         : <Upload size={15} />}
                     Importer CSV
                 </button>
+                <InfoTip
+                    label="Format CSV attendu"
+                    side="bottom"
+                    widthClass="w-80"
+                    content={<CsvFormatHelp />}
+                />
                 <input
                     ref={fileInputRef}
                     type="file"

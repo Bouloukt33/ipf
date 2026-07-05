@@ -1,4 +1,5 @@
 import { useAdminDashboard } from '../hooks/useAdminDashboard';
+import { InfoTip } from '../components/admin/InfoTip';
 import { 
   Users, 
   CircleGauge, 
@@ -49,34 +50,38 @@ export function AdminDashboardPage() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-        <KPICard 
-          title="Utilisateurs" 
-          value={stats?.users.total || 0} 
+        <KPICard
+          title="Utilisateurs"
+          value={stats?.users.total || 0}
           subValue={`+${stats?.users.newThisWeek} cette semaine`}
           icon={<Users className="text-[#10B981]" size={24} />}
           color="bg-green-50"
+          help="Nombre total de comptes créés, actifs ou suspendus."
         />
-        <KPICard 
-          title="Questions" 
-          value={stats?.questions.total || 0} 
+        <KPICard
+          title="Questions"
+          value={stats?.questions.total || 0}
           subValue="Toutes catégories"
           icon={<CircleGauge className="text-[#D27A2D]" size={24} />}
           color="bg-orange-50"
+          help="Questions en base, tous statuts confondus (actives, suspendues, archivées)."
         />
-        <KPICard 
-          title="Sessions" 
-          value={stats?.sessions.total || 0} 
+        <KPICard
+          title="Sessions"
+          value={stats?.sessions.total || 0}
           subValue={`${stats?.sessions.last7Days} derniers 7j`}
-          icon={<Zap className="text-[#7C3AED]" size={24} />}
+          icon={<Zap size={24} className="text-[#7C3AED]" />}
           color="bg-purple-50"
+          help="Parties de quiz lancées par les joueurs depuis le lancement."
         />
-        <KPICard 
-          title="Conversion" 
-          value="12.4%" 
+        <KPICard
+          title="Conversion"
+          value="12.4%"
           subValue="+2.1% vs mois dernier"
           icon={<TrendingUp className="text-[#1CB0F6]" size={24} />}
           color="bg-blue-50"
           trend="up"
+          help="Part des utilisateurs gratuits passés à un abonnement payant."
         />
       </div>
 
@@ -182,7 +187,7 @@ export function AdminDashboardPage() {
   );
 }
 
-function KPICard({ title, value, subValue, icon, color, trend }: any) {
+function KPICard({ title, value, subValue, icon, color, trend, help }: any) {
   return (
     <div className="bg-white p-6 rounded-[28px] shadow-soft border border-ink-100 flex flex-col">
       <div className="flex items-center justify-between mb-4">
@@ -195,7 +200,10 @@ function KPICard({ title, value, subValue, icon, color, trend }: any) {
           </div>
         )}
       </div>
-      <h4 className="text-[14px] font-bold text-[#5a7a99] mb-1">{title}</h4>
+      <h4 className="text-[14px] font-bold text-[#5a7a99] mb-1 flex items-center gap-1">
+        {title}
+        {help && <InfoTip content={help} label={`À propos de « ${title} »`} iconSize={13} />}
+      </h4>
       <p className="text-[28px] font-black text-[#172E42] mb-1">{value}</p>
       <p className="text-[12px] font-bold text-[#5a7a99] opacity-70">{subValue}</p>
     </div>

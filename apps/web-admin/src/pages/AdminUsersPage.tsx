@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAdminUsers } from '../hooks/useAdminUsers';
 import { Search, Mail, Zap, UserPlus, UserX, UserCheck } from 'lucide-react';
 import { UserModal } from '../components/admin/UserModal';
+import { InfoTip } from '../components/admin/InfoTip';
 import { Toast, useToast } from '../components/admin/Toast';
 import type { CreateUserPayload } from '../services/users.service';
 
@@ -41,12 +42,27 @@ export function AdminUsersPage() {
           <h1 className="text-[28px] font-black text-[#172E42] mb-1">Utilisateurs</h1>
           <p className="text-[14px] font-semibold text-[#5a7a99]">Analyse des performances et engagement des joueurs</p>
         </div>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="h-[52px] px-8 rounded-[20px] bg-navy text-white font-black text-[15px] flex items-center gap-3 hover:bg-black shadow-lg shadow-navy/20 transition-all active:scale-95"
-        >
-          <UserPlus size={20} /> Nouvel utilisateur
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="h-[52px] px-8 rounded-[20px] bg-navy text-white font-black text-[15px] flex items-center gap-3 hover:bg-black shadow-lg shadow-navy/20 transition-all active:scale-95"
+          >
+            <UserPlus size={20} /> Nouvel utilisateur
+          </button>
+          <InfoTip
+            label="Aide sur la gestion des comptes"
+            side="left"
+            widthClass="w-72"
+            content={
+              <>
+                <p className="mb-1"><b>Créer</b> : le compte est ouvert (Auth0 + base) et
+                l'utilisateur reçoit un email pour définir son mot de passe.</p>
+                <p><b>Suspendre</b> : bloque la connexion sans rien supprimer —
+                réactivable à tout moment depuis la liste.</p>
+              </>
+            }
+          />
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-4 mb-8">
