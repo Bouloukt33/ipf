@@ -62,8 +62,7 @@ export function useQuestions(): UseQuestionsReturn {
         setError(null);
         try {
             const token = await getToken();
-            
-            // On lance les requêtes en parallèle mais on les gère individuellement
+
             const [questionsRes, statsRes] = await Promise.allSettled([
                 questionsService.getAll(token, currentFilters, page, ITEMS_PER_PAGE),
                 questionsService.getStats(token),
@@ -92,7 +91,7 @@ export function useQuestions(): UseQuestionsReturn {
         if (!isAuthenticated) return;
         try {
             const token = await getToken();
-            const cats = await categoriesService.getCategories(token);
+            const cats = await categoriesService.getAll(token);
             setCategories(cats);
         } catch (err) {
             console.error('Failed to load categories:', err);

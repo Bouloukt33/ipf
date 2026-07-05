@@ -1,13 +1,6 @@
 import { Search, X, SlidersHorizontal } from 'lucide-react';
-import type {
-    IQuestionFilters,
-    QuestionStatus,
-    ICategory,
-} from '../../lib/types';
-import {
-    DIFFICULTY_LABELS,
-    STATUS_LABELS,
-} from '../../lib/types';
+import type { IQuestionFilters, QuestionStatus, ICategory } from '../../lib/types';
+import { DIFFICULTY_LABELS, STATUS_LABELS } from '../../lib/types';
 import { enterAt } from '../../lib/utils';
 
 interface QuestionFiltersProps {
@@ -38,7 +31,6 @@ export function QuestionFilters({ filters, categories, onChange, onReset }: Ques
                 <SlidersHorizontal size={16} />
             </span>
 
-            {/* Search */}
             <div className="relative flex-1 min-w-[220px] max-w-[380px]">
                 <Search
                     size={16}
@@ -48,32 +40,30 @@ export function QuestionFilters({ filters, categories, onChange, onReset }: Ques
                 <input
                     type="text"
                     value={filters.search}
-                    onChange={(e) => onChange({ search: e.target.value })}
+                    onChange={(event) => onChange({ search: event.target.value })}
                     placeholder="Rechercher une question ou un code…"
                     aria-label="Rechercher une question"
                     className={`${FIELD_CLASSES} w-full pl-10 pr-4 font-semibold text-sm cursor-text placeholder:text-steel`}
                 />
             </div>
 
-            {/* Category */}
             <select
                 value={filters.categoryId}
-                onChange={(e) => onChange({ categoryId: e.target.value })}
+                onChange={(event) => onChange({ categoryId: event.target.value })}
                 aria-label="Filtrer par type de bail"
                 className={`${FIELD_CLASSES} px-3.5`}
             >
                 <option value="">Tous les types</option>
-                {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                        {cat.name}
+                {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                        {category.name}
                     </option>
                 ))}
             </select>
 
-            {/* Level */}
             <select
                 value={filters.level}
-                onChange={(e) => onChange({ level: e.target.value ? Number(e.target.value) : '' })}
+                onChange={(event) => onChange({ level: event.target.value ? Number(event.target.value) : '' })}
                 aria-label="Filtrer par difficulté"
                 className={`${FIELD_CLASSES} px-3.5`}
             >
@@ -85,10 +75,9 @@ export function QuestionFilters({ filters, categories, onChange, onReset }: Ques
                 ))}
             </select>
 
-            {/* Status */}
             <select
                 value={filters.status}
-                onChange={(e) => onChange({ status: e.target.value as QuestionStatus | '' })}
+                onChange={(event) => onChange({ status: event.target.value as QuestionStatus | '' })}
                 aria-label="Filtrer par statut"
                 className={`${FIELD_CLASSES} px-3.5`}
             >
@@ -100,7 +89,6 @@ export function QuestionFilters({ filters, categories, onChange, onReset }: Ques
                 ))}
             </select>
 
-            {/* Reset */}
             {hasActiveFilters && (
                 <button
                     onClick={onReset}

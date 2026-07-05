@@ -340,6 +340,14 @@ export class AdminController {
     return this.adminService.toggleCategoryActive(id);
   }
 
+  @Delete('categories/:id')
+  @Permissions('write:questions')
+  @ApiOperation({ summary: 'Supprimer un type de bail (Admin)' })
+  @ApiParam({ name: 'id' })
+  async deleteCategory(@Param('id') id: string) {
+    return this.adminService.deleteCategory(id);
+  }
+
   @Get('questions/stats')
   @Permissions('read:admin')
   @ApiOperation({

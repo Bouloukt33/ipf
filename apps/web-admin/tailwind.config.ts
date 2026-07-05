@@ -1,10 +1,10 @@
-import type { Config } from "tailwindcss";
-import tailwindAnimate from "tailwindcss-animate";
+import type { Config } from 'tailwindcss';
+import tailwindAnimate from 'tailwindcss-animate';
 
 const config: Config = {
     content: [
-        "./index.html",
-        "./src/**/*.{js,ts,jsx,tsx}",
+        './index.html',
+        './src/**/*.{js,ts,jsx,tsx}',
     ],
     theme: {
         extend: {
@@ -13,23 +13,40 @@ const config: Config = {
                     DEFAULT: '#D27A2D',
                     light: '#e8924a',
                     dark: '#b5681f',
+                    foreground: 'hsl(var(--primary-foreground))',
                 },
-                navy: '#172E42',
+                secondary: {
+                    DEFAULT: 'hsl(var(--secondary))',
+                    foreground: 'hsl(var(--secondary-foreground))',
+                },
+                navy: 'hsl(213 51% 18%)',
                 charcoal: '#2A262A',
                 background: '#FFFFFF',
+                foreground: 'hsl(var(--foreground))',
                 surface: '#F8F9FA',
                 cream: '#F8F5F1',
                 steel: '#5a7a99',
-                ink: { 100: 'rgba(23, 46, 66, 0.1)' },
+                border: 'hsl(var(--border))',
+                input: 'hsl(var(--input))',
+                ring: 'hsl(var(--ring))',
+                muted: {
+                    DEFAULT: 'hsl(var(--muted))',
+                    foreground: 'hsl(var(--muted-foreground))',
+                },
+                accent: {
+                    DEFAULT: 'hsl(var(--accent))',
+                    foreground: 'hsl(var(--accent-foreground))',
+                },
+                destructive: {
+                    DEFAULT: 'hsl(var(--destructive))',
+                    foreground: 'hsl(var(--destructive-foreground))',
+                },
                 text: {
                     primary: '#172E42',
                     secondary: '#2A262A',
                     muted: '#6B7280',
                 },
-                border: "hsl(var(--border))",
-                input: "hsl(var(--input))",
-                ring: "hsl(var(--ring))",
-                foreground: "hsl(var(--foreground))",
+                ink: { 100: 'rgba(23, 46, 66, 0.1)' },
             },
             fontFamily: {
                 nunito: ['Nunito', 'sans-serif'],
@@ -40,10 +57,10 @@ const config: Config = {
                 'gradient-light': 'linear-gradient(180deg, #FFFFFF 0%, #F8F9FA 100%)',
             },
             boxShadow: {
-                'primary': '0 10px 30px rgba(210, 122, 45, 0.3)',
+                primary: '0 10px 30px rgba(210, 122, 45, 0.3)',
                 'primary-lg': '0 15px 50px rgba(210, 122, 45, 0.4)',
-                'soft': '0 4px 20px rgba(23, 46, 66, 0.08)',
-                'card': '0 8px 30px rgba(23, 46, 66, 0.1)',
+                soft: '0 4px 20px rgba(23, 46, 66, 0.08)',
+                card: '0 8px 30px rgba(23, 46, 66, 0.1)',
             },
             animation: {
                 'float-around': 'float-around 20s ease-in-out infinite',
@@ -57,11 +74,11 @@ const config: Config = {
                 'fade-in-right': 'fade-in-right 0.6s ease-out forwards',
                 'scale-in': 'scale-in 0.5s ease-out forwards',
                 'slide-up': 'slide-up 0.5s ease-out forwards',
-                'shimmer': 'shimmer 2s linear infinite',
+                shimmer: 'shimmer 2s linear infinite',
                 'glow-pulse': 'glow-pulse 2s ease-in-out infinite',
                 'rotate-slow': 'rotate-slow 20s linear infinite',
                 'bounce-soft': 'bounce-soft 2s ease-in-out infinite',
-                'wiggle': 'wiggle 1s ease-in-out infinite',
+                wiggle: 'wiggle 1s ease-in-out infinite',
                 'grow-x': 'grow-x 0.8s ease-out',
             },
             keyframes: {
@@ -110,7 +127,7 @@ const config: Config = {
                     '0%': { opacity: '0', transform: 'translateY(100%)' },
                     '100%': { opacity: '1', transform: 'translateY(0)' },
                 },
-                'shimmer': {
+                shimmer: {
                     '0%': { backgroundPosition: '-200% 0' },
                     '100%': { backgroundPosition: '200% 0' },
                 },
@@ -126,12 +143,10 @@ const config: Config = {
                     '0%, 100%': { transform: 'translateY(0)' },
                     '50%': { transform: 'translateY(-5px)' },
                 },
-                'wiggle': {
+                wiggle: {
                     '0%, 100%': { transform: 'rotate(-3deg)' },
                     '50%': { transform: 'rotate(3deg)' },
                 },
-                // Croissance d'une barre de progression : l'état final vient du
-                // transform inline de l'élément, seul le départ est fixé ici.
                 'grow-x': {
                     '0%': { transform: 'scaleX(0)' },
                 },

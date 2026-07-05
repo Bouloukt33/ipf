@@ -52,6 +52,16 @@ export class QuestionsService {
     return {};
   }
 
+  /** Codification lisible attribuée à la création (ex. QA3F92K). */
+  private generateCodification(): string {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = 'Q';
+    for (let i = 0; i < 6; i++) {
+      result += chars[Math.floor(Math.random() * chars.length)];
+    }
+    return result;
+  }
+
   async findAll(filters?: {
     categoryId?: string;
     themeId?: string;
@@ -125,6 +135,7 @@ export class QuestionsService {
         ...rest,
         level: data.level || 1,
         isPremium: data.isPremium || false,
+        codification: this.generateCodification(),
         ...this.syncStatus(status),
       },
       include: { category: true, theme: true },
@@ -213,6 +224,7 @@ export class QuestionsService {
       correctAnswer: string;
       level: number;
       isPremium: boolean;
+      codification: string;
     }[] = [];
 
     for (let i = 1; i < rows.length; i++) {
@@ -276,6 +288,7 @@ export class QuestionsService {
         correctAnswer,
         level,
         isPremium,
+        codification: this.generateCodification(),
       });
     }
 

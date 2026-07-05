@@ -5,7 +5,7 @@ import { useState } from "react";
 export function MobileLogoutItem() {
     const { logout } = useAuth0();
     const [hovered, setHovered] = useState(false);
-    
+
     return (
         <button
             onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}

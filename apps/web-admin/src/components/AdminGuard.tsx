@@ -43,7 +43,7 @@ export function AdminGuard({ children }: { children: React.ReactNode }) {
       <div className="flex items-center justify-center h-screen bg-[#F8F5F1]">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-[#D27A2D] border-t-transparent rounded-full animate-spin" />
-          <span className="text-[16px] font-black text-[#172E42] tracking-wider uppercase">Vérification des droits…</span>
+          <span className="text-[16px] font-black text-[#172E42] tracking-wider uppercase">Verification des droits...</span>
         </div>
       </div>
     );
@@ -62,15 +62,15 @@ export function AdminGuard({ children }: { children: React.ReactNode }) {
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
           </div>
-          <h1 className="text-[24px] font-black text-[#172E42] mb-3">Accès Refusé</h1>
+          <h1 className="text-[24px] font-black text-[#172E42] mb-3">Acces Refuse</h1>
           <p className="text-[15px] font-semibold text-[#5a7a99] mb-8 leading-relaxed">
-            Votre compte ne possède pas les permissions nécessaires pour accéder à l'interface d'administration.
+            Votre compte ne possede pas les permissions necessaires pour acceder a l'interface d'administration.
           </p>
           <button
             onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
             className="w-full h-[52px] rounded-[16px] border-none bg-[#172E42] font-extrabold text-[15px] text-white cursor-pointer transition-all hover:bg-black"
           >
-            Se déconnecter
+            Se deconnecter
           </button>
         </div>
       </div>

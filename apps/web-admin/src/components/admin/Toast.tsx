@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
 export type ToastType = 'success' | 'error' | 'info';
 
@@ -41,9 +41,6 @@ export function Toast({ message, type = 'success', isVisible, onHide, duration =
         </div>
     );
 }
-
-// ── Hook to control toast ─────────────────────────────────────────────────────
-import { useState, useCallback } from 'react';
 
 export function useToast() {
     const [toast, setToast] = useState<{ message: string; type: ToastType; visible: boolean }>({

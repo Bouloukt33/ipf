@@ -39,7 +39,7 @@ export function AdminQuestionsPage() {
     } = useQuestions();
 
     const [packs, setPacks] = useState<IPack[]>([]);
-    
+
     const loadPacks = useCallback(async () => {
         try {
             const token = await getAccessTokenSilently({
@@ -123,16 +123,16 @@ export function AdminQuestionsPage() {
         }
     }, [editingQuestion, updateQuestion, createQuestion, showToast]);
 
-    const handleDelete  = useCallback(async (id: string) => { 
-        try { await deleteQuestion(id); showToast('Question supprimée.', 'info'); } 
+    const handleDelete = useCallback(async (id: string) => {
+        try { await deleteQuestion(id); showToast('Question supprimée.', 'info'); }
         catch (err: any) { showToast(err.message, 'error'); }
     }, [deleteQuestion, showToast]);
 
     const handleStatus = useCallback(async (id: string, status: string) => {
-        try { 
-            await updateStatus(id, status); 
+        try {
+            await updateStatus(id, status);
             const msg = status === 'ACTIVE' ? 'Question réactivée.' : status === 'SUSPENDED' ? 'Question suspendue.' : 'Question archivée.';
-            showToast(msg, status === 'ACTIVE' ? 'success' : 'info'); 
+            showToast(msg, status === 'ACTIVE' ? 'success' : 'info');
         } catch (err: any) { showToast(err.message, 'error'); }
     }, [updateStatus, showToast]);
 
@@ -175,7 +175,6 @@ export function AdminQuestionsPage() {
                 onRestore={(id) => handleStatus(id, 'ACTIVE')}
             />
 
-            {/* Pagination simple pour le moment */}
             {!isLoading && totalPages > 1 && (
                 <div className="mt-7 flex justify-center items-center gap-2">
                     <button
