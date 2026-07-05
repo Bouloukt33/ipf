@@ -237,12 +237,6 @@ export interface SubscriptionStatus {
   } | null;
 }
 
-export interface SubscribeResponse {
-  success: boolean;
-  plan: { name: string; slug: string };
-  subscription: { startDate: string; endDate: string; status: string };
-}
-
 export const api = {
   quiz: {
     start: (payload: StartSessionPayload) =>
@@ -294,11 +288,6 @@ export const api = {
   subscription: {
     getPlans: () => request<SubscriptionPlan[]>('/subscription/plans'),
     getStatus: () => request<SubscriptionStatus>('/subscription/status'),
-    subscribe: (planSlug: string) =>
-      request<SubscribeResponse>('/subscription/subscribe', {
-        method: 'POST',
-        body: JSON.stringify({ planSlug }),
-      }),
   },
 
   payment: {
