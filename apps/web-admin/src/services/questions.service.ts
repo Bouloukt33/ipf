@@ -23,7 +23,7 @@ export const questionsService = {
         const params = new URLSearchParams();
         params.set('page', String(page));
         params.set('limit', String(limit));
-        
+
         if (filters?.search) params.set('search', filters.search);
         if (filters?.categoryId) params.set('categoryId', filters.categoryId);
         if (filters?.themeId) params.set('themeId', filters.themeId);

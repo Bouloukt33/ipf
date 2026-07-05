@@ -40,3 +40,10 @@ yarn-error.log*
 
 # Claude — fichiers locaux uniquement (settings.local.json), le reste est versionné
 .claude/settings.local.json
+
+# Docker override local (dev perso, ne pas commiter)
+docker-compose.override.yml
+
+# Rapport LaTeX (non versionné dans le dépôt projet)
+rapport/
+rapport.zip

@@ -20,8 +20,8 @@ export function QuestionFilters({ filters, categories, onChange, onReset }: Ques
         filters.search ||
         filters.level ||
         filters.status ||
-        filters.categoryId;        
-        
+        filters.categoryId;
+
     return (
         <div className="flex flex-wrap items-center gap-3 mb-6">
             {/* Search */}
@@ -65,21 +65,22 @@ export function QuestionFilters({ filters, categories, onChange, onReset }: Ques
                     </option>
                 ))}
             </select>
-{/* Level */}
-<select
-    value={filters.level}
-    onChange={(e) => onChange({ level: e.target.value ? Number(e.target.value) : '' })}
-    className="h-[42px] px-3.5 border-2 border-[rgba(210,122,45,0.18)] rounded-xl
-font-bold text-[13px] text-[#172E42] bg-white cursor-pointer outline-none
-focus:border-[#D27A2D] transition-colors font-nunito"
->
-    <option value="">Toutes les difficultés</option>
-    {Object.entries(DIFFICULTY_LABELS).map(([key, label]) => (
-        <option key={key} value={key}>
-            {label}
-        </option>
-    ))}
-</select>
+
+            {/* Level */}
+            <select
+                value={filters.level}
+                onChange={(e) => onChange({ level: e.target.value ? Number(e.target.value) : '' })}
+                className="h-[42px] px-3.5 border-2 border-[rgba(210,122,45,0.18)] rounded-xl
+          font-bold text-[13px] text-[#172E42] bg-white cursor-pointer outline-none
+          focus:border-[#D27A2D] transition-colors font-nunito"
+            >
+                <option value="">Toutes les difficultés</option>
+                {Object.entries(DIFFICULTY_LABELS).map(([key, label]) => (
+                    <option key={key} value={key}>
+                        {label}
+                    </option>
+                ))}
+            </select>
 
             {/* Status */}
             <select

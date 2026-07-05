@@ -37,7 +37,7 @@ export function AdminQuestionsPage() {
     } = useQuestions();
 
     const [packs, setPacks] = useState<IPack[]>([]);
-    
+
     const loadPacks = useCallback(async () => {
         try {
             const token = await getAccessTokenSilently({
@@ -104,16 +104,16 @@ export function AdminQuestionsPage() {
         }
     }, [editingQuestion, updateQuestion, createQuestion, showToast]);
 
-    const handleDelete  = useCallback(async (id: string) => { 
-        try { await deleteQuestion(id); showToast('Question supprimée.', 'info'); } 
+    const handleDelete = useCallback(async (id: string) => {
+        try { await deleteQuestion(id); showToast('Question supprimée.', 'info'); }
         catch (err: any) { showToast(err.message, 'error'); }
     }, [deleteQuestion, showToast]);
 
     const handleStatus = useCallback(async (id: string, status: string) => {
-        try { 
-            await updateStatus(id, status); 
+        try {
+            await updateStatus(id, status);
             const msg = status === 'ACTIVE' ? 'Question réactivée.' : status === 'SUSPENDED' ? 'Question suspendue.' : 'Question archivée.';
-            showToast(msg, status === 'ACTIVE' ? 'success' : 'info'); 
+            showToast(msg, status === 'ACTIVE' ? 'success' : 'info');
         } catch (err: any) { showToast(err.message, 'error'); }
     }, [updateStatus, showToast]);
 
@@ -177,10 +177,9 @@ export function AdminQuestionsPage() {
                 onRestore={(id) => handleStatus(id, 'ACTIVE')}
             />
 
-            {/* Pagination simple pour le moment */}
             {!isLoading && totalPages > 1 && (
                 <div className="mt-7 flex justify-center gap-2">
-                    <button 
+                    <button
                         onClick={() => setPage(currentPage - 1)}
                         disabled={currentPage === 1}
                         className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold disabled:opacity-50"
@@ -190,7 +189,7 @@ export function AdminQuestionsPage() {
                     <span className="px-4 py-2 text-sm font-bold text-[#172E42]">
                         Page {currentPage} sur {totalPages}
                     </span>
-                    <button 
+                    <button
                         onClick={() => setPage(currentPage + 1)}
                         disabled={currentPage === totalPages}
                         className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold disabled:opacity-50"

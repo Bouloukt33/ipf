@@ -152,6 +152,7 @@ describe('QuestionsService', () => {
           ...createDto,
           level: 1,
           isPremium: false,
+          codification: expect.stringMatching(/^Q[A-Z0-9]{6}$/) as string,
         },
         include: { category: true, theme: true },
       });
@@ -278,6 +279,7 @@ describe('QuestionsService', () => {
             correctAnswer: 'A', // normalisé en majuscule
             level: 2,
             isPremium: true, // « oui »
+            codification: expect.stringMatching(/^Q[A-Z0-9]{6}$/) as string,
           },
         ],
       });
