@@ -18,6 +18,8 @@ const config: Config = {
                 charcoal: '#2A262A',
                 background: '#FFFFFF',
                 surface: '#F8F9FA',
+                cream: '#F8F5F1',
+                ink: { 100: 'rgba(23, 46, 66, 0.1)' },
                 text: {
                     primary: '#172E42',
                     secondary: '#2A262A',
