@@ -5,22 +5,22 @@ interface LivesDisplayProps {
   maxLives?: number;
 }
 
-/** Cœurs de vies — pastille verre dépoli pensée pour l'arène navy du quiz. */
+/** Rangée de cœurs — la vie perdue s'éteint, la dernière vie pulse. */
 export default function LivesDisplay({ lives, maxLives = 5 }: LivesDisplayProps) {
   const isLastLife = lives === 1;
 
   return (
     <div
-      className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-2 rounded-full bg-white/10 border border-white/15 backdrop-blur"
+      className="flex items-center gap-1 sm:gap-1.5"
       role="img"
-      aria-label={`${lives} vies restantes sur ${maxLives}`}
+      aria-label={`${lives} essais restants sur ${maxLives}`}
     >
       {Array.from({ length: maxLives }, (_, i) => {
         const isAlive = i < lives;
         return (
           <svg
             key={i}
-            className={`w-[16px] h-[16px] sm:w-[20px] sm:h-[20px] transition-all duration-300 ${
+            className={`w-[18px] h-[18px] sm:w-[22px] sm:h-[22px] transition-all duration-300 ${
               isAlive
                 ? `drop-shadow-[0_2px_6px_rgba(239,68,68,0.5)] ${
                     isLastLife ? 'motion-safe:animate-countdown-pulse' : ''

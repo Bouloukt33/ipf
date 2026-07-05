@@ -160,8 +160,8 @@ function QuizPlayContent() {
         <div aria-hidden className="absolute -bottom-28 -left-16 w-80 h-80 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
 
         <div className="relative flex-1 flex flex-col">
-          {/* Header : Quitter + Catégorie + Vies */}
-          <div className="flex items-center justify-between gap-2 sm:gap-4 mb-5">
+          {/* Header : Quitter + Catégorie + Live */}
+          <div className="flex items-center justify-between gap-2 sm:gap-4 mb-4">
             <button
               onClick={() => router.push('/quiz')}
               className="p-2.5 rounded-xl bg-white/10 border border-white/15 text-white/70
@@ -172,21 +172,49 @@ function QuizPlayContent() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="px-3 sm:px-4 py-1.5 bg-primary/15 text-primary-light text-xs sm:text-sm
-                font-black uppercase tracking-wider rounded-full truncate">
-                {state.categoryName}
-              </span>
-              <span className="hidden sm:flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-primary motion-safe:animate-pulse" aria-hidden />
-                <span className="text-xs text-white/40 font-bold">Live</span>
+            <span className="px-3 sm:px-4 py-1.5 bg-primary/15 text-primary-light text-xs sm:text-sm
+              font-black uppercase tracking-wider rounded-full truncate">
+              {state.categoryName}
+            </span>
+            <span className="flex items-center gap-1.5 flex-shrink-0">
+              <span className="w-2 h-2 rounded-full bg-primary motion-safe:animate-pulse" aria-hidden />
+              <span className="text-xs text-white/40 font-bold">Live</span>
+            </span>
+          </div>
+
+          {/* HUD : essais restants, XP de session, combo */}
+          <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-4">
+            <div className="flex flex-col items-center gap-1 px-2 py-2.5 rounded-2xl bg-white/10 border border-white/15 backdrop-blur">
+              <span className="text-[10px] font-black uppercase tracking-widest text-white/50">Essais</span>
+              <LivesDisplay lives={state.lives} />
+            </div>
+            <div className="flex flex-col items-center gap-1 px-2 py-2.5 rounded-2xl bg-white/10 border border-white/15 backdrop-blur">
+              <span className="text-[10px] font-black uppercase tracking-widest text-white/50">XP session</span>
+              <span
+                key={state.totalXpSession}
+                className="flex items-center gap-1 text-sm sm:text-base font-black text-amber-300 tabular-nums animate-scale-in"
+              >
+                <Zap size={14} className="fill-amber-300" aria-hidden />
+                {state.totalXpSession}
               </span>
             </div>
-            <LivesDisplay lives={state.lives} />
+            <div className="flex flex-col items-center gap-1 px-2 py-2.5 rounded-2xl bg-white/10 border border-white/15 backdrop-blur">
+              <span className="text-[10px] font-black uppercase tracking-widest text-white/50">Combo</span>
+              {state.comboCount >= 2 ? (
+                <span
+                  key={state.comboCount}
+                  className="text-sm sm:text-base font-black text-orange-400 animate-scale-in"
+                >
+                  🔥 x{state.comboCount}
+                </span>
+              ) : (
+                <span className="text-sm sm:text-base font-black text-white/30">—</span>
+              )}
+            </div>
           </div>
 
           {/* Progression */}
-          <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center gap-3 mb-5">
             <ProgressBar
               current={state.question.questionNumber}
               total={state.totalQuestions}
@@ -197,28 +225,19 @@ function QuizPlayContent() {
             </span>
           </div>
 
-          {/* Timer + combo */}
-          <div className="relative flex items-center justify-center mb-5 sm:mb-6">
+          {/* Timer */}
+          <div className="flex items-center justify-center mb-4 sm:mb-5">
             <Timer
               key={state.question.id}
               duration={state.durationOverride || 5}
               isRunning={isTimerRunning}
               onTimeout={handleTimeout}
             />
-            {state.comboCount >= 2 && (
-              <span
-                className="absolute right-0 top-1/2 -translate-y-1/2 inline-flex items-center gap-1
-                  px-2.5 sm:px-3 py-1.5 rounded-full bg-amber-400/15 border border-amber-300/25
-                  text-amber-300 text-[11px] sm:text-xs font-black animate-scale-in"
-              >
-                🔥 x{state.comboCount}
-              </span>
-            )}
           </div>
 
-          {/* Question */}
-          <div className="text-center mb-6 sm:mb-8">
-            <p className="text-lg sm:text-2xl font-extrabold text-white leading-relaxed">
+          {/* Question — compacte et lisible */}
+          <div className="text-center mb-5 sm:mb-6">
+            <p className="text-base sm:text-xl font-bold text-white leading-snug max-w-xl mx-auto [text-wrap:balance]">
               {state.question.text}
             </p>
           </div>
