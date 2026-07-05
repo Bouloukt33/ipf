@@ -1,17 +1,11 @@
-import Navbar from '@/components/Navbar';
-import Hero from '@/components/Hero';
-import Features from '@/components/Features';
-import Pricing from '@/components/Pricing';
-import Footer from '@/components/Footer';
+import { auth0 } from '@/lib/auth0';
+import { redirect } from 'next/navigation';
 
-export default function Home() {
-  return (
-    <div className="min-h-screen overflow-x-hidden font-nunito text-white">
-      <Navbar />
-      <Hero />
-      <Features />
-      <Pricing />
-      <Footer />
-    </div>
-  );
+export default async function Home() {
+    const session = await auth0.getSession();
+    if (session) {
+        redirect('/dashboard');
+    } else {
+        redirect('/auth/login');
+    }
 }

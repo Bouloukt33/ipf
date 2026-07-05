@@ -106,20 +106,14 @@ Ce point de la spec initiale n'a pas encore été défini. À traiter lors du pr
 ## ⚙️ Infrastructure / Build
 
 ### Junction `.prisma` fragile
-**Statut : workaround manuel**
+**Statut : ✅ Résolu (migration npm workspaces, juillet 2026)**
 
-La résolution des types Prisma dans `apps/api` repose sur une junction Windows créée manuellement :
-```
-apps/api/node_modules/@prisma/client/.prisma → apps/api/node_modules/.prisma
-```
-Elle est recréée automatiquement si on lance `npx prisma generate` depuis `apps/api/`. Mais si le projet est cloné ou que quelqu'un fait `npm install` sans relancer `prisma generate`, les types disparaissent et la build casse avec 147 erreurs TS.
-- **À faire** : ajouter un `postinstall` script dans `apps/api/package.json` → `"postinstall": "prisma generate"`
+Le client Prisma est désormais généré dans le `node_modules` racine (`output = "../../../node_modules/.prisma/client"` dans le schema) et `apps/api` a un script `postinstall: prisma generate`. Plus de junction manuelle.
 
-### pnpm workspace — packages manquants dans le lockfile
-**Statut : fonctionnel mais lockfile incohérent**
+### Gestionnaire de paquets — pnpm/npm mélangés
+**Statut : ✅ Résolu (migration npm workspaces, juillet 2026)**
 
-Le `pnpm-lock.yaml` a été créé avant l'ajout de `packages:` dans `pnpm-workspace.yaml`. Certains packages workspace (`web-app`, `api`, `landing`) ne sont peut-être pas correctement référencés.
-- **À faire** : faire un `pnpm install` propre après un `rm -rf node_modules` pour resynchroniser le lockfile
+Le repo est passé à **npm workspaces** exclusivement : un seul `package-lock.json` à la racine, plus aucun `pnpm-lock.yaml`. Toujours lancer `npm install` depuis la racine du monorepo.
 
 ---
 

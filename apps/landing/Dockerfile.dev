@@ -1,0 +1,25 @@
+# =============================================================================
+# Dockerfile.dev - Landing Next.js (IPF - 5 Secondes Chrono)
+# Hot-reload — contexte de build = RACINE du monorepo (npm workspaces)
+# Le code source est monté via volume dans docker-compose (voir profil "dev")
+# =============================================================================
+
+FROM node:20-alpine
+
+WORKDIR /repo
+
+RUN apk add --no-cache libc6-compat
+
+COPY package.json package-lock.json ./
+COPY apps/landing/package.json apps/landing/
+
+RUN npm ci --workspace=landing
+
+EXPOSE 3004
+
+ENV NODE_ENV=development
+ENV PORT=3004
+ENV HOSTNAME="0.0.0.0"
+ENV NEXT_TELEMETRY_DISABLED=1
+
+CMD ["npm", "run", "dev", "--workspace=landing"]

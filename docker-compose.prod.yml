@@ -1,0 +1,143 @@
+# =============================================================================
+# Docker Compose — PRODUCTION (IPF - 5 Secondes Chrono)
+# =============================================================================
+#
+#   docker compose -f docker-compose.prod.yml up -d --build
+#
+# Différences avec le docker-compose.yml local :
+#   - NODE_ENV=production partout (Swagger désactivé, logs réduits)
+#   - POSTGRES_PASSWORD obligatoire (pas de mot de passe par défaut)
+#   - Pas de profils dev/tools, pas de port debug
+#   - Postgres/Redis non exposés sur l'hôte (réseau interne uniquement)
+# =============================================================================
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ipf-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-ipf_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD est requis en production}
+      POSTGRES_DB: ${POSTGRES_DB:-ipf_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ipf_admin} -d ${POSTGRES_DB:-ipf_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ipf-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: ipf-redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ipf-network
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: ipf-api
+    restart: unless-stopped
+    ports:
+      - "${API_PORT:-3000}:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-ipf_admin}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-ipf_db}?schema=public
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      AUTH0_DOMAIN: ${AUTH0_DOMAIN}
+      AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
+      AUTH0_CLIENT_ID: ${AUTH0_CLIENT_ID}
+      AUTH0_CONNECTION: ${AUTH0_CONNECTION:-Username-Password-Authentication}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - ipf-network
+    volumes:
+      - ./contenu_5_secondes_chrono:/app/contenu_5_secondes_chrono
+
+  web-app:
+    build:
+      context: .
+      dockerfile: apps/web-app/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+    container_name: ipf-web-app
+    restart: unless-stopped
+    ports:
+      - "${WEB_APP_PORT:-3001}:3001"
+    environment:
+      NODE_ENV: production
+      AUTH0_DOMAIN: ${AUTH0_DOMAIN}
+      AUTH0_CLIENT_ID: ${AUTH0_CLIENT_ID}
+      AUTH0_CLIENT_SECRET: ${AUTH0_CLIENT_SECRET}
+      AUTH0_SECRET: ${AUTH0_SECRET}
+      AUTH0_BASE_URL: ${AUTH0_BASE_URL}
+      AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
+      AUTH0_ISSUER_BASE_URL: ${AUTH0_ISSUER_BASE_URL}
+      APP_BASE_URL: ${APP_BASE_URL}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+      API_INTERNAL_URL: http://api:3000
+    depends_on:
+      - api
+    networks:
+      - ipf-network
+
+  landing:
+    build:
+      context: .
+      dockerfile: apps/landing/Dockerfile
+    container_name: ipf-landing
+    restart: unless-stopped
+    ports:
+      - "${LANDING_PORT:-3004}:3004"
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_APP_URL: ${APP_BASE_URL}
+    networks:
+      - ipf-network
+
+  web-admin:
+    build:
+      context: .
+      dockerfile: apps/web-admin/Dockerfile
+      args:
+        VITE_API_URL: ${NEXT_PUBLIC_API_URL}
+        VITE_AUTH0_DOMAIN: ${AUTH0_DOMAIN}
+        VITE_AUTH0_CLIENT_ID: ${AUTH0_CLIENT_ID}
+        VITE_AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
+    container_name: ipf-web-admin
+    restart: unless-stopped
+    ports:
+      - "${WEB_ADMIN_PORT:-3002}:80"
+    depends_on:
+      - api
+    networks:
+      - ipf-network
+
+volumes:
+  postgres_data:
+    name: ipf-postgres-data
+  redis_data:
+    name: ipf-redis-data
+
+networks:
+  ipf-network:
+    name: ipf-network
+    driver: bridge

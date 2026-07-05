@@ -1,5 +1,10 @@
 import { Controller, Get, Param, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AuthGuard } from '../auth/auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { LeaderboardService } from './leaderboard.service';
@@ -12,7 +17,9 @@ export class LeaderboardController {
   constructor(private leaderboardService: LeaderboardService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Classement global — podium (top 3) + liste (rang 4+)' })
+  @ApiOperation({
+    summary: 'Classement global — podium (top 3) + liste (rang 4+)',
+  })
   getGlobal(@CurrentUser() user: any) {
     return this.leaderboardService.getGlobal(user.userId);
   }

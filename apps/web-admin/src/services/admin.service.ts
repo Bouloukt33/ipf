@@ -33,10 +33,22 @@ export interface ActivityItem {
   };
 }
 
+/** Session récente telle que consommée par le dashboard (endpoint /admin/activity). */
+export interface RecentSession {
+  id: string;
+  score: number;
+  xpEarned: number;
+  completedAt: string;
+  pack?: { name: string } | null;
+  user: {
+    profile?: { displayName?: string | null; avatarUrl?: string | null } | null;
+  };
+}
+
 export const adminService = {
   getStats: (token: string): Promise<DashboardStats> =>
     apiRequest('/admin/dashboard', token),
 
-  getActivity: (token: string): Promise<{ recentSessions: any[]; recentUsers: any[] }> =>
+  getActivity: (token: string): Promise<{ recentSessions: RecentSession[]; recentUsers: any[] }> =>
     apiRequest('/admin/activity', token),
 };

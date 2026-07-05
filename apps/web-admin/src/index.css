@@ -45,11 +45,11 @@
     padding: 0;
   }
   body {
-    @apply bg-background text-foreground font-nunito overflow-x-hidden;
+    @apply bg-background text-foreground overflow-x-hidden;
   }
 }
 
-/* Custom styles from web-app */
+/* Custom styles */
 .gradient-text-animate {
     background: linear-gradient(135deg, #D27A2D, #e8924a, #D27A2D);
     background-size: 200% auto;

@@ -12,14 +12,16 @@ const EMAIL_TEMPLATES: Record<EmailTemplateId, any> = {
     name: 'Upsell Premium',
     subject: 'Passez au niveau supérieur avec IPF Premium !',
     description: 'Envoyé aux utilisateurs Apprenti actifs.',
-    html: (data: any) => `<h1>Bonjour ${data.displayName}</h1><p>Vous êtes au niveau ${data.level}...</p>`,
+    html: (data: any) =>
+      `<h1>Bonjour ${data.displayName}</h1><p>Vous êtes au niveau ${data.level}...</p>`,
   },
   coaching_relance: {
     id: 'coaching_relance',
     name: 'Relance Coaching',
-    subject: 'Besoin d\'un coup de pouce sur vos révisions ?',
+    subject: "Besoin d'un coup de pouce sur vos révisions ?",
     description: 'Envoyé aux abonnés avec une faible précision.',
-    html: (data: any) => `<h1>Bonjour ${data.displayName}</h1><p>Nous avons remarqué que...</p>`,
+    html: (data: any) =>
+      `<h1>Bonjour ${data.displayName}</h1><p>Nous avons remarqué que...</p>`,
   },
 };
 
@@ -28,16 +30,28 @@ export class AdminService {
   constructor(private prisma: PrismaService) {}
 
   async getDashboardStats() {
-    const [totalUsers, activeUsers, newUsers, totalQuestions, totalSessions, last7DaysSessions, totalCategories] = await Promise.all([
+    const [
+      totalUsers,
+      activeUsers,
+      newUsers,
+      totalQuestions,
+      totalSessions,
+      last7DaysSessions,
+      totalCategories,
+    ] = await Promise.all([
       this.prisma.user.count(),
       this.prisma.user.count({ where: { isActive: true } }),
       this.prisma.user.count({
-        where: { createdAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } },
+        where: {
+          createdAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
+        },
       }),
       this.prisma.question.count(),
       this.prisma.quizSession.count(),
       this.prisma.quizSession.count({
-        where: { startedAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } },
+        where: {
+          startedAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
+        },
       }),
       this.prisma.category.count(),
     ]);
@@ -105,7 +119,9 @@ export class AdminService {
         orderBy: { completedAt: 'desc' },
         include: {
           user: {
-            include: { profile: { select: { displayName: true, avatarUrl: true } } },
+            include: {
+              profile: { select: { displayName: true, avatarUrl: true } },
+            },
           },
           category: { select: { name: true } },
           pack: { select: { name: true } },
@@ -131,19 +147,26 @@ export class AdminService {
     page?: number;
     limit?: number;
   }) {
-    const page  = filters?.page  || 1;
+    const page = filters?.page || 1;
     const limit = filters?.limit || 20;
-    const skip  = (page - 1) * limit;
+    const skip = (page - 1) * limit;
 
     const where: any = {};
     if (filters?.search) {
       where.OR = [
         { email: { contains: filters.search, mode: 'insensitive' } },
-        { profile: { displayName: { contains: filters.search, mode: 'insensitive' } } },
+        {
+          profile: {
+            displayName: { contains: filters.search, mode: 'insensitive' },
+          },
+        },
       ];
     }
     if (filters?.professionalStatus) {
-      where.profile = { ...where.profile, professionalStatus: filters.professionalStatus };
+      where.profile = {
+        ...where.profile,
+        professionalStatus: filters.professionalStatus,
+      };
     }
     if (filters?.ageRange) {
       where.profile = { ...where.profile, ageRange: filters.ageRange };
@@ -169,45 +192,50 @@ export class AdminService {
       by: ['userId'],
       where: { userId: { in: userIds }, status: 'COMPLETED' },
       _count: { id: true },
-      _sum:   { correctAnswers: true, totalQuestions: true, xpEarned: true, durationMs: true },
+      _sum: {
+        correctAnswers: true,
+        totalQuestions: true,
+        xpEarned: true,
+        durationMs: true,
+      },
     });
 
     const aggMap = new Map(sessionAggs.map((a) => [a.userId, a]));
 
     const data = users.map((u) => {
       const agg = aggMap.get(u.id);
-      const totalQ   = agg?._sum.totalQuestions  ?? 0;
-      const totalOk  = agg?._sum.correctAnswers  ?? 0;
+      const totalQ = agg?._sum.totalQuestions ?? 0;
+      const totalOk = agg?._sum.correctAnswers ?? 0;
       const accuracy = totalQ > 0 ? Math.round((totalOk / totalQ) * 100) : 0;
 
       return {
-        id:        u.id,
-        email:     u.email,
-        role:      u.role,
-        isActive:  u.isActive,
+        id: u.id,
+        email: u.email,
+        role: u.role,
+        isActive: u.isActive,
         createdAt: u.createdAt,
         profile: {
-          displayName:        u.profile?.displayName       ?? null,
-          avatarUrl:          u.profile?.avatarUrl         ?? null,
-          ageRange:           u.profile?.ageRange          ?? null,
+          displayName: u.profile?.displayName ?? null,
+          avatarUrl: u.profile?.avatarUrl ?? null,
+          ageRange: u.profile?.ageRange ?? null,
           professionalStatus: u.profile?.professionalStatus ?? null,
-          jobProfile:         u.profile?.jobProfile        ?? null,
-          xpTotal:            u.profile?.xpTotal           ?? 0,
-          level:              u.profile?.level             ?? 1,
-          streakDays:         u.profile?.streakDays        ?? 0,
-          bestStreak:         u.profile?.bestStreak        ?? 0,
-          lastPlayedAt:       u.profile?.lastPlayedAt      ?? null,
+          jobProfile: u.profile?.jobProfile ?? null,
+          xpTotal: u.profile?.xpTotal ?? 0,
+          level: u.profile?.level ?? 1,
+          streakDays: u.profile?.streakDays ?? 0,
+          bestStreak: u.profile?.bestStreak ?? 0,
+          lastPlayedAt: u.profile?.lastPlayedAt ?? null,
         },
         ranking: u.ranking
           ? { eloScore: u.ranking.eloScore, globalRank: u.ranking.globalRank }
           : null,
         stats: {
-          sessionsPlayed:        agg?._count.id           ?? 0,
+          sessionsPlayed: agg?._count.id ?? 0,
           totalQuestionsAnswered: totalQ,
-          totalCorrectAnswers:   totalOk,
+          totalCorrectAnswers: totalOk,
           accuracy,
-          totalXpEarned:         agg?._sum.xpEarned       ?? 0,
-          totalDurationMs:       agg?._sum.durationMs     ?? 0,
+          totalXpEarned: agg?._sum.xpEarned ?? 0,
+          totalDurationMs: agg?._sum.durationMs ?? 0,
         },
       };
     });
@@ -233,38 +261,52 @@ export class AdminService {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    const [recentSessions, categoryAgg, activityAgg, globalAgg] = await Promise.all([
-      // 20 dernières sessions
-      this.prisma.quizSession.findMany({
-        where: { userId: id, status: 'COMPLETED' },
-        take: 20,
-        orderBy: { completedAt: 'desc' },
-        include: { category: { select: { name: true, slug: true, color: true } } },
-      }),
-      // Répartition par catégorie
-      this.prisma.quizSession.groupBy({
-        by: ['categoryId'],
-        where: { userId: id, status: 'COMPLETED' },
-        _count: { id: true },
-        _sum:   { correctAnswers: true, totalQuestions: true },
-      }),
-      // Calendrier d'activité (30 jours) — sessions groupées par date
-      this.prisma.quizSession.findMany({
-        where: { userId: id, status: 'COMPLETED', startedAt: { gte: thirtyDaysAgo } },
-        select: { startedAt: true },
-        orderBy: { startedAt: 'asc' },
-      }),
-      // Stats globales
-      this.prisma.quizSession.aggregate({
-        where: { userId: id, status: 'COMPLETED' },
-        _count: { id: true },
-        _sum:   { correctAnswers: true, totalQuestions: true, xpEarned: true, durationMs: true },
-        _avg:   { durationMs: true },
-      }),
-    ]);
+    const [recentSessions, categoryAgg, activityAgg, globalAgg] =
+      await Promise.all([
+        // 20 dernières sessions
+        this.prisma.quizSession.findMany({
+          where: { userId: id, status: 'COMPLETED' },
+          take: 20,
+          orderBy: { completedAt: 'desc' },
+          include: {
+            category: { select: { name: true, slug: true, color: true } },
+          },
+        }),
+        // Répartition par catégorie
+        this.prisma.quizSession.groupBy({
+          by: ['categoryId'],
+          where: { userId: id, status: 'COMPLETED' },
+          _count: { id: true },
+          _sum: { correctAnswers: true, totalQuestions: true },
+        }),
+        // Calendrier d'activité (30 jours) — sessions groupées par date
+        this.prisma.quizSession.findMany({
+          where: {
+            userId: id,
+            status: 'COMPLETED',
+            startedAt: { gte: thirtyDaysAgo },
+          },
+          select: { startedAt: true },
+          orderBy: { startedAt: 'asc' },
+        }),
+        // Stats globales
+        this.prisma.quizSession.aggregate({
+          where: { userId: id, status: 'COMPLETED' },
+          _count: { id: true },
+          _sum: {
+            correctAnswers: true,
+            totalQuestions: true,
+            xpEarned: true,
+            durationMs: true,
+          },
+          _avg: { durationMs: true },
+        }),
+      ]);
 
     // Résoudre les noms de catégories
-    const catIds = categoryAgg.map((a) => a.categoryId).filter(Boolean) as string[];
+    const catIds = categoryAgg
+      .map((a) => a.categoryId)
+      .filter(Boolean) as string[];
     const categories = catIds.length
       ? await this.prisma.category.findMany({
           where: { id: { in: catIds } },
@@ -279,101 +321,96 @@ export class AdminService {
       const key = s.startedAt.toISOString().slice(0, 10);
       calMap.set(key, (calMap.get(key) ?? 0) + 1);
     }
-    const activityCalendar = Array.from(calMap.entries()).map(([date, count]) => ({ date, count }));
+    const activityCalendar = Array.from(calMap.entries()).map(
+      ([date, count]) => ({ date, count }),
+    );
 
-    const totalQ  = globalAgg._sum.totalQuestions  ?? 0;
-    const totalOk = globalAgg._sum.correctAnswers   ?? 0;
+    const totalQ = globalAgg._sum.totalQuestions ?? 0;
+    const totalOk = globalAgg._sum.correctAnswers ?? 0;
 
     return {
-      id:        user.id,
-      email:     user.email,
-      role:      user.role,
-      isActive:  user.isActive,
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      isActive: user.isActive,
       createdAt: user.createdAt,
       profile: {
-        displayName:        user.profile?.displayName       ?? null,
-        avatarUrl:          user.profile?.avatarUrl         ?? null,
-        ageRange:           user.profile?.ageRange          ?? null,
+        displayName: user.profile?.displayName ?? null,
+        avatarUrl: user.profile?.avatarUrl ?? null,
+        ageRange: user.profile?.ageRange ?? null,
         professionalStatus: user.profile?.professionalStatus ?? null,
-        jobProfile:         user.profile?.jobProfile        ?? null,
-        xpTotal:            user.profile?.xpTotal           ?? 0,
-        level:              user.profile?.level             ?? 1,
-        streakDays:         user.profile?.streakDays        ?? 0,
-        bestStreak:         user.profile?.bestStreak        ?? 0,
-        lastPlayedAt:       user.profile?.lastPlayedAt      ?? null,
+        jobProfile: user.profile?.jobProfile ?? null,
+        xpTotal: user.profile?.xpTotal ?? 0,
+        level: user.profile?.level ?? 1,
+        streakDays: user.profile?.streakDays ?? 0,
+        bestStreak: user.profile?.bestStreak ?? 0,
+        lastPlayedAt: user.profile?.lastPlayedAt ?? null,
       },
       ranking: user.ranking
-        ? { eloScore: user.ranking.eloScore, globalRank: user.ranking.globalRank,
-            weeklyRank: user.ranking.weeklyRank, monthlyRank: user.ranking.monthlyRank }
+        ? {
+            eloScore: user.ranking.eloScore,
+            globalRank: user.ranking.globalRank,
+            weeklyRank: user.ranking.weeklyRank,
+            monthlyRank: user.ranking.monthlyRank,
+          }
         : null,
       badges: user.userBadges.map((ub) => ({
-        name: ub.badge.name, slug: ub.badge.slug, unlockedAt: ub.unlockedAt,
+        name: ub.badge.name,
+        slug: ub.badge.slug,
+        unlockedAt: ub.unlockedAt,
       })),
       stats: {
-        sessionsPlayed:         globalAgg._count.id         ?? 0,
+        sessionsPlayed: globalAgg._count.id ?? 0,
         totalQuestionsAnswered: totalQ,
-        totalCorrectAnswers:    totalOk,
+        totalCorrectAnswers: totalOk,
         accuracy: totalQ > 0 ? Math.round((totalOk / totalQ) * 100) : 0,
-        totalXpEarned:          globalAgg._sum.xpEarned     ?? 0,
-        totalDurationMs:        globalAgg._sum.durationMs   ?? 0,
-        avgSessionDurationMs:   Math.round(globalAgg._avg.durationMs ?? 0),
+        totalXpEarned: globalAgg._sum.xpEarned ?? 0,
+        totalDurationMs: globalAgg._sum.durationMs ?? 0,
+        avgSessionDurationMs: Math.round(globalAgg._avg.durationMs ?? 0),
       },
       recentSessions: recentSessions.map((s) => ({
-        id:              s.id,
-        mode:            s.mode,
-        score:           s.score,
-        correctAnswers:  s.correctAnswers,
-        totalQuestions:  s.totalQuestions,
-        accuracy:        s.totalQuestions > 0
-          ? Math.round((s.correctAnswers / s.totalQuestions) * 100) : 0,
-        xpEarned:        s.xpEarned,
-        durationMs:      s.durationMs,
-        completedAt:     s.completedAt,
-        category:        s.category,
+        id: s.id,
+        mode: s.mode,
+        score: s.score,
+        correctAnswers: s.correctAnswers,
+        totalQuestions: s.totalQuestions,
+        accuracy:
+          s.totalQuestions > 0
+            ? Math.round((s.correctAnswers / s.totalQuestions) * 100)
+            : 0,
+        xpEarned: s.xpEarned,
+        durationMs: s.durationMs,
+        completedAt: s.completedAt,
+        category: s.category,
       })),
-      categoryBreakdown: categoryAgg.map((a) => {
-        const tq  = a._sum.totalQuestions ?? 0;
-        const tok = a._sum.correctAnswers  ?? 0;
-        const cat = a.categoryId ? catMap.get(a.categoryId) : null;
-        return {
-          categoryId:   a.categoryId,
-          categoryName: cat?.name  ?? 'Inconnue',
-          color:        cat?.color ?? '#999',
-          sessionsCount: a._count.id,
-          accuracy: tq > 0 ? Math.round((tok / tq) * 100) : 0,
-        };
-      }).sort((a, b) => b.sessionsCount - a.sessionsCount),
+      categoryBreakdown: categoryAgg
+        .map((a) => {
+          const tq = a._sum.totalQuestions ?? 0;
+          const tok = a._sum.correctAnswers ?? 0;
+          const cat = a.categoryId ? catMap.get(a.categoryId) : null;
+          return {
+            categoryId: a.categoryId,
+            categoryName: cat?.name ?? 'Inconnue',
+            color: cat?.color ?? '#999',
+            sessionsCount: a._count.id,
+            accuracy: tq > 0 ? Math.round((tok / tq) * 100) : 0,
+          };
+        })
+        .sort((a, b) => b.sessionsCount - a.sessionsCount),
       activityCalendar,
     };
   }
 
   async getQuestionStats() {
-    const [byCategory, byLevel, premiumCount] = await Promise.all([
-      this.prisma.question.groupBy({
-        by: ['categoryId'],
-        _count: true,
-      }),
-      this.prisma.question.groupBy({
-        by: ['level'],
-        _count: true,
-      }),
-      this.prisma.question.count({ where: { isPremium: true } }),
-    ]);
-
-    const categories = await this.prisma.category.findMany({
-      select: { id: true, name: true },
-    });
-
-    const categoryMap = new Map(categories.map((c) => [c.id, c.name]));
-
-    return {
-      byCategory: byCategory.map((item) => ({
-        category: categoryMap.get(item.categoryId) || 'Unknown',
-        count: item._count,
-      })),
-      byLevel,
-      premiumCount,
-    };
+    const [total, active, suspended, archived, premiumCount] =
+      await Promise.all([
+        this.prisma.question.count(),
+        this.prisma.question.count({ where: { status: 'ACTIVE' } }),
+        this.prisma.question.count({ where: { status: 'SUSPENDED' } }),
+        this.prisma.question.count({ where: { status: 'ARCHIVED' } }),
+        this.prisma.question.count({ where: { isPremium: true } }),
+      ]);
+    return { total, active, suspended, archived, premiumCount };
   }
 
   // ── Subscriptions ─────────────────────────────────────────────────────────────
@@ -385,23 +422,33 @@ export class AdminService {
     page?: number;
     limit?: number;
   }) {
-    const page  = filters?.page  || 1;
+    const page = filters?.page || 1;
     const limit = filters?.limit || 20;
-    const skip  = (page - 1) * limit;
+    const skip = (page - 1) * limit;
 
     const where: any = { subscription: { isNot: null } };
 
     if (filters?.search) {
       where.OR = [
         { email: { contains: filters.search, mode: 'insensitive' } },
-        { profile: { displayName: { contains: filters.search, mode: 'insensitive' } } },
+        {
+          profile: {
+            displayName: { contains: filters.search, mode: 'insensitive' },
+          },
+        },
       ];
     }
     if (filters?.planSlug) {
-        where.subscription = { ...where.subscription, is: { plan: { slug: filters.planSlug } } };
+      where.subscription = {
+        ...where.subscription,
+        is: { plan: { slug: filters.planSlug } },
+      };
     }
     if (filters?.status) {
-        where.subscription = { ...where.subscription, is: { status: filters.status } };
+      where.subscription = {
+        ...where.subscription,
+        is: { status: filters.status },
+      };
     }
 
     const [users, total] = await Promise.all([
@@ -429,35 +476,35 @@ export class AdminService {
     const durationMap = new Map(durationAgg.map((a) => [a.userId, a]));
 
     const data = users.map((u) => {
-      const agg  = durationMap.get(u.id);
+      const agg = durationMap.get(u.id);
       const msTotal = Number(agg?._sum.durationMs ?? 0);
       return {
-        id:       u.id,
-        email:    u.email,
+        id: u.id,
+        email: u.email,
         isActive: u.isActive,
         profile: {
           displayName: u.profile?.displayName ?? null,
-          avatarUrl:   u.profile?.avatarUrl   ?? null,
-          streakDays:  u.profile?.streakDays  ?? 0,
-          level:       u.profile?.level       ?? 1,
+          avatarUrl: u.profile?.avatarUrl ?? null,
+          streakDays: u.profile?.streakDays ?? 0,
+          level: u.profile?.level ?? 1,
           lastPlayedAt: u.profile?.lastPlayedAt ?? null,
         },
         subscription: {
-          id:                 u.subscription!.id,
-          status:             u.subscription!.status,
-          cancelAtPeriodEnd:  u.subscription!.cancelAtPeriodEnd,
+          id: u.subscription!.id,
+          status: u.subscription!.status,
+          cancelAtPeriodEnd: u.subscription!.cancelAtPeriodEnd,
           currentPeriodStart: u.subscription!.currentPeriodStart,
-          currentPeriodEnd:   u.subscription!.currentPeriodEnd,
-          createdAt:          u.subscription!.createdAt,
+          currentPeriodEnd: u.subscription!.currentPeriodEnd,
+          createdAt: u.subscription!.createdAt,
           plan: {
-            slug:  u.subscription!.plan.slug,
-            name:  u.subscription!.plan.name,
+            slug: u.subscription!.plan.slug,
+            name: u.subscription!.plan.name,
             price: Number(u.subscription!.plan.price),
           },
         },
         usage: {
-          sessionsPlayed:   agg?._count.id ?? 0,
-          totalHours:       Math.round(msTotal / 3_600_000 * 10) / 10,
+          sessionsPlayed: agg?._count.id ?? 0,
+          totalHours: Math.round((msTotal / 3_600_000) * 10) / 10,
         },
       };
     });
@@ -494,18 +541,21 @@ export class AdminService {
 
     const upsell = apprentiUsers
       .map((u) => {
-        const agg       = sessMap.get(u.id);
-        const sessions  = agg?._count.id ?? 0;
-        const streak    = u.profile?.streakDays ?? 0;
-        const tq        = Number(agg?._sum.totalQuestions ?? 0);
-        const tok       = Number(agg?._sum.correctAnswers ?? 0);
-        const accuracy  = tq > 0 ? Math.round((tok / tq) * 100) : 0;
+        const agg = sessMap.get(u.id);
+        const sessions = agg?._count.id ?? 0;
+        const streak = u.profile?.streakDays ?? 0;
+        const tq = Number(agg?._sum.totalQuestions ?? 0);
+        const tok = Number(agg?._sum.correctAnswers ?? 0);
+        const accuracy = tq > 0 ? Math.round((tok / tq) * 100) : 0;
         return {
-          id: u.id, email: u.email,
+          id: u.id,
+          email: u.email,
           displayName: u.profile?.displayName ?? null,
-          avatarUrl:   u.profile?.avatarUrl   ?? null,
+          avatarUrl: u.profile?.avatarUrl ?? null,
           planName: u.subscription?.plan.name ?? 'Apprenti',
-          streakDays: streak, sessions, accuracy,
+          streakDays: streak,
+          sessions,
+          accuracy,
           engagementScore: streak * 2 + sessions,
         };
       })
@@ -535,19 +585,21 @@ export class AdminService {
 
     const coaching = premiumUsers
       .map((u) => {
-        const agg      = premMap.get(u.id);
+        const agg = premMap.get(u.id);
         const sessions = agg?._count.id ?? 0;
-        const tq       = Number(agg?._sum.totalQuestions ?? 0);
-        const tok      = Number(agg?._sum.correctAnswers ?? 0);
+        const tq = Number(agg?._sum.totalQuestions ?? 0);
+        const tok = Number(agg?._sum.correctAnswers ?? 0);
         const accuracy = tq > 0 ? Math.round((tok / tq) * 100) : 0;
         return {
-          id: u.id, email: u.email,
+          id: u.id,
+          email: u.email,
           displayName: u.profile?.displayName ?? null,
-          avatarUrl:   u.profile?.avatarUrl   ?? null,
+          avatarUrl: u.profile?.avatarUrl ?? null,
           planName: u.subscription?.plan.name ?? '',
           planSlug: u.subscription?.plan.slug ?? '',
           streakDays: u.profile?.streakDays ?? 0,
-          sessions, accuracy,
+          sessions,
+          accuracy,
         };
       })
       .filter((u) => u.sessions >= 3 && u.accuracy < 55)
@@ -584,16 +636,18 @@ export class AdminService {
 
     return this.prisma.plan.create({
       data: {
-        name:           data.name,
-        slug:           data.slug,
-        description:    data.description    ?? null,
-        price:          data.price,
-        currency:       data.currency       ?? 'EUR',
+        name: data.name,
+        slug: data.slug,
+        description: data.description ?? null,
+        price: data.price,
+        currency: data.currency ?? 'EUR',
         intervalMonths: data.intervalMonths ?? 1,
-        features: data.features ? JSON.stringify(data.features) : Prisma.JsonNull,
-        stripePriceId:  data.stripePriceId  ?? null,
-        isActive:       data.isActive       ?? true,
-        order:          data.order          ?? 0,
+        features: data.features
+          ? JSON.stringify(data.features)
+          : Prisma.JsonNull,
+        stripePriceId: data.stripePriceId ?? null,
+        isActive: data.isActive ?? true,
+        order: data.order ?? 0,
       },
       include: { _count: { select: { subscriptions: true } } },
     });
@@ -631,24 +685,30 @@ export class AdminService {
     return this.prisma.plan.update({
       where: { id },
       data: {
-        ...(data.name        !== undefined && { name: data.name }),
-        ...(data.description !== undefined && { description: data.description }),
-        ...(data.price       !== undefined && { price: data.price }),
-        ...(data.features    !== undefined && { features: JSON.stringify(data.features) }),
-        ...(data.isActive    !== undefined && { isActive: data.isActive }),
-        ...(data.order       !== undefined && { order: data.order }),
+        ...(data.name !== undefined && { name: data.name }),
+        ...(data.description !== undefined && {
+          description: data.description,
+        }),
+        ...(data.price !== undefined && { price: data.price }),
+        ...(data.features !== undefined && {
+          features: JSON.stringify(data.features),
+        }),
+        ...(data.isActive !== undefined && { isActive: data.isActive }),
+        ...(data.order !== undefined && { order: data.order }),
       },
     });
   }
 
   async cancelSubscription(subscriptionId: string) {
-    const sub = await this.prisma.subscription.findUnique({ where: { id: subscriptionId } });
+    const sub = await this.prisma.subscription.findUnique({
+      where: { id: subscriptionId },
+    });
     if (!sub) throw new NotFoundException('Abonnement introuvable');
     return this.prisma.subscription.update({
       where: { id: subscriptionId },
       data: {
-        status:            'CANCELED',
-        canceledAt:        new Date(),
+        status: 'CANCELED',
+        canceledAt: new Date(),
         cancelAtPeriodEnd: false,
       },
     });
@@ -659,11 +719,11 @@ export class AdminService {
       this.prisma.subscription.findUnique({ where: { id: subscriptionId } }),
       this.prisma.plan.findUnique({ where: { id: planId } }),
     ]);
-    if (!sub)  throw new NotFoundException('Abonnement introuvable');
+    if (!sub) throw new NotFoundException('Abonnement introuvable');
     if (!plan) throw new NotFoundException('Plan introuvable');
     return this.prisma.subscription.update({
       where: { id: subscriptionId },
-      data:  { planId },
+      data: { planId },
       include: { plan: true },
     });
   }
@@ -688,27 +748,39 @@ export class AdminService {
   }
 
   getEmailTemplates() {
-    return Object.values(EMAIL_TEMPLATES).map(({ id, name, subject, description }) => ({
-      id, name, subject, description,
-    }));
+    return Object.values(EMAIL_TEMPLATES).map(
+      ({ id, name, subject, description }) => ({
+        id,
+        name,
+        subject,
+        description,
+      }),
+    );
   }
 
   getEmailTemplatePreview(templateId: EmailTemplateId) {
     const tpl = EMAIL_TEMPLATES[templateId];
-    if (!tpl) throw new NotFoundException(`Template "${templateId}" introuvable`);
+    if (!tpl)
+      throw new NotFoundException(`Template "${templateId}" introuvable`);
 
     const sampleData: any = {
       displayName: 'Marie Laurent',
-      streakDays:  12,
+      streakDays: 12,
       sessionsPlayed: 24,
-      accuracy:    48,
+      accuracy: 48,
     };
-    return { id: tpl.id, name: tpl.name, subject: tpl.subject, html: tpl.html(sampleData) };
+    return {
+      id: tpl.id,
+      name: tpl.name,
+      subject: tpl.subject,
+      html: tpl.html(sampleData),
+    };
   }
 
   async sendEmailToUser(userId: string, templateId: EmailTemplateId) {
     const tpl = EMAIL_TEMPLATES[templateId];
-    if (!tpl) throw new NotFoundException(`Template "${templateId}" introuvable`);
+    if (!tpl)
+      throw new NotFoundException(`Template "${templateId}" introuvable`);
 
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -722,30 +794,37 @@ export class AdminService {
     const sessionAgg = await this.prisma.quizSession.aggregate({
       where: { userId: user.id, status: 'COMPLETED' },
       _count: { id: true },
-      _sum:   { correctAnswers: true, totalQuestions: true },
+      _sum: { correctAnswers: true, totalQuestions: true },
     });
 
-    const tq  = Number(sessionAgg._sum.totalQuestions ?? 0);
-    const tok = Number(sessionAgg._sum.correctAnswers  ?? 0);
+    const tq = Number(sessionAgg._sum.totalQuestions ?? 0);
+    const tok = Number(sessionAgg._sum.correctAnswers ?? 0);
     const templateData = {
-      displayName:    user.profile?.displayName ?? user.email.split('@')[0],
-      streakDays:     user.profile?.streakDays  ?? 0,
-      sessionsPlayed: sessionAgg._count.id      ?? 0,
-      accuracy:       tq > 0 ? Math.round((tok / tq) * 100) : 0,
+      displayName: user.profile?.displayName ?? user.email.split('@')[0],
+      streakDays: user.profile?.streakDays ?? 0,
+      sessionsPlayed: sessionAgg._count.id ?? 0,
+      accuracy: tq > 0 ? Math.round((tok / tq) * 100) : 0,
     };
 
     const html = tpl.html(templateData);
 
     const transport = this.createTransport();
     if (!transport) {
-      this.logger.warn(`[MAILER NOT CONFIGURED] Would send "${tpl.subject}" to ${user.email}`);
+      this.logger.warn(
+        `[MAILER NOT CONFIGURED] Would send "${tpl.subject}" to ${user.email}`,
+      );
       this.logger.log(`Preview:\n${html.slice(0, 200)}…`);
-      return { sent: false, reason: 'MAILER_NOT_CONFIGURED', to: user.email, subject: tpl.subject };
+      return {
+        sent: false,
+        reason: 'MAILER_NOT_CONFIGURED',
+        to: user.email,
+        subject: tpl.subject,
+      };
     }
 
     await transport.sendMail({
       from: process.env.MAILER_FROM || 'noreply@ipf.com',
-      to:   user.email,
+      to: user.email,
       subject: tpl.subject,
       html,
     });
@@ -753,11 +832,20 @@ export class AdminService {
     return { sent: true, to: user.email, subject: tpl.subject };
   }
 
-  async sendEmailToSegment(segment: 'upsell' | 'coaching', templateId: EmailTemplateId) {
+  async sendEmailToSegment(
+    segment: 'upsell' | 'coaching',
+    templateId: EmailTemplateId,
+  ) {
     const prospects = await this.getProspects();
-    const targets   = segment === 'upsell' ? prospects.upsell : prospects.coaching;
+    const targets =
+      segment === 'upsell' ? prospects.upsell : prospects.coaching;
 
-    const results: { sent: boolean; to: string; subject: string; reason?: string }[] = [];
+    const results: {
+      sent: boolean;
+      to: string;
+      subject: string;
+      reason?: string;
+    }[] = [];
     for (const t of targets) {
       const r = await this.sendEmailToUser(t.id, templateId);
       results.push(r);
@@ -766,8 +854,8 @@ export class AdminService {
     return {
       segment,
       templateId,
-      total:  targets.length,
-      sent:   results.filter((r) => r.sent).length,
+      total: targets.length,
+      sent: results.filter((r) => r.sent).length,
       results,
     };
   }
@@ -792,18 +880,23 @@ export class AdminService {
     order?: number;
     isPremium?: boolean;
   }) {
-    const existing = await this.prisma.category.findUnique({ where: { slug: data.slug } });
-    if (existing) throw new Error(`Un type de bail avec le slug "${data.slug}" existe déjà`);
+    const existing = await this.prisma.category.findUnique({
+      where: { slug: data.slug },
+    });
+    if (existing)
+      throw new Error(
+        `Un type de bail avec le slug "${data.slug}" existe déjà`,
+      );
 
     return this.prisma.category.create({
       data: {
-        name:        data.name,
-        slug:        data.slug,
+        name: data.name,
+        slug: data.slug,
         description: data.description ?? null,
-        color:       data.color       ?? '#D27A2D',
-        iconUrl:     data.iconUrl     ?? null,
-        order:       data.order       ?? 0,
-        isPremium:   data.isPremium   ?? false,
+        color: data.color ?? '#D27A2D',
+        iconUrl: data.iconUrl ?? null,
+        order: data.order ?? 0,
+        isPremium: data.isPremium ?? false,
       },
     });
   }
@@ -811,37 +904,43 @@ export class AdminService {
   async updateCategory(
     id: string,
     data: {
-      name?:        string;
-      slug?:        string;
+      name?: string;
+      slug?: string;
       description?: string;
-      color?:       string;
-      iconUrl?:     string;
-      order?:       number;
-      isPremium?:   boolean;
-      isActive?:    boolean;
+      color?: string;
+      iconUrl?: string;
+      order?: number;
+      isPremium?: boolean;
+      isActive?: boolean;
     },
   ) {
     const cat = await this.prisma.category.findUnique({ where: { id } });
     if (!cat) throw new NotFoundException('Catégorie non trouvée');
 
     if (data.slug && data.slug !== cat.slug) {
-      const conflict = await this.prisma.category.findUnique({ where: { slug: data.slug } });
+      const conflict = await this.prisma.category.findUnique({
+        where: { slug: data.slug },
+      });
       if (conflict) throw new Error(`Le slug "${data.slug}" est déjà utilisé`);
     }
 
     return this.prisma.category.update({
       where: { id },
       data: {
-        ...(data.name        !== undefined && { name:        data.name }),
-        ...(data.slug        !== undefined && { slug:        data.slug }),
-        ...(data.description !== undefined && { description: data.description }),
-        ...(data.color       !== undefined && { color:       data.color }),
-        ...(data.iconUrl     !== undefined && { iconUrl:     data.iconUrl }),
-        ...(data.order       !== undefined && { order:       data.order }),
-        ...(data.isPremium   !== undefined && { isPremium:   data.isPremium }),
-        ...(data.isActive    !== undefined && { isActive:    data.isActive }),
+        ...(data.name !== undefined && { name: data.name }),
+        ...(data.slug !== undefined && { slug: data.slug }),
+        ...(data.description !== undefined && {
+          description: data.description,
+        }),
+        ...(data.color !== undefined && { color: data.color }),
+        ...(data.iconUrl !== undefined && { iconUrl: data.iconUrl }),
+        ...(data.order !== undefined && { order: data.order }),
+        ...(data.isPremium !== undefined && { isPremium: data.isPremium }),
+        ...(data.isActive !== undefined && { isActive: data.isActive }),
       },
-      include: { _count: { select: { questions: true, packs: true, themes: true } } },
+      include: {
+        _count: { select: { questions: true, packs: true, themes: true } },
+      },
     });
   }
 
@@ -850,8 +949,14 @@ export class AdminService {
     if (!cat) throw new NotFoundException('Catégorie non trouvée');
     return this.prisma.category.update({
       where: { id },
-      data:  { isActive: !cat.isActive },
+      data: { isActive: !cat.isActive },
     });
+  }
+
+  async deleteCategory(id: string) {
+    const cat = await this.prisma.category.findUnique({ where: { id } });
+    if (!cat) throw new NotFoundException('Catégorie non trouvée');
+    return this.prisma.category.delete({ where: { id } });
   }
 
   async searchUsers(query: string) {
@@ -859,7 +964,9 @@ export class AdminService {
       where: {
         OR: [
           { email: { contains: query, mode: 'insensitive' } },
-          { profile: { displayName: { contains: query, mode: 'insensitive' } } },
+          {
+            profile: { displayName: { contains: query, mode: 'insensitive' } },
+          },
         ],
       },
       select: {

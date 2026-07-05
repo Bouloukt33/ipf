@@ -2,7 +2,7 @@ import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 
 /**
  * Décorateur pour récupérer l'utilisateur courant dans un contrôleur
- * 
+ *
  * Exemple d'utilisation:
  * @Get('profile')
  * getProfile(@CurrentUser() user: any) {

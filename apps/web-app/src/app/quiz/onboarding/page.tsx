@@ -274,7 +274,7 @@ export default function OnboardingPage() {
                 </button>
                 {selectedSector === sector.id && (
                   <div className="mt-2 ml-3 space-y-2 animate-fade-in-up">
-                    {sector.jobProfiles.map((job) => (
+                    {sector.jobProfiles?.map((job) => (
                       <button
                         key={job.id}
                         onClick={() => setJobProfileId(job.id)}

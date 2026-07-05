@@ -41,8 +41,8 @@ export class SubscriptionService {
     }
 
     // User is premium if they have an active subscription that hasn't expired
-    const isPremium = user.subscription 
-      ? user.subscription.status === 'ACTIVE' && 
+    const isPremium = user.subscription
+      ? user.subscription.status === 'ACTIVE' &&
         user.subscription.currentPeriodEnd > new Date()
       : false;
 

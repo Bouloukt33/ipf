@@ -71,8 +71,8 @@ test('affiche le quiz pour un apprenti', () => {
 ## Scripts
 
 ```bash
-pnpm test           # Tous les tests
-pnpm test:unit      # Tests unitaires
-pnpm test:e2e       # Tests E2E Playwright
-pnpm test:coverage  # Couverture
+npm run test           # Tous les tests
+npm run test:unit      # Tests unitaires
+npm run test:e2e       # Tests E2E Playwright
+npm run test:coverage  # Couverture
 ```

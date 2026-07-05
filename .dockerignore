@@ -1,0 +1,36 @@
+# Dépendances (réinstallées dans l'image)
+node_modules
+**/node_modules
+
+# Builds locaux (refaits dans l'image)
+**/dist
+**/.next
+**/out
+**/coverage
+**/*.tsbuildinfo
+
+# Git / IDE
+.git
+.gitignore
+.idea
+.vscode
+.claude
+
+# Secrets
+.env
+.env.*
+!.env.example
+**/.env
+!**/.env.example
+
+# Docs & divers
+*.md
+**/*.md
+**/*.log
+contenu_5_secondes_chrono
+**/contenu_5_secondes_chrono
+
+# Docker
+docker-compose*.yml
+**/Dockerfile*
+**/.dockerignore

@@ -20,7 +20,7 @@ import {
 interface QuestionRowProps {
     question:   IQuestion;
     packs:      IPack[];
-    isEven:     boolean;
+    number:     number;
     onEdit:     (question: IQuestion) => void;
     onDelete:   (id: string) => void;
     onSuspend:  (id: string) => void;
@@ -48,7 +48,7 @@ const STATUS_DOTS: Record<QuestionStatus, string> = {
 };
 
 export function QuestionRow({
-    question, isEven, onEdit, onDelete, onSuspend, onArchive, onRestore, packs,
+    question, number, onEdit, onDelete, onSuspend, onArchive, onRestore, packs,
 }: QuestionRowProps) {
     const packName = question.packId
         ? (packs.find((p) => p.id === question.packId)?.name ?? question.packId)
@@ -64,13 +64,16 @@ export function QuestionRow({
 
     return (
         <tr
-            className={`
-        border-b border-[rgba(210,122,45,0.08)] transition-colors cursor-pointer
-        hover:bg-[rgba(210,122,45,0.04)]
-        ${isEven ? 'bg-white' : 'bg-[#fafaf9]'}
-      `}
+            className="border-b border-ink-100/60 last:border-0 transition-colors cursor-pointer hover:bg-cream/60"
             onClick={() => onEdit(question)}
         >
+            {/* Numéro */}
+            <td className="px-4 py-3 whitespace-nowrap text-right">
+                <span className="font-mono text-[12px] font-bold text-[#5a7a99]">
+                    {number}
+                </span>
+            </td>
+
             {/* Code */}
             <td className="px-4 py-3 whitespace-nowrap">
                 <span className="font-mono text-[12px] font-extrabold text-[#D27A2D] bg-[rgba(210,122,45,0.1)] px-2 py-0.5 rounded-md">
@@ -173,6 +176,7 @@ export function QuestionRow({
                                 <div className="absolute right-0 top-9 z-20 bg-white border border-[rgba(210,122,45,0.18)] rounded-xl shadow-lg py-1.5 min-w-[160px]">
                                     {question.status !== 'ACTIVE' && (
                                         <button
+                                            title="La question redevient jouable dans les quiz"
                                             onClick={() => { setMenuOpen(false); onRestore(question.id); }}
                                             className="w-full px-4 py-2 text-left text-[13px] font-bold text-[#10B981] hover:bg-[rgba(16,185,129,0.06)] transition-colors flex items-center gap-2.5"
                                         >
@@ -182,6 +186,7 @@ export function QuestionRow({
                                     )}
                                     {question.status !== 'SUSPENDED' && (
                                         <button
+                                            title="Retire temporairement la question des quiz — réactivable à tout moment"
                                             onClick={() => { setMenuOpen(false); onSuspend(question.id); }}
                                             className="w-full px-4 py-2 text-left text-[13px] font-bold text-[#F59E0B] hover:bg-[rgba(245,158,11,0.06)] transition-colors flex items-center gap-2.5"
                                         >
@@ -191,6 +196,7 @@ export function QuestionRow({
                                     )}
                                     {question.status !== 'ARCHIVED' && (
                                         <button
+                                            title="Sort définitivement la question des quiz — conservée pour l'historique"
                                             onClick={() => { setMenuOpen(false); onArchive(question.id); }}
                                             className="w-full px-4 py-2 text-left text-[13px] font-bold text-[#6B7280] hover:bg-[rgba(107,114,128,0.06)] transition-colors flex items-center gap-2.5"
                                         >
@@ -200,6 +206,7 @@ export function QuestionRow({
                                     )}
                                     <div className="my-1 h-px bg-[rgba(210,122,45,0.1)]" />
                                     <button
+                                        title="Suppression définitive et irréversible"
                                         onClick={handleDelete}
                                         className="w-full px-4 py-2 text-left text-[13px] font-bold text-[#EF4444] hover:bg-[rgba(239,68,68,0.06)] transition-colors flex items-center gap-2.5"
                                     >

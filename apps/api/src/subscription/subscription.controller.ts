@@ -1,8 +1,4 @@
-import {
-  Controller,
-  Get,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, UseGuards } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -22,7 +18,7 @@ export class SubscriptionController {
   @Get('plans')
   @ApiOperation({
     summary: 'Liste des plans',
-    description: 'Retourne tous les plans d\'abonnement disponibles',
+    description: "Retourne tous les plans d'abonnement disponibles",
   })
   @ApiResponse({ status: 200, description: 'Liste des plans' })
   async getPlans() {
@@ -32,9 +28,9 @@ export class SubscriptionController {
   @Get('status')
   @ApiOperation({
     summary: 'Statut abonnement',
-    description: 'Retourne le statut d\'abonnement de l\'utilisateur connecté',
+    description: "Retourne le statut d'abonnement de l'utilisateur connecté",
   })
-  @ApiResponse({ status: 200, description: 'Statut de l\'abonnement' })
+  @ApiResponse({ status: 200, description: "Statut de l'abonnement" })
   async getStatus(@CurrentUser('userId') userId: string) {
     return this.subscriptionService.getStatus(userId);
   }

@@ -23,7 +23,7 @@ export class PaymentService {
     const isSimulation = this.config.get<string>('STRIPE_SIMULATION_MODE') === 'true';
 
     if (!isSimulation && secretKey && secretKey !== 'sk_PLACEHOLDER') {
-      this.stripe = new Stripe(secretKey, { apiVersion: '2026-05-27.dahlia' });
+      this.stripe = new Stripe(secretKey, { apiVersion: '2026-06-24.dahlia' });
     }
   }
 

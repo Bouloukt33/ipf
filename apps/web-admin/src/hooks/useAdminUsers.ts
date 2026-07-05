@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { usersService } from '../services/users.service';
-import type { UserAnalytics } from '../services/users.service';
+import type { UserAnalytics, CreateUserPayload } from '../services/users.service';
 import { ENV } from '../lib/env';
 import { AUTH0_SCOPE } from '../lib/auth0';
 
@@ -37,5 +37,26 @@ export function useAdminUsers() {
     loadUsers();
   }, [loadUsers]);
 
-  return { users, meta, isLoading, error, setFilters, filters };
+  const getToken = useCallback(() => getAccessTokenSilently({
+    authorizationParams: {
+      audience: ENV.auth0Audience,
+      scope: AUTH0_SCOPE,
+    },
+  }), [getAccessTokenSilently]);
+
+  const createUser = useCallback(async (data: CreateUserPayload) => {
+    const token = await getToken();
+    const result = await usersService.create(token, data);
+    await loadUsers();
+    return result;
+  }, [getToken, loadUsers]);
+
+  const toggleUserActive = useCallback(async (id: string) => {
+    const token = await getToken();
+    const result = await usersService.toggleActive(token, id);
+    await loadUsers();
+    return result;
+  }, [getToken, loadUsers]);
+
+  return { users, meta, isLoading, error, setFilters, filters, createUser, toggleUserActive };
 }

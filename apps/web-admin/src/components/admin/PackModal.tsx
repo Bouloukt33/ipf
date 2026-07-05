@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
-import type { IPack, IPackFormData, ICategory, IQuestion } from '../../lib/types';
+import type { IPack, IPackFormData, ICategory, IQuestion, PackStatus } from '../../lib/types';
+import { PACK_STATUS_LABELS } from '../../lib/types';
 import { usersService } from '../../services/users.service';
 import { questionsService } from '../../services/questions.service';
 import { ENV } from '../../lib/env';
@@ -23,6 +24,7 @@ export function PackModal({ isOpen, pack, categories, onClose, onSave }: PackMod
         description: '',
         categoryId: '',
         isActive: true,
+        status: 'ACTIVE',
         visibility: 'PUBLIC',
         assignedUserId: null,
         durationOverride: null,
@@ -48,6 +50,7 @@ export function PackModal({ isOpen, pack, categories, onClose, onSave }: PackMod
                     description: pack.description || '',
                     categoryId: pack.categoryId,
                     isActive: pack.isActive,
+                    status: pack.status || (pack.isActive ? 'ACTIVE' : 'DISABLED'),
                     visibility: pack.visibility,
                     assignedUserId: pack.assignedUserId || null,
                     durationOverride: pack.durationOverride || null,
@@ -62,6 +65,7 @@ export function PackModal({ isOpen, pack, categories, onClose, onSave }: PackMod
                     description: '',
                     categoryId: categories[0]?.id || '',
                     isActive: true,
+                    status: 'ACTIVE',
                     visibility: 'PUBLIC',
                     assignedUserId: null,
                     durationOverride: null,
@@ -189,13 +193,31 @@ export function PackModal({ isOpen, pack, categories, onClose, onSave }: PackMod
                                 </div>
                                 <div className="space-y-1.5">
                                     <label className="text-[11px] font-black uppercase text-gray-400 tracking-wider">Type de bail</label>
-                                    <select 
+                                    <select
                                         className="w-full h-12 px-4 rounded-xl border-2 border-gray-100 focus:border-orange-500 outline-none font-bold text-navy"
                                         value={form.categoryId}
                                         onChange={(e) => setForm({...form, categoryId: e.target.value, questionIds: []})}
                                     >
                                         {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                                     </select>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-[11px] font-black uppercase text-gray-400 tracking-wider">Statut</label>
+                                    <select
+                                        className="w-full h-12 px-4 rounded-xl border-2 border-gray-100 focus:border-orange-500 outline-none font-bold text-navy"
+                                        value={form.status}
+                                        onChange={(e) => {
+                                            const status = e.target.value as PackStatus;
+                                            setForm({...form, status, isActive: status === 'ACTIVE'});
+                                        }}
+                                    >
+                                        {(Object.keys(PACK_STATUS_LABELS) as PackStatus[]).map(s => (
+                                            <option key={s} value={s}>{PACK_STATUS_LABELS[s]}</option>
+                                        ))}
+                                    </select>
+                                    <p className="text-[11px] font-semibold text-gray-400">
+                                        Seul un pack actif est visible et jouable dans l'application.
+                                    </p>
                                 </div>
                             </div>
                         </section>

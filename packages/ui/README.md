@@ -58,8 +58,8 @@ import { Button, QuizTimer, Card } from '@ipf/ui';
 ## Scripts
 
 ```bash
-pnpm dev        # Storybook dev
-pnpm build      # Build library
-pnpm storybook  # Storybook
-pnpm lint       # Linting
+npm run dev        # Storybook dev
+npm run build      # Build library
+npm run storybook  # Storybook
+npm run lint       # Linting
 ```

@@ -1,15 +1,20 @@
 import { NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     rawBody: true, // Nécessaire pour vérifier la signature des webhooks Stripe
-    logger: process.env.NODE_ENV === 'production' 
-      ? ['error', 'warn'] 
-      : ['log', 'error', 'warn', 'debug', 'verbose'],
+    logger:
+      process.env.NODE_ENV === 'production'
+        ? ['error', 'warn']
+        : ['log', 'error', 'warn', 'debug', 'verbose'],
   });
+
+  // Corps JSON jusqu'à 2 Mo : nécessaire pour l'import CSV de questions
+  app.useBodyParser('json', { limit: '2mb' });
 
   // Configuration CORS pour autoriser les requêtes depuis les frontends
   app.enableCors({
@@ -19,7 +24,7 @@ async function bootstrap() {
       'http://localhost:5173', // web-admin (Vite local)
     ],
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
     credentials: true,
   });
 
@@ -39,7 +44,7 @@ async function bootstrap() {
   if (process.env.NODE_ENV !== 'production') {
     const config = new DocumentBuilder()
       .setTitle('IPF - 5 Secondes Chrono API')
-      .setDescription('Documentation de l\'API du jeu 5 Secondes Chrono')
+      .setDescription("Documentation de l'API du jeu 5 Secondes Chrono")
       .setVersion('1.0')
       .addBearerAuth()
       .build();

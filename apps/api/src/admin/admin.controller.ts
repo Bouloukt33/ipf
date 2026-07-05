@@ -1,5 +1,23 @@
-import { Controller, Get, Put, Post, Delete, Patch, Param, Query, Body, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiQuery } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Put,
+  Post,
+  Delete,
+  Patch,
+  Param,
+  Query,
+  Body,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiParam,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { AdminService, EmailTemplateId } from './admin.service';
 import { AuthGuard, PermissionsGuard, Permissions } from '../auth';
 
@@ -12,29 +30,54 @@ export class AdminController {
 
   @Get('dashboard')
   @Permissions('read:admin')
-  @ApiOperation({ summary: 'Dashboard admin', description: 'Récupère les statistiques globales pour le tableau de bord administrateur' })
-  @ApiResponse({ status: 200, description: 'Statistiques du dashboard retournées' })
+  @ApiOperation({
+    summary: 'Dashboard admin',
+    description:
+      'Récupère les statistiques globales pour le tableau de bord administrateur',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Statistiques du dashboard retournées',
+  })
   @ApiResponse({ status: 401, description: 'Non autorisé' })
-  @ApiResponse({ status: 403, description: 'Permission insuffisante - Accès admin requis' })
+  @ApiResponse({
+    status: 403,
+    description: 'Permission insuffisante - Accès admin requis',
+  })
   async getDashboardStats() {
     return this.adminService.getDashboardStats();
   }
 
   @Get('activity')
   @Permissions('read:admin')
-  @ApiOperation({ summary: 'Activité récente', description: 'Récupère les dernières activités sur la plateforme (connexions, parties, etc.)' })
+  @ApiOperation({
+    summary: 'Activité récente',
+    description:
+      'Récupère les dernières activités sur la plateforme (connexions, parties, etc.)',
+  })
   @ApiResponse({ status: 200, description: 'Liste des activités récentes' })
   @ApiResponse({ status: 401, description: 'Non autorisé' })
-  @ApiResponse({ status: 403, description: 'Permission insuffisante - Accès admin requis' })
+  @ApiResponse({
+    status: 403,
+    description: 'Permission insuffisante - Accès admin requis',
+  })
   async getRecentActivity() {
     return this.adminService.getRecentActivity();
   }
 
   @Get('users')
   @Permissions('read:admin')
-  @ApiOperation({ summary: 'Analytics utilisateurs', description: 'Liste des utilisateurs avec stats de performance et engagement' })
+  @ApiOperation({
+    summary: 'Analytics utilisateurs',
+    description:
+      'Liste des utilisateurs avec stats de performance et engagement',
+  })
   @ApiQuery({ name: 'search', required: false })
-  @ApiQuery({ name: 'professionalStatus', required: false, enum: ['SALARIE', 'INDEPENDANT', 'MANDATAIRE'] })
+  @ApiQuery({
+    name: 'professionalStatus',
+    required: false,
+    enum: ['SALARIE', 'INDEPENDANT', 'MANDATAIRE'],
+  })
   @ApiQuery({ name: 'ageRange', required: false })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
@@ -53,22 +96,25 @@ export class AdminController {
       page: page ? parseInt(page) : 1,
       limit: limit ? parseInt(limit) : 20,
     });
-    }
+  }
 
-    @Get('users/search')
-    @Permissions('read:admin')
-    @ApiOperation({ summary: 'Recherche utilisateur', description: 'Recherche rapide d\'un utilisateur par email ou nom pour assignation de pack' })
-    @ApiQuery({ name: 'q', required: true })
-    @ApiResponse({ status: 200 })
-    async searchUsers(@Query('q') query: string) {
+  @Get('users/search')
+  @Permissions('read:admin')
+  @ApiOperation({
+    summary: 'Recherche utilisateur',
+    description:
+      "Recherche rapide d'un utilisateur par email ou nom pour assignation de pack",
+  })
+  @ApiQuery({ name: 'q', required: true })
+  @ApiResponse({ status: 200 })
+  async searchUsers(@Query('q') query: string) {
     return this.adminService.searchUsers(query);
-    }
-
+  }
 
   @Get('users/:id')
   @Permissions('read:admin')
   @ApiOperation({ summary: 'Détail analytique utilisateur' })
-  @ApiParam({ name: 'id', description: 'ID de l\'utilisateur' })
+  @ApiParam({ name: 'id', description: "ID de l'utilisateur" })
   @ApiResponse({ status: 200 })
   @ApiResponse({ status: 404 })
   async getAnalyticsUserDetail(@Param('id') id: string) {
@@ -80,21 +126,31 @@ export class AdminController {
   @Get('subscriptions')
   @Permissions('read:admin')
   @ApiOperation({ summary: 'Liste des abonnements' })
-  @ApiQuery({ name: 'planSlug', required: false, enum: ['apprenti', 'compagnon', 'reussite'] })
-  @ApiQuery({ name: 'status', required: false, enum: ['ACTIVE', 'CANCELED', 'PAST_DUE', 'UNPAID', 'TRIALING'] })
+  @ApiQuery({
+    name: 'planSlug',
+    required: false,
+    enum: ['apprenti', 'compagnon', 'reussite'],
+  })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    enum: ['ACTIVE', 'CANCELED', 'PAST_DUE', 'UNPAID', 'TRIALING'],
+  })
   @ApiQuery({ name: 'search', required: false })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   async getSubscriptions(
     @Query('planSlug') planSlug?: string,
-    @Query('status')   status?: string,
-    @Query('search')   search?: string,
-    @Query('page')     page?: string,
-    @Query('limit')    limit?: string,
+    @Query('status') status?: string,
+    @Query('search') search?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
   ) {
     return this.adminService.getSubscriptions({
-      planSlug, status, search,
-      page:  page  ? parseInt(page)  : 1,
+      planSlug,
+      status,
+      search,
+      page: page ? parseInt(page) : 1,
       limit: limit ? parseInt(limit) : 20,
     });
   }
@@ -138,10 +194,18 @@ export class AdminController {
   @Permissions('write:questions')
   @ApiOperation({ summary: 'Créer un plan (Admin)' })
   async createAdminPlan(
-    @Body() data: {
-      name: string; slug: string; description?: string;
-      price: number; currency?: string; intervalMonths?: number;
-      features?: string[]; stripePriceId?: string; isActive?: boolean; order?: number;
+    @Body()
+    data: {
+      name: string;
+      slug: string;
+      description?: string;
+      price: number;
+      currency?: string;
+      intervalMonths?: number;
+      features?: string[];
+      stripePriceId?: string;
+      isActive?: boolean;
+      order?: number;
     },
   ) {
     return this.adminService.createAdminPlan(data);
@@ -161,7 +225,8 @@ export class AdminController {
   @ApiParam({ name: 'id' })
   async updateAdminPlan(
     @Param('id') id: string,
-    @Body() data: {
+    @Body()
+    data: {
       name?: string;
       description?: string;
       price?: number;
@@ -184,7 +249,7 @@ export class AdminController {
 
   @Get('email/templates/:id/preview')
   @Permissions('read:admin')
-  @ApiOperation({ summary: 'Prévisualisation HTML d\'un template' })
+  @ApiOperation({ summary: "Prévisualisation HTML d'un template" })
   @ApiParam({ name: 'id' })
   async previewEmailTemplate(@Param('id') id: string) {
     return this.adminService.getEmailTemplatePreview(id as EmailTemplateId);
@@ -198,17 +263,25 @@ export class AdminController {
     @Param('userId') userId: string,
     @Body('templateId') templateId: string,
   ) {
-    return this.adminService.sendEmailToUser(userId, templateId as EmailTemplateId);
+    return this.adminService.sendEmailToUser(
+      userId,
+      templateId as EmailTemplateId,
+    );
   }
 
   @Post('email/send/segment')
   @Permissions('write:questions')
-  @ApiOperation({ summary: 'Envoyer un email à un segment (upsell ou coaching)' })
+  @ApiOperation({
+    summary: 'Envoyer un email à un segment (upsell ou coaching)',
+  })
   async sendEmailToSegment(
-    @Body('segment')    segment:    'upsell' | 'coaching',
+    @Body('segment') segment: 'upsell' | 'coaching',
     @Body('templateId') templateId: string,
   ) {
-    return this.adminService.sendEmailToSegment(segment, templateId as EmailTemplateId);
+    return this.adminService.sendEmailToSegment(
+      segment,
+      templateId as EmailTemplateId,
+    );
   }
 
   // ── Categories ──────────────────────────────────────────────────────────────
@@ -224,9 +297,15 @@ export class AdminController {
   @Permissions('write:questions')
   @ApiOperation({ summary: 'Créer un type de bail (Admin)' })
   async createCategory(
-    @Body() data: {
-      name: string; slug: string; description?: string;
-      color?: string; iconUrl?: string; order?: number; isPremium?: boolean;
+    @Body()
+    data: {
+      name: string;
+      slug: string;
+      description?: string;
+      color?: string;
+      iconUrl?: string;
+      order?: number;
+      isPremium?: boolean;
     },
   ) {
     return this.adminService.createCategory(data);
@@ -238,10 +317,16 @@ export class AdminController {
   @ApiParam({ name: 'id' })
   async updateCategory(
     @Param('id') id: string,
-    @Body() data: {
-      name?: string; slug?: string; description?: string;
-      color?: string; iconUrl?: string; order?: number;
-      isPremium?: boolean; isActive?: boolean;
+    @Body()
+    data: {
+      name?: string;
+      slug?: string;
+      description?: string;
+      color?: string;
+      iconUrl?: string;
+      order?: number;
+      isPremium?: boolean;
+      isActive?: boolean;
     },
   ) {
     return this.adminService.updateCategory(id, data);
@@ -255,12 +340,30 @@ export class AdminController {
     return this.adminService.toggleCategoryActive(id);
   }
 
+  @Delete('categories/:id')
+  @Permissions('write:questions')
+  @ApiOperation({ summary: 'Supprimer un type de bail (Admin)' })
+  @ApiParam({ name: 'id' })
+  async deleteCategory(@Param('id') id: string) {
+    return this.adminService.deleteCategory(id);
+  }
+
   @Get('questions/stats')
   @Permissions('read:admin')
-  @ApiOperation({ summary: 'Statistiques des questions', description: 'Récupère les statistiques détaillées sur les questions (par catégorie, taux de réussite, etc.)' })
-  @ApiResponse({ status: 200, description: 'Statistiques des questions retournées' })
+  @ApiOperation({
+    summary: 'Statistiques des questions',
+    description:
+      'Récupère les statistiques détaillées sur les questions (par catégorie, taux de réussite, etc.)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Statistiques des questions retournées',
+  })
   @ApiResponse({ status: 401, description: 'Non autorisé' })
-  @ApiResponse({ status: 403, description: 'Permission insuffisante - Accès admin requis' })
+  @ApiResponse({
+    status: 403,
+    description: 'Permission insuffisante - Accès admin requis',
+  })
   async getQuestionStats() {
     return this.adminService.getQuestionStats();
   }

@@ -1,5 +1,10 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { AppService } from './app.service';
 import { AuthGuard, PermissionsGuard, Permissions, CurrentUser } from './auth';
 
@@ -9,7 +14,10 @@ export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Page d\'accueil', description: 'Route publique - accessible sans authentification' })
+  @ApiOperation({
+    summary: "Page d'accueil",
+    description: 'Route publique - accessible sans authentification',
+  })
   @ApiResponse({ status: 200, description: 'Message de bienvenue' })
   getHello(): string {
     return this.appService.getHello();
@@ -18,9 +26,18 @@ export class AppController {
   @Get('protected')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Route protégée', description: 'Vérifie que l\'utilisateur est authentifié' })
-  @ApiResponse({ status: 200, description: 'Utilisateur authentifié avec succès' })
-  @ApiResponse({ status: 401, description: 'Non autorisé - Token invalide ou manquant' })
+  @ApiOperation({
+    summary: 'Route protégée',
+    description: "Vérifie que l'utilisateur est authentifié",
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Utilisateur authentifié avec succès',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Non autorisé - Token invalide ou manquant',
+  })
   getProtected(@CurrentUser() user: any) {
     return {
       message: 'Vous êtes authentifié!',
@@ -32,10 +49,16 @@ export class AppController {
   @UseGuards(AuthGuard, PermissionsGuard)
   @Permissions('read:admin')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Route admin', description: 'Accès réservé aux administrateurs avec permission read:admin' })
+  @ApiOperation({
+    summary: 'Route admin',
+    description: 'Accès réservé aux administrateurs avec permission read:admin',
+  })
   @ApiResponse({ status: 200, description: 'Accès admin autorisé' })
   @ApiResponse({ status: 401, description: 'Non autorisé' })
-  @ApiResponse({ status: 403, description: 'Accès interdit - Permissions insuffisantes' })
+  @ApiResponse({
+    status: 403,
+    description: 'Accès interdit - Permissions insuffisantes',
+  })
   getAdmin(@CurrentUser() user: any) {
     return {
       message: 'Accès admin autorisé',

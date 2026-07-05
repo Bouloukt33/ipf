@@ -41,11 +41,23 @@ export interface SubscriptionItem {
   };
 }
 
+export interface CreateUserPayload {
+  email: string;
+  displayName?: string;
+  role?: 'USER' | 'MODERATOR' | 'ADMIN';
+}
+
 export const usersService = {
   getAnalytics: (token: string, params: any): Promise<{ data: UserAnalytics[], meta: any }> => {
     const query = new URLSearchParams(params).toString();
     return apiRequest(`/admin/users?${query}`, token);
   },
+
+  create: (token: string, data: CreateUserPayload): Promise<{ message: string }> =>
+    apiRequest('/users', token, { method: 'POST', body: JSON.stringify(data) }),
+
+  toggleActive: (token: string, id: string): Promise<{ isActive: boolean }> =>
+    apiRequest(`/users/${id}/toggle-active`, token, { method: 'POST' }),
 
   getSubscriptions: (token: string, params: any): Promise<{ data: SubscriptionItem[], meta: any }> => {
     const query = new URLSearchParams(params).toString();

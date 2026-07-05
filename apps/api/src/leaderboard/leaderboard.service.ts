@@ -8,8 +8,14 @@ const PODIUM_BG: Record<number, string> = {
 };
 
 const AVATAR_COLORS = [
-  'bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-red-500',
-  'bg-indigo-500', 'bg-pink-500', 'bg-teal-500', 'bg-orange-500',
+  'bg-blue-500',
+  'bg-green-500',
+  'bg-purple-500',
+  'bg-red-500',
+  'bg-indigo-500',
+  'bg-pink-500',
+  'bg-teal-500',
+  'bg-orange-500',
 ];
 
 function avatarBg(id: string): string {
@@ -18,7 +24,10 @@ function avatarBg(id: string): string {
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
 }
 
-function getInitial(displayName: string | null | undefined, email: string): string {
+function getInitial(
+  displayName: string | null | undefined,
+  email: string,
+): string {
   return (displayName ?? email ?? '?').charAt(0).toUpperCase();
 }
 
@@ -26,7 +35,10 @@ function getInitial(displayName: string | null | undefined, email: string): stri
 export class LeaderboardService {
   constructor(private prisma: PrismaService) {}
 
-  private async getOrCreateLeaderboard(type: 'GLOBAL' | 'CATEGORY', categoryId?: string) {
+  private async getOrCreateLeaderboard(
+    type: 'GLOBAL' | 'CATEGORY',
+    categoryId?: string,
+  ) {
     const where: any = { type, isActive: true };
     if (categoryId) where.categoryId = categoryId;
 

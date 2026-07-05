@@ -113,28 +113,29 @@ export class QuizService {
     if (packId) {
       const pack = await this.prisma.pack.findUnique({
         where: { id: packId },
-        include: { 
-          category: true, 
-          questions: { select: { id: true } } 
-        }
+        include: {
+          category: true,
+          questions: { select: { id: true } },
+        },
       });
 
       if (!pack) throw new NotFoundException('Pack non trouvé');
 
       if (pack.visibility === 'PRIVATE' && pack.assignedUserId !== user.id) {
-        throw new ForbiddenException('Ce pack est privé et ne vous est pas assigné');
+        throw new ForbiddenException(
+          'Ce pack est privé et ne vous est pas assigné',
+        );
       }
 
-      const allPackQuestionIds = pack.questions.map(q => q.id);
+      const allPackQuestionIds = pack.questions.map((q) => q.id);
       this.shuffle(allPackQuestionIds);
-      
+
       const count = pack.targetQuestionCount || allPackQuestionIds.length;
       questionIds = allPackQuestionIds.slice(0, count);
-      
+
       categoryId = pack.categoryId;
       sessionCategoryName = pack.name;
       durationOverride = pack.durationOverride;
-
     } else {
       if (!categoryId) {
         const defaultCat = await this.prisma.category.findFirst({
@@ -151,15 +152,23 @@ export class QuizService {
       }
 
       if (category?.isPremium && !isPremium) {
-        throw new ForbiddenException('Cette catégorie est réservée aux abonnés Premium');
+        throw new ForbiddenException(
+          'Cette catégorie est réservée aux abonnés Premium',
+        );
       }
 
       sessionCategoryName = category?.name ?? 'Bail commercial';
-      questionIds = await this.selectQuestions(user.id, categoryId, QUESTIONS_PER_SESSION);
+      questionIds = await this.selectQuestions(
+        user.id,
+        categoryId,
+        QUESTIONS_PER_SESSION,
+      );
     }
 
     if (questionIds.length === 0) {
-      throw new BadRequestException('Aucune question disponible pour cette sélection');
+      throw new BadRequestException(
+        'Aucune question disponible pour cette sélection',
+      );
     }
 
     const session = await this.prisma.quizSession.create({
@@ -217,8 +226,10 @@ export class QuizService {
 
     if (!user) throw new NotFoundException('Utilisateur non trouvé');
     if (!session) throw new NotFoundException('Session non trouvée');
-    if (session.userId !== user.id) throw new ForbiddenException('Accès non autorisé');
-    if (session.status !== 'IN_PROGRESS') throw new BadRequestException('Session terminée');
+    if (session.userId !== user.id)
+      throw new ForbiddenException('Accès non autorisé');
+    if (session.status !== 'IN_PROGRESS')
+      throw new BadRequestException('Session terminée');
 
     const questionOrder = session.questionOrder as string[];
     const currentIdx = session.currentQuestionIdx;
@@ -230,8 +241,10 @@ export class QuizService {
     const serverElapsedMs = session.questionServedAt
       ? Date.now() - new Date(session.questionServedAt).getTime()
       : 0;
-    
-    const limitMs = session.durationOverride ? session.durationOverride * 1000 : TIMER_LIMIT_MS;
+
+    const limitMs = session.durationOverride
+      ? session.durationOverride * 1000
+      : TIMER_LIMIT_MS;
     const isTimedOut = serverElapsedMs > limitMs + TIMER_TOLERANCE_MS;
 
     const question = await this.prisma.question.findUnique({
@@ -241,14 +254,19 @@ export class QuizService {
     if (!question) throw new NotFoundException('Question non trouvée');
 
     const isSkip = userAnswer === 'SKIP';
-    const isCorrect = !isTimedOut && !isSkip && question.correctAnswer === userAnswer;
+    const isCorrect =
+      !isTimedOut && !isSkip && question.correctAnswer === userAnswer;
 
     let xpEarned = 0;
     let newCombo = session.comboCount;
     let newLives = session.livesRemaining;
 
     if (isCorrect) {
-      xpEarned = this.calculateXP(responseTimeMs, question.level ?? 1, session.comboCount);
+      xpEarned = this.calculateXP(
+        responseTimeMs,
+        question.level ?? 1,
+        session.comboCount,
+      );
       newCombo = session.comboCount + 1;
     } else {
       xpEarned = isSkip ? XP_SKIP : XP_WRONG;
@@ -270,7 +288,9 @@ export class QuizService {
     const nextIdx = currentIdx + 1;
     const isGameOver = newLives <= 0;
     const isSessionComplete = nextIdx >= questionOrder.length || isGameOver;
-    const newStatus: SessionStatus = isSessionComplete ? 'COMPLETED' : 'IN_PROGRESS';
+    const newStatus: SessionStatus = isSessionComplete
+      ? 'COMPLETED'
+      : 'IN_PROGRESS';
 
     await this.prisma.quizSession.update({
       where: { id: sessionId },
@@ -286,16 +306,21 @@ export class QuizService {
       },
     });
 
-    const feedback = question.pedagogicalContent ? {
-      keyMessage: (question.pedagogicalContent as any).keyMessage ?? null,
-      essentialPoints: (question.pedagogicalContent as any).essentialPoints ?? null,
-      example: (question.pedagogicalContent as any).example ?? null,
-      trap: (question.pedagogicalContent as any).trap ?? null,
-    } : null;
+    const feedback = question.pedagogicalContent
+      ? {
+          keyMessage: (question.pedagogicalContent as any).keyMessage ?? null,
+          essentialPoints:
+            (question.pedagogicalContent as any).essentialPoints ?? null,
+          example: (question.pedagogicalContent as any).example ?? null,
+          trap: (question.pedagogicalContent as any).trap ?? null,
+        }
+      : null;
 
     let nextQuestion: QuestionPayload | null = null;
     if (!isSessionComplete && nextIdx < questionOrder.length) {
-      const nextQ = await this.prisma.question.findUnique({ where: { id: questionOrder[nextIdx] } });
+      const nextQ = await this.prisma.question.findUnique({
+        where: { id: questionOrder[nextIdx] },
+      });
       if (nextQ) {
         nextQuestion = {
           id: nextQ.id,
@@ -323,8 +348,14 @@ export class QuizService {
     };
   }
 
-  async completeSession(sessionId: string, auth0Id: string): Promise<CompletionResult> {
-    const user = await this.prisma.user.findUnique({ where: { auth0Id }, select: { id: true } });
+  async completeSession(
+    sessionId: string,
+    auth0Id: string,
+  ): Promise<CompletionResult> {
+    const user = await this.prisma.user.findUnique({
+      where: { auth0Id },
+      select: { id: true },
+    });
     if (!user) throw new NotFoundException('Utilisateur non trouvé');
 
     const session = await this.prisma.quizSession.findUnique({
@@ -336,7 +367,8 @@ export class QuizService {
     });
 
     if (!session) throw new NotFoundException('Session non trouvée');
-    if (session.userId !== user.id) throw new ForbiddenException('Accès non autorisé');
+    if (session.userId !== user.id)
+      throw new ForbiddenException('Accès non autorisé');
 
     const wasInProgress = session.status === 'IN_PROGRESS';
     if (wasInProgress) {
@@ -347,9 +379,14 @@ export class QuizService {
     }
 
     const answeredCount = session.answers.length;
-    const accuracy = answeredCount > 0 ? (session.correctAnswers / answeredCount) * 100 : 0;
-    const totalTimeMs = session.answers.reduce((sum, a) => sum + a.responseTimeMs, 0);
-    const averageTimeMs = answeredCount > 0 ? Math.round(totalTimeMs / answeredCount) : 0;
+    const accuracy =
+      answeredCount > 0 ? (session.correctAnswers / answeredCount) * 100 : 0;
+    const totalTimeMs = session.answers.reduce(
+      (sum, a) => sum + a.responseTimeMs,
+      0,
+    );
+    const averageTimeMs =
+      answeredCount > 0 ? Math.round(totalTimeMs / answeredCount) : 0;
     const bestCombo = this.calculateBestCombo(session.answers);
 
     const profile = session.user.profile;
@@ -358,7 +395,9 @@ export class QuizService {
     const newXpTotal = previousXp + session.xpEarned;
     const newLevel = this.calculateLevel(newXpTotal);
     const leveledUp = newLevel > previousLevel;
-    const streakDays = profile ? this.calculateStreak(profile.lastPlayedAt, profile.streakDays) : 1;
+    const streakDays = profile
+      ? this.calculateStreak(profile.lastPlayedAt, profile.streakDays)
+      : 1;
 
     if (profile) {
       await this.prisma.userProfile.update({
@@ -375,8 +414,17 @@ export class QuizService {
     }
 
     if (wasInProgress) {
-      await this.updateMastery(session.userId, session.categoryId, answeredCount, session.correctAnswers);
-      await this.updateLeaderboards(session.userId, newXpTotal, session.categoryId);
+      await this.updateMastery(
+        session.userId,
+        session.categoryId,
+        answeredCount,
+        session.correctAnswers,
+      );
+      await this.updateLeaderboards(
+        session.userId,
+        newXpTotal,
+        session.categoryId,
+      );
     }
 
     return {
@@ -393,7 +441,9 @@ export class QuizService {
       leveledUp,
       previousLevel,
       xpForCurrentLevel: LEVEL_THRESHOLDS[newLevel - 1] ?? 0,
-      xpForNextLevel: LEVEL_THRESHOLDS[newLevel] ?? LEVEL_THRESHOLDS[LEVEL_THRESHOLDS.length - 1],
+      xpForNextLevel:
+        LEVEL_THRESHOLDS[newLevel] ??
+        LEVEL_THRESHOLDS[LEVEL_THRESHOLDS.length - 1],
       streakDays,
       mascotRange: this.getMascotRange(accuracy),
     };
@@ -429,7 +479,8 @@ export class QuizService {
       },
     });
 
-    if (!session || session.userId !== user.id) throw new ForbiddenException('Accès non autorisé');
+    if (!session || session.userId !== user.id)
+      throw new ForbiddenException('Accès non autorisé');
 
     return {
       sessionId: session.id,
@@ -448,12 +499,16 @@ export class QuizService {
         isCorrect: a.isCorrect,
         responseTimeMs: a.responseTimeMs,
         xpEarned: a.xpEarned,
-        feedback: a.question.pedagogicalContent ? {
-          keyMessage: (a.question.pedagogicalContent as any).keyMessage ?? null,
-          essentialPoints: (a.question.pedagogicalContent as any).essentialPoints ?? null,
-          example: (a.question.pedagogicalContent as any).example ?? null,
-          trap: (a.question.pedagogicalContent as any).trap ?? null,
-        } : null,
+        feedback: a.question.pedagogicalContent
+          ? {
+              keyMessage:
+                (a.question.pedagogicalContent as any).keyMessage ?? null,
+              essentialPoints:
+                (a.question.pedagogicalContent as any).essentialPoints ?? null,
+              example: (a.question.pedagogicalContent as any).example ?? null,
+              trap: (a.question.pedagogicalContent as any).trap ?? null,
+            }
+          : null,
       })),
     };
   }
@@ -467,15 +522,20 @@ export class QuizService {
       include: { category: { select: { name: true } } },
     });
 
-    if (!session || session.userId !== user.id) throw new ForbiddenException('Accès non autorisé');
-    if (session.status !== 'IN_PROGRESS') throw new BadRequestException('Session terminée');
+    if (!session || session.userId !== user.id)
+      throw new ForbiddenException('Accès non autorisé');
+    if (session.status !== 'IN_PROGRESS')
+      throw new BadRequestException('Session terminée');
 
     const questionOrder = session.questionOrder as string[];
     const currentIdx = session.currentQuestionIdx;
 
-    if (currentIdx >= questionOrder.length) throw new BadRequestException('Toutes les questions ont été répondues');
+    if (currentIdx >= questionOrder.length)
+      throw new BadRequestException('Toutes les questions ont été répondues');
 
-    const question = await this.prisma.question.findUnique({ where: { id: questionOrder[currentIdx] } });
+    const question = await this.prisma.question.findUnique({
+      where: { id: questionOrder[currentIdx] },
+    });
     if (!question) throw new NotFoundException('Question non trouvée');
 
     await this.prisma.quizSession.update({
@@ -507,9 +567,11 @@ export class QuizService {
       this.prisma.user.findUnique({ where: { auth0Id }, select: { id: true } }),
       this.prisma.quizSession.findUnique({ where: { id: sessionId } }),
     ]);
-    
-    if (!user || !session || session.userId !== user.id) throw new ForbiddenException('Accès non autorisé');
-    if (session.status !== 'IN_PROGRESS') throw new BadRequestException('Session terminée');
+
+    if (!user || !session || session.userId !== user.id)
+      throw new ForbiddenException('Accès non autorisé');
+    if (session.status !== 'IN_PROGRESS')
+      throw new BadRequestException('Session terminée');
 
     await this.prisma.quizSession.update({
       where: { id: sessionId },
@@ -521,7 +583,11 @@ export class QuizService {
 
   // ── Private helpers ──
 
-  private calculateXP(responseTimeMs: number, level: number = 1, comboCount: number = 0): number {
+  private calculateXP(
+    responseTimeMs: number,
+    level: number = 1,
+    comboCount: number = 0,
+  ): number {
     const baseXP = XP_BASE[level as keyof typeof XP_BASE] ?? XP_BASE[1];
     let speedMult = 0.8;
     for (const { maxMs, mult } of SPEED_MULTIPLIERS) {
@@ -534,7 +600,11 @@ export class QuizService {
     return Math.round(baseXP * speedMult * comboBonus);
   }
 
-  private async selectQuestions(userId: string, categoryId: string | undefined, count: number): Promise<string[]> {
+  private async selectQuestions(
+    userId: string,
+    categoryId: string | undefined,
+    count: number,
+  ): Promise<string[]> {
     const where: any = { isActive: true };
     if (categoryId) where.categoryId = categoryId;
 
@@ -545,14 +615,20 @@ export class QuizService {
     });
     const seenIds = new Set(answeredQuestionIds.map((a) => a.questionId));
 
-    const allQuestions = await this.prisma.question.findMany({ where, select: { id: true } });
+    const allQuestions = await this.prisma.question.findMany({
+      where,
+      select: { id: true },
+    });
     const unseen = allQuestions.filter((q) => !seenIds.has(q.id));
     const seen = allQuestions.filter((q) => seenIds.has(q.id));
 
     this.shuffle(unseen);
     this.shuffle(seen);
 
-    const selected = [...unseen.slice(0, count), ...seen.slice(0, Math.max(0, count - unseen.length))].slice(0, count);
+    const selected = [
+      ...unseen.slice(0, count),
+      ...seen.slice(0, Math.max(0, count - unseen.length)),
+    ].slice(0, count);
     this.shuffle(selected);
     return selected.map((q) => q.id);
   }
@@ -568,28 +644,42 @@ export class QuizService {
     return Math.min(level, LEVEL_THRESHOLDS.length);
   }
 
-  private calculateStreak(lastPlayedAt: Date | null, currentStreak: number): number {
+  private calculateStreak(
+    lastPlayedAt: Date | null,
+    currentStreak: number,
+  ): number {
     if (!lastPlayedAt) return 1;
     const now = new Date();
     const lastPlayed = new Date(lastPlayedAt);
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const lastDay = new Date(lastPlayed.getFullYear(), lastPlayed.getMonth(), lastPlayed.getDate());
-    const diffDays = Math.floor((today.getTime() - lastDay.getTime()) / (1000 * 60 * 60 * 24));
+    const lastDay = new Date(
+      lastPlayed.getFullYear(),
+      lastPlayed.getMonth(),
+      lastPlayed.getDate(),
+    );
+    const diffDays = Math.floor(
+      (today.getTime() - lastDay.getTime()) / (1000 * 60 * 60 * 24),
+    );
     if (diffDays === 0) return currentStreak;
     if (diffDays === 1) return currentStreak + 1;
     return 1;
   }
 
   private calculateBestCombo(answers: Array<{ isCorrect: boolean }>): number {
-    let best = 0, current = 0;
+    let best = 0,
+      current = 0;
     for (const a of answers) {
-      if (a.isCorrect) { current++; best = Math.max(best, current); }
-      else current = 0;
+      if (a.isCorrect) {
+        current++;
+        best = Math.max(best, current);
+      } else current = 0;
     }
     return best;
   }
 
-  private getMascotRange(accuracy: number): 'sad' | 'moderate' | 'good' | 'great' | 'perfect' {
+  private getMascotRange(
+    accuracy: number,
+  ): 'sad' | 'moderate' | 'good' | 'great' | 'perfect' {
     if (accuracy >= 90) return 'perfect';
     if (accuracy >= 75) return 'great';
     if (accuracy >= 50) return 'good';
@@ -604,38 +694,85 @@ export class QuizService {
     }
   }
 
-  private async updateMastery(userId: string, categoryId: string | null, questionsSeen: number, correctCount: number) {
+  private async updateMastery(
+    userId: string,
+    categoryId: string | null,
+    questionsSeen: number,
+    correctCount: number,
+  ) {
     if (!categoryId) return;
-    const existing = await this.prisma.userMastery.findFirst({ where: { userId, categoryId, themeId: null } });
+    const existing = await this.prisma.userMastery.findFirst({
+      where: { userId, categoryId, themeId: null },
+    });
     if (existing) {
       const newSeen = existing.questionsSeen + questionsSeen;
       const newCorrect = existing.correctCount + correctCount;
       await this.prisma.userMastery.update({
         where: { id: existing.id },
-        data: { questionsSeen: newSeen, correctCount: newCorrect, masteryLevel: newSeen > 0 ? newCorrect / newSeen : 0, lastPracticedAt: new Date() },
+        data: {
+          questionsSeen: newSeen,
+          correctCount: newCorrect,
+          masteryLevel: newSeen > 0 ? newCorrect / newSeen : 0,
+          lastPracticedAt: new Date(),
+        },
       });
     } else {
       await this.prisma.userMastery.create({
-        data: { userId, categoryId, themeId: null, questionsSeen, correctCount, masteryLevel: questionsSeen > 0 ? correctCount / questionsSeen : 0, lastPracticedAt: new Date() },
+        data: {
+          userId,
+          categoryId,
+          themeId: null,
+          questionsSeen,
+          correctCount,
+          masteryLevel: questionsSeen > 0 ? correctCount / questionsSeen : 0,
+          lastPracticedAt: new Date(),
+        },
       });
     }
   }
 
-  private async updateLeaderboards(userId: string, newXpTotal: number, categoryId: string | null) {
-    let globalLb = await this.prisma.leaderboard.findFirst({ where: { type: 'GLOBAL', isActive: true } });
-    if (!globalLb) globalLb = await this.prisma.leaderboard.create({ data: { type: 'GLOBAL', isActive: true } });
+  private async updateLeaderboards(
+    userId: string,
+    newXpTotal: number,
+    categoryId: string | null,
+  ) {
+    let globalLb = await this.prisma.leaderboard.findFirst({
+      where: { type: 'GLOBAL', isActive: true },
+    });
+    if (!globalLb)
+      globalLb = await this.prisma.leaderboard.create({
+        data: { type: 'GLOBAL', isActive: true },
+      });
     await this.prisma.leaderboardEntry.upsert({
       where: { leaderboardId_userId: { leaderboardId: globalLb.id, userId } },
-      create: { leaderboardId: globalLb.id, userId, score: newXpTotal, rank: 0 },
+      create: {
+        leaderboardId: globalLb.id,
+        userId,
+        score: newXpTotal,
+        rank: 0,
+      },
       update: { score: newXpTotal },
     });
     if (!categoryId) return;
-    let categoryLb = await this.prisma.leaderboard.findFirst({ where: { type: 'CATEGORY', categoryId, isActive: true } });
-    if (!categoryLb) categoryLb = await this.prisma.leaderboard.create({ data: { type: 'CATEGORY', categoryId, isActive: true } });
-    const { _sum } = await this.prisma.quizSession.aggregate({ where: { userId, categoryId, status: 'COMPLETED' }, _sum: { xpEarned: true } });
+    let categoryLb = await this.prisma.leaderboard.findFirst({
+      where: { type: 'CATEGORY', categoryId, isActive: true },
+    });
+    if (!categoryLb)
+      categoryLb = await this.prisma.leaderboard.create({
+        data: { type: 'CATEGORY', categoryId, isActive: true },
+      });
+    const { _sum } = await this.prisma.quizSession.aggregate({
+      where: { userId, categoryId, status: 'COMPLETED' },
+      _sum: { xpEarned: true },
+    });
     await this.prisma.leaderboardEntry.upsert({
       where: { leaderboardId_userId: { leaderboardId: categoryLb.id, userId } },
-      create: { leaderboardId: categoryLb.id, userId, score: _sum.xpEarned ?? 0, rank: 0 },
+      create: {
+        leaderboardId: categoryLb.id,
+        userId,
+        score: _sum.xpEarned ?? 0,
+        rank: 0,
+      },
       update: { score: _sum.xpEarned ?? 0 },
     });
   }

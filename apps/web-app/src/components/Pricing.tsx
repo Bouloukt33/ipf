@@ -56,7 +56,7 @@ export default function Pricing() {
                         Choisissez votre formule
                     </h2>
                     <p className="text-xl text-charcoal/70 font-semibold">
-                        Des options adaptées à tous les profils d'apprentissage
+                        Des options adaptées à tous les profils d&apos;apprentissage
                     </p>
                 </div>
 

@@ -17,17 +17,17 @@ export class PacksService {
     const where: Record<string, any> = {};
     if (!filters?.includeInactive) where.isActive = true;
     if (filters?.categoryId) where.categoryId = filters.categoryId;
-    
+
     // Logique de visibilité
     if (!filters?.isAdmin) {
       if (filters?.auth0Id) {
         const user = await this.prisma.user.findUnique({
-          where: { auth0Id: filters.auth0Id }
+          where: { auth0Id: filters.auth0Id },
         });
         if (user) {
           where.OR = [
             { visibility: 'PUBLIC' },
-            { visibility: 'PRIVATE', assignedUserId: user.id }
+            { visibility: 'PRIVATE', assignedUserId: user.id },
           ];
         } else {
           where.visibility = 'PUBLIC';
@@ -49,6 +49,7 @@ export class PacksService {
         isFree: true,
         price: true,
         isActive: true,
+        status: true,
         order: true,
         visibility: true,
         assignedUserId: true,
@@ -61,8 +62,8 @@ export class PacksService {
           select: {
             id: true,
             email: true,
-            profile: { select: { displayName: true } }
-          }
+            profile: { select: { displayName: true } },
+          },
         },
         _count: { select: { questions: true } },
       },
@@ -83,6 +84,7 @@ export class PacksService {
         isFree: true,
         price: true,
         isActive: true,
+        status: true,
         order: true,
         visibility: true,
         assignedUserId: true,
@@ -95,8 +97,8 @@ export class PacksService {
           select: {
             id: true,
             email: true,
-            profile: { select: { displayName: true } }
-          }
+            profile: { select: { displayName: true } },
+          },
         },
         questions: {
           include: { theme: true },
@@ -128,6 +130,7 @@ export class PacksService {
         isFree: true,
         price: true,
         isActive: true,
+        status: true,
         order: true,
         visibility: true,
         assignedUserId: true,
@@ -149,9 +152,41 @@ export class PacksService {
     return pack;
   }
 
+  /**
+   * Statut à 3 états (point client n°8) : `isActive` reste le miroir
+   * booléen filtré par les endpoints publics — seul un pack ACTIVE est
+   * visible/jouable, SUSPENDED et DISABLED sont masqués.
+   */
+  private resolveStatus(data: { status?: string; isActive?: boolean }): {
+    status: 'ACTIVE' | 'SUSPENDED' | 'DISABLED';
+    isActive: boolean;
+  } | null {
+    if (data.status !== undefined) {
+      return {
+        status: data.status as 'ACTIVE' | 'SUSPENDED' | 'DISABLED',
+        isActive: data.status === 'ACTIVE',
+      };
+    }
+    if (data.isActive !== undefined) {
+      return {
+        status: data.isActive ? 'ACTIVE' : 'DISABLED',
+        isActive: data.isActive,
+      };
+    }
+    return null;
+  }
+
   async create(data: CreatePackDto) {
     const { questionIds, ...packData } = data;
-    console.log('[PacksService] Creating pack with questions:', questionIds?.length);
+    console.log(
+      '[PacksService] Creating pack with questions:',
+      questionIds?.length,
+    );
+
+    const resolved = this.resolveStatus(packData) ?? {
+      status: 'ACTIVE' as const,
+      isActive: true,
+    };
 
     return this.prisma.pack.create({
       data: {
@@ -163,13 +198,18 @@ export class PacksService {
         isFree: packData.isFree ?? false,
         price: packData.price ? packData.price : null,
         order: packData.order ?? 0,
+        status: resolved.status,
+        isActive: resolved.isActive,
         visibility: packData.visibility ?? 'PUBLIC',
         assignedUserId: packData.assignedUserId ?? null,
         durationOverride: packData.durationOverride ?? null,
         targetQuestionCount: packData.targetQuestionCount ?? null,
-        questions: questionIds && questionIds.length > 0 ? {
-          connect: questionIds.map(id => ({ id }))
-        } : undefined,
+        questions:
+          questionIds && questionIds.length > 0
+            ? {
+                connect: questionIds.map((id) => ({ id })),
+              }
+            : undefined,
       },
       include: { category: true, _count: { select: { questions: true } } },
     });
@@ -178,28 +218,41 @@ export class PacksService {
   async update(id: string, data: UpdatePackDto) {
     const { questionIds, ...updateData } = data;
     await this.findOne(id);
-    
-    console.log('[PacksService] Updating pack questions, count:', questionIds?.length);
+
+    console.log(
+      '[PacksService] Updating pack questions, count:',
+      questionIds?.length,
+    );
 
     const payload: Record<string, any> = {};
     if (updateData.name !== undefined) payload.name = updateData.name;
     if (updateData.slug !== undefined) payload.slug = updateData.slug;
-    if (updateData.description !== undefined) payload.description = updateData.description;
+    if (updateData.description !== undefined)
+      payload.description = updateData.description;
     if (updateData.type !== undefined) payload.type = updateData.type;
     if (updateData.isFree !== undefined) payload.isFree = updateData.isFree;
     if (updateData.price !== undefined) payload.price = updateData.price;
     if (updateData.order !== undefined) payload.order = updateData.order;
-    if (updateData.isActive !== undefined) payload.isActive = updateData.isActive;
-    if (updateData.categoryId !== undefined) payload.categoryId = updateData.categoryId;
-    if (updateData.visibility !== undefined) payload.visibility = updateData.visibility;
-    if (updateData.assignedUserId !== undefined) payload.assignedUserId = updateData.assignedUserId;
-    if (updateData.durationOverride !== undefined) payload.durationOverride = updateData.durationOverride;
-    if (updateData.targetQuestionCount !== undefined) payload.targetQuestionCount = updateData.targetQuestionCount;
+    const resolved = this.resolveStatus(updateData);
+    if (resolved) {
+      payload.status = resolved.status;
+      payload.isActive = resolved.isActive;
+    }
+    if (updateData.categoryId !== undefined)
+      payload.categoryId = updateData.categoryId;
+    if (updateData.visibility !== undefined)
+      payload.visibility = updateData.visibility;
+    if (updateData.assignedUserId !== undefined)
+      payload.assignedUserId = updateData.assignedUserId;
+    if (updateData.durationOverride !== undefined)
+      payload.durationOverride = updateData.durationOverride;
+    if (updateData.targetQuestionCount !== undefined)
+      payload.targetQuestionCount = updateData.targetQuestionCount;
 
     // Gestion des questions via relation set (écrase les anciennes)
     if (questionIds !== undefined) {
       payload.questions = {
-        set: questionIds.map(qid => ({ id: qid }))
+        set: questionIds.map((qid) => ({ id: qid })),
       };
     }
 
@@ -217,9 +270,10 @@ export class PacksService {
 
   async toggleActive(id: string) {
     const pack = await this.findOne(id);
+    const isActive = !pack.isActive;
     return this.prisma.pack.update({
       where: { id },
-      data: { isActive: !pack.isActive },
+      data: { isActive, status: isActive ? 'ACTIVE' : 'DISABLED' },
     });
   }
 
@@ -229,10 +283,10 @@ export class PacksService {
       where: { id: packId },
       data: {
         questions: {
-          connect: questionIds.map(id => ({ id }))
-        }
+          connect: questionIds.map((id) => ({ id })),
+        },
       },
-      include: { _count: { select: { questions: true } } }
+      include: { _count: { select: { questions: true } } },
     });
   }
 
@@ -242,9 +296,9 @@ export class PacksService {
       where: { id: packId },
       data: {
         questions: {
-          disconnect: { id: questionId }
-        }
-      }
+          disconnect: { id: questionId },
+        },
+      },
     });
   }
 }
