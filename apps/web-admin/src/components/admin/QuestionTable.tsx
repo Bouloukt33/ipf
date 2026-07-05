@@ -1,5 +1,7 @@
+import { SearchX } from 'lucide-react';
 import type { IQuestion, IPack } from '../../lib/types';
 import { QuestionRow } from './QuestionRow';
+import { enterAt } from '../../lib/utils';
 
 interface QuestionTableProps {
     packs:      IPack[];
@@ -31,12 +33,17 @@ export function QuestionTable({
 }: QuestionTableProps) {
     if (isLoading) {
         return (
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                <div className="flex items-center justify-center py-20">
-                    <div className="flex flex-col items-center gap-3">
-                        <div className="w-8 h-8 border-4 border-[#D27A2D] border-t-transparent rounded-full animate-spin" />
-                        <span className="text-sm font-bold text-[#5a7a99]">Chargement…</span>
-                    </div>
+            <div className="bg-white rounded-[28px] border border-ink-100 shadow-soft overflow-hidden p-6" aria-busy="true">
+                <div className="space-y-4">
+                    {Array.from({ length: 6 }).map((_, i) => (
+                        <div key={i} className="flex items-center gap-4">
+                            <div className="h-5 w-10 rounded-lg bg-ink-100 animate-pulse flex-shrink-0" />
+                            <div className="h-5 w-24 rounded-lg bg-ink-100 animate-pulse flex-shrink-0" />
+                            <div className="h-5 flex-1 rounded-lg bg-ink-100 animate-pulse" />
+                            <div className="h-5 w-28 rounded-full bg-ink-100 animate-pulse flex-shrink-0" />
+                            <div className="h-5 w-20 rounded-full bg-ink-100 animate-pulse flex-shrink-0" />
+                        </div>
+                    ))}
                 </div>
             </div>
         );
@@ -44,10 +51,12 @@ export function QuestionTable({
 
     if (questions.length === 0) {
         return (
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                <div className="flex flex-col items-center justify-center py-16 text-[#5a7a99]">
-                    <div className="text-5xl mb-3">🔍</div>
-                    <div className="text-base font-bold">Aucune question trouvée</div>
+            <div className="bg-white rounded-[28px] border border-ink-100 shadow-soft overflow-hidden motion-safe:animate-scale-in">
+                <div className="flex flex-col items-center justify-center py-16 text-steel">
+                    <span aria-hidden className="flex items-center justify-center w-14 h-14 rounded-2xl bg-cream text-primary mb-4">
+                        <SearchX size={26} />
+                    </span>
+                    <div className="text-base font-black text-text-primary">Aucune question trouvée</div>
                     <div className="text-sm font-semibold mt-1">Modifiez vos filtres ou créez une nouvelle question</div>
                 </div>
             </div>
@@ -55,18 +64,20 @@ export function QuestionTable({
     }
 
     return (
-        <div className="bg-white rounded-xl border-[1.5px] border-gray-200 overflow-hidden shadow-sm">
+        <div
+            className="bg-white rounded-[28px] border border-ink-100 overflow-hidden shadow-soft motion-safe:animate-fade-in-up"
+            style={enterAt(160)}
+        >
             <div className="overflow-x-auto">
                 <table className="w-full border-collapse">
                     <thead>
-                        <tr>
+                        <tr className="border-b border-ink-100">
                             {COLUMNS.map((col) => (
                                 <th
                                     key={col.key}
                                     className={`
-                    ${col.width} px-4 py-3 text-left
-                    text-[11px] font-extrabold uppercase tracking-widest text-[#5a7a99]
-                    border-b-2 border-[rgba(210,122,45,0.15)] bg-[#fafaf9] whitespace-nowrap
+                    ${col.width} px-4 py-4 text-left
+                    text-[11px] font-black uppercase tracking-wider text-steel whitespace-nowrap
                   `}
                                 >
                                     {col.label}
@@ -80,7 +91,6 @@ export function QuestionTable({
                                 key={question.id}
                                 question={question}
                                 number={startIndex + idx + 1}
-                                isEven={idx % 2 === 0}
                                 onEdit={onEdit}
                                 onDelete={onDelete}
                                 onSuspend={onSuspend}

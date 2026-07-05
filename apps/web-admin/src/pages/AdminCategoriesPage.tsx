@@ -1,26 +1,38 @@
 import { useAdminCategories } from '../hooks/useAdminCategories';
 import { BookOpen, Plus, MoreVertical } from 'lucide-react';
+import { PageHero } from '../components/admin/PageHero';
+import { enterAt } from '../lib/utils';
 
 export function AdminCategoriesPage() {
   const { categories, isLoading } = useAdminCategories();
 
   return (
-    <div className="flex-1 p-8 bg-[#F8F5F1] min-h-screen">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-[28px] font-black text-[#172E42] mb-1">Types de baux</h1>
-          <p className="text-[14px] font-semibold text-[#5a7a99]">Gestion des catégories de questions et thématiques</p>
-        </div>
-        <button className="h-[48px] px-6 rounded-[16px] bg-[#172E42] text-white font-black text-[14px] flex items-center gap-2 hover:bg-black transition-all">
-          <Plus size={18} /> Nouveau bail
-        </button>
-      </div>
+    <div className="flex-1 p-8 bg-cream min-h-screen">
+      <PageHero
+        eyebrow="Contenu"
+        title="Types de baux"
+        subtitle="Gestion des catégories de questions et thématiques"
+        actions={
+          <button
+            className="h-[48px] px-6 rounded-2xl border-none bg-gradient-primary text-white font-black text-[14px]
+              flex items-center gap-2 cursor-pointer shadow-primary transition-transform
+              motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.97]"
+          >
+            <Plus size={18} aria-hidden /> Nouveau bail
+          </button>
+        }
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {isLoading ? (
-          <div className="col-span-full py-20 text-center text-[#5a7a99] font-bold">Chargement...</div>
-        ) : categories.map((cat) => (
-          <div key={cat.id} className="bg-white p-6 rounded-[32px] shadow-soft border border-ink-100 flex flex-col">
+          <div className="col-span-full py-20 text-center text-steel font-bold">Chargement...</div>
+        ) : categories.map((cat, index) => (
+          <div
+            key={cat.id}
+            className="bg-white p-6 rounded-[32px] shadow-soft border border-ink-100 flex flex-col
+              transition-transform duration-200 motion-safe:hover:-translate-y-1 motion-safe:animate-fade-in-up"
+            style={enterAt(120 + Math.min(index, 8) * 70)}
+          >
             <div className="flex justify-between items-start mb-6">
               <div 
                 className="w-14 h-14 rounded-2xl flex items-center justify-center text-white"

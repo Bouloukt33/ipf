@@ -18,6 +18,9 @@ const config: Config = {
                 charcoal: '#2A262A',
                 background: '#FFFFFF',
                 surface: '#F8F9FA',
+                cream: '#F8F5F1',
+                steel: '#5a7a99',
+                ink: { 100: 'rgba(23, 46, 66, 0.1)' },
                 text: {
                     primary: '#172E42',
                     secondary: '#2A262A',
@@ -59,6 +62,7 @@ const config: Config = {
                 'rotate-slow': 'rotate-slow 20s linear infinite',
                 'bounce-soft': 'bounce-soft 2s ease-in-out infinite',
                 'wiggle': 'wiggle 1s ease-in-out infinite',
+                'grow-x': 'grow-x 0.8s ease-out',
             },
             keyframes: {
                 'float-around': {
@@ -125,6 +129,11 @@ const config: Config = {
                 'wiggle': {
                     '0%, 100%': { transform: 'rotate(-3deg)' },
                     '50%': { transform: 'rotate(3deg)' },
+                },
+                // Croissance d'une barre de progression : l'état final vient du
+                // transform inline de l'élément, seul le départ est fixé ici.
+                'grow-x': {
+                    '0%': { transform: 'scaleX(0)' },
                 },
             },
         },
