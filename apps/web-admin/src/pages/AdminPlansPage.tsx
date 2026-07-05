@@ -1,21 +1,29 @@
 import { useAdminPlans } from '../hooks/useAdminMarketing';
 import { CreditCard, Check, Settings } from 'lucide-react';
+import { PageHero } from '../components/admin/PageHero';
+import { enterAt } from '../lib/utils';
 
 export function AdminPlansPage() {
   const { plans, isLoading } = useAdminPlans();
 
   return (
-    <div className="flex-1 p-8 bg-[#F8F5F1] min-h-screen">
-      <div className="mb-8">
-        <h1 className="text-[28px] font-black text-[#172E42] mb-1">Plans tarifaires</h1>
-        <p className="text-[14px] font-semibold text-[#5a7a99]">Configuration des offres et tarifs</p>
-      </div>
+    <div className="flex-1 p-8 bg-cream min-h-screen">
+      <PageHero
+        eyebrow="Offres"
+        title="Plans tarifaires"
+        subtitle="Configuration des offres et tarifs"
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {isLoading ? (
-          <div className="col-span-full py-20 text-center text-[#5a7a99] font-bold">Chargement...</div>
-        ) : plans.map((plan) => (
-          <div key={plan.id} className="bg-white rounded-[32px] shadow-soft border border-ink-100 overflow-hidden flex flex-col">
+          <div className="col-span-full py-20 text-center text-steel font-bold">Chargement...</div>
+        ) : plans.map((plan, index) => (
+          <div
+            key={plan.id}
+            className="bg-white rounded-[32px] shadow-soft border border-ink-100 overflow-hidden flex flex-col
+              transition-transform duration-200 motion-safe:hover:-translate-y-1 motion-safe:animate-fade-in-up"
+            style={enterAt(120 + index * 90)}
+          >
             <div className="p-8 border-b border-gray-50 bg-gray-50/30">
               <div className="flex justify-between items-start mb-4">
                 <div className="w-12 h-12 rounded-2xl bg-[#172E42] text-white flex items-center justify-center">

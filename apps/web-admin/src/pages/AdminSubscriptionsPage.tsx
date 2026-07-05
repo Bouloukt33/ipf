@@ -1,22 +1,25 @@
 import { useAdminSubscriptions } from '../hooks/useAdminSubscriptions';
 import { Calendar } from 'lucide-react';
+import { PageHero } from '../components/admin/PageHero';
+import { enterAt } from '../lib/utils';
 
 export function AdminSubscriptionsPage() {
   const { subscriptions, isLoading } = useAdminSubscriptions();
 
   return (
-    <div className="flex-1 p-8 bg-[#F8F5F1] min-h-screen">
-      <div className="mb-8">
-        <h1 className="text-[28px] font-black text-[#172E42] mb-1">Abonnements</h1>
-        <p className="text-[14px] font-semibold text-[#5a7a99]">Suivi des paiements et gestion des accès premium</p>
-      </div>
+    <div className="flex-1 p-8 bg-cream min-h-screen">
+      <PageHero
+        eyebrow="Revenus"
+        title="Abonnements"
+        subtitle="Suivi des paiements et gestion des accès premium"
+      />
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-        <div className="xl:col-span-2">
+        <div className="xl:col-span-2 motion-safe:animate-fade-in-up" style={enterAt(120)}>
           <div className="bg-white rounded-[32px] shadow-soft border border-ink-100 overflow-hidden">
             <table className="w-full border-collapse">
               <thead>
-                <tr className="bg-gray-50/50 border-b border-gray-100">
+                <tr className="border-b border-ink-100">
                   <th className="px-6 py-5 text-left text-[11px] font-black uppercase tracking-wider text-[#5a7a99]">Abonné</th>
                   <th className="px-6 py-5 text-left text-[11px] font-black uppercase tracking-wider text-[#5a7a99]">Plan</th>
                   <th className="px-6 py-5 text-left text-[11px] font-black uppercase tracking-wider text-[#5a7a99]">Statut</th>
@@ -61,20 +64,23 @@ export function AdminSubscriptionsPage() {
         </div>
 
         {/* Sidebar side info or quick stats could go here */}
-        <div className="space-y-6">
-          <div className="bg-navy p-8 rounded-[32px] text-white shadow-card">
-            <h3 className="text-[18px] font-black mb-4">Revenus récurrents</h3>
-            <p className="text-[36px] font-black mb-2">1,240 €</p>
-            <p className="text-[13px] font-bold text-white/60 mb-6">MRR Estimé (Mois en cours)</p>
-            <div className="h-px bg-white/10 mb-6" />
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-[13px] font-bold text-white/70">Abonnés actifs</span>
-                <span className="text-[15px] font-black">42</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-[13px] font-bold text-white/70">Taux de churn</span>
-                <span className="text-[15px] font-black text-red-400">4.2%</span>
+        <div className="space-y-6 motion-safe:animate-fade-in-up" style={enterAt(200)}>
+          <div className="relative overflow-hidden bg-gradient-hero p-8 rounded-[32px] text-white shadow-card">
+            <div aria-hidden className="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
+            <div className="relative">
+              <h3 className="text-[18px] font-black mb-4">Revenus récurrents</h3>
+              <p className="text-[36px] font-black mb-2">1,240 €</p>
+              <p className="text-[13px] font-bold text-white/60 mb-6">MRR Estimé (Mois en cours)</p>
+              <div className="h-px bg-white/10 mb-6" />
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-[13px] font-bold text-white/70">Abonnés actifs</span>
+                  <span className="text-[15px] font-black">42</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-[13px] font-bold text-white/70">Taux de churn</span>
+                  <span className="text-[15px] font-black text-red-400">4.2%</span>
+                </div>
               </div>
             </div>
           </div>
