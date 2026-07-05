@@ -1,16 +1,12 @@
-import { useState, type CSSProperties } from 'react';
+import { useState } from 'react';
 import { useAdminUsers } from '../hooks/useAdminUsers';
 import { Search, Mail, Zap, UserPlus, UserX, UserCheck, Users as UsersIcon } from 'lucide-react';
 import { UserModal } from '../components/admin/UserModal';
 import { InfoTip } from '../components/admin/InfoTip';
+import { PageHero } from '../components/admin/PageHero';
 import { Toast, useToast } from '../components/admin/Toast';
+import { enterAt } from '../lib/utils';
 import type { CreateUserPayload } from '../services/users.service';
-
-/** Entrée en scène décalée : l'état 0 % est maintenu pendant le délai. */
-const enterAt = (ms: number): CSSProperties => ({
-  animationDelay: `${ms}ms`,
-  animationFillMode: 'backwards',
-});
 
 export function AdminUsersPage() {
   const { users, isLoading, setFilters, filters, createUser, toggleUserActive } = useAdminUsers();
@@ -43,50 +39,51 @@ export function AdminUsersPage() {
 
   return (
     <div className="flex-1 p-8 bg-cream min-h-screen">
-      <div className="flex justify-between items-center mb-8 motion-safe:animate-fade-in-down">
-        <div>
-          <h1 className="text-[28px] font-black text-text-primary mb-1">Utilisateurs</h1>
-          <p className="text-[14px] font-semibold text-steel">Analyse des performances et engagement des joueurs</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="h-[52px] px-8 rounded-[20px] border-none bg-gradient-primary text-white font-black text-[15px]
-              flex items-center gap-3 cursor-pointer shadow-primary transition-transform
-              motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.97]
-              focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-          >
-            <UserPlus size={20} aria-hidden /> Nouvel utilisateur
-          </button>
-          <InfoTip
-            label="Aide sur la gestion des comptes"
-            side="left"
-            widthClass="w-72"
-            content={
-              <>
-                <p className="mb-1"><b>Créer</b> : le compte est ouvert (Auth0 + base) et
-                l'utilisateur reçoit un email pour définir son mot de passe.</p>
-                <p><b>Suspendre</b> : bloque la connexion sans rien supprimer —
-                réactivable à tout moment depuis la liste.</p>
-              </>
-            }
-          />
-        </div>
-      </div>
-
-      <div className="flex flex-wrap items-center gap-4 mb-8 motion-safe:animate-fade-in-up" style={enterAt(80)}>
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-steel" size={18} aria-hidden />
+      <PageHero
+        eyebrow="Communauté"
+        title="Utilisateurs"
+        subtitle="Analyse des performances et engagement des joueurs"
+        actions={
+          <>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="h-[52px] px-8 rounded-[20px] border-none bg-gradient-primary text-white font-black text-[15px]
+                flex items-center gap-3 cursor-pointer shadow-primary transition-transform
+                motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.97]
+                focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-light"
+            >
+              <UserPlus size={20} aria-hidden /> Nouvel utilisateur
+            </button>
+            <InfoTip
+              onDark
+              label="Aide sur la gestion des comptes"
+              side="left"
+              widthClass="w-72"
+              content={
+                <>
+                  <p className="mb-1"><b>Créer</b> : le compte est ouvert (Auth0 + base) et
+                  l'utilisateur reçoit un email pour définir son mot de passe.</p>
+                  <p><b>Suspendre</b> : bloque la connexion sans rien supprimer —
+                  réactivable à tout moment depuis la liste.</p>
+                </>
+              }
+            />
+          </>
+        }
+      >
+        <div className="relative max-w-md motion-safe:animate-fade-in-up" style={enterAt(120)}>
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50" size={18} aria-hidden />
           <input
             type="text"
             placeholder="Rechercher un utilisateur (nom, email)..."
             aria-label="Rechercher un utilisateur"
-            className="w-full h-[52px] pl-12 pr-4 rounded-[18px] border-2 border-transparent bg-white shadow-soft
-              focus:border-primary outline-none transition-colors font-semibold"
+            className="w-full h-[52px] pl-12 pr-4 rounded-2xl bg-white/10 border border-white/15 backdrop-blur
+              text-white placeholder:text-white/40 font-semibold outline-none
+              focus:border-primary-light focus:bg-white/15 transition-colors"
             onChange={(e) => setFilters({ ...filters, search: e.target.value, page: 1 })}
           />
         </div>
-      </div>
+      </PageHero>
 
       <div
         className="bg-white rounded-[32px] shadow-soft border border-ink-100 overflow-hidden motion-safe:animate-fade-in-up"
@@ -94,7 +91,7 @@ export function AdminUsersPage() {
       >
         <table className="w-full border-collapse">
           <thead>
-            <tr className="bg-gray-50/50 border-b border-gray-100">
+            <tr className="border-b border-ink-100">
               <th className="px-6 py-5 text-left text-[11px] font-black uppercase tracking-wider text-steel">Utilisateur</th>
               <th className="px-6 py-5 text-left text-[11px] font-black uppercase tracking-wider text-steel">Statut</th>
               <th className="px-6 py-5 text-left text-[11px] font-black uppercase tracking-wider text-steel">Niveau / XP</th>

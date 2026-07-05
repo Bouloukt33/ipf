@@ -47,36 +47,17 @@ export function QuestionActions({ stats, onCreateNew, onImportCsv }: QuestionAct
     };
 
     return (
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-            {/* Stats pills */}
+        <div className="flex flex-wrap items-end justify-between gap-5">
+            {/* Stats — chips verre dépoli sur le bandeau héros */}
             {stats && (
                 <div className="flex flex-wrap items-center gap-2">
-                    <StatPill
-                        label="Total"
-                        value={stats.total}
-                        color="text-[#172E42] bg-[rgba(30,58,95,0.08)]"
-                    />
-                    <StatPill
-                        label="Actifs"
-                        value={stats.active}
-                        color="text-[#10B981] bg-[rgba(16,185,129,0.1)]"
-                    />
-                    <StatPill
-                        label="Suspendus"
-                        value={stats.suspended}
-                        color="text-[#F59E0B] bg-[rgba(245,158,11,0.1)]"
-                    />
-                    <StatPill
-                        label="Archivés"
-                        value={stats.archived}
-                        color="text-[#6B7280] bg-[rgba(107,114,128,0.1)]"
-                    />
-                    <StatPill
-                        label="Premium"
-                        value={stats.premium}
-                        color="text-[#7C3AED] bg-[rgba(124,58,237,0.1)]"
-                    />
+                    <StatPill label="Total" value={stats.total} dot="bg-white/60" />
+                    <StatPill label="Actifs" value={stats.active} dot="bg-[#34D399]" />
+                    <StatPill label="Suspendus" value={stats.suspended} dot="bg-[#FBBF24]" />
+                    <StatPill label="Archivés" value={stats.archived} dot="bg-white/30" />
+                    <StatPill label="Premium" value={stats.premium} dot="bg-[#A78BFA]" />
                     <InfoTip
+                        onDark
                         label="Signification des statuts"
                         side="bottom"
                         widthClass="w-72"
@@ -97,27 +78,28 @@ export function QuestionActions({ stats, onCreateNew, onImportCsv }: QuestionAct
                 <button
                     onClick={downloadCsvTemplate}
                     title="Télécharger un CSV pré-rempli, prêt pour Excel"
-                    className="h-[42px] px-4 rounded-[12px] border-2 border-gray-200 bg-white
-                      font-extrabold text-[13px] text-[#5a7a99] cursor-pointer font-nunito
-                      flex items-center gap-2 transition-all hover:border-[#D27A2D] hover:text-[#D27A2D]"
+                    className="h-[44px] px-4 rounded-2xl border border-white/20 bg-white/5 backdrop-blur
+                      font-extrabold text-[13px] text-white/80 cursor-pointer font-nunito
+                      flex items-center gap-2 transition-colors hover:bg-white/15 hover:text-white"
                 >
-                    <Download size={15} />
+                    <Download size={15} aria-hidden />
                     Modèle
                 </button>
                 <button
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isImporting}
-                    className="h-[42px] px-5 rounded-[12px] border-2 border-[#172E42] bg-white
-                      font-extrabold text-[13px] text-[#172E42] cursor-pointer font-nunito
-                      flex items-center gap-2 transition-all hover:bg-[#172E42] hover:text-white
+                    className="h-[44px] px-5 rounded-2xl border border-white/30 bg-white/10 backdrop-blur
+                      font-extrabold text-[13px] text-white cursor-pointer font-nunito
+                      flex items-center gap-2 transition-colors hover:bg-white/20
                       disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     {isImporting
-                        ? <div className="w-4 h-4 border-2 border-gray-300 border-t-[#172E42] rounded-full animate-spin" />
-                        : <Upload size={15} />}
+                        ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        : <Upload size={15} aria-hidden />}
                     Importer CSV
                 </button>
                 <InfoTip
+                    onDark
                     label="Format CSV attendu"
                     side="bottom"
                     widthClass="w-80"
@@ -132,13 +114,12 @@ export function QuestionActions({ stats, onCreateNew, onImportCsv }: QuestionAct
                 />
                 <button
                     onClick={onCreateNew}
-                    className="h-[42px] px-5 rounded-[12px] border-none
-                      bg-gradient-to-br from-[#D27A2D] to-[#F59E0B]
+                    className="h-[44px] px-5 rounded-2xl border-none bg-gradient-primary shadow-primary
                       font-extrabold text-[13px] text-white cursor-pointer font-nunito
-                      flex items-center gap-2 transition-all hover:shadow-lg hover:shadow-[rgba(210,122,45,0.3)]
-                      hover:-translate-y-px"
+                      flex items-center gap-2 transition-transform
+                      motion-safe:hover:scale-[1.03] motion-safe:active:scale-[0.97]"
                 >
-                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5" aria-hidden>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                     </svg>
                     Nouvelle question
@@ -151,16 +132,17 @@ export function QuestionActions({ stats, onCreateNew, onImportCsv }: QuestionAct
 function StatPill({
     label,
     value,
-    color,
+    dot,
 }: {
     label: string;
     value: number;
-    color: string;
+    dot: string;
 }) {
     return (
-        <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full ${color}`}>
-            <span className="text-[13px] font-extrabold">{value}</span>
-            <span className="text-[11px] font-bold">{label}</span>
+        <div className="flex items-center gap-2 px-3.5 py-2 rounded-full bg-white/10 border border-white/15 backdrop-blur">
+            <span aria-hidden className={`w-2 h-2 rounded-full ${dot}`} />
+            <span className="text-[13px] font-extrabold text-white tabular-nums">{value}</span>
+            <span className="text-[11px] font-bold text-white/60">{label}</span>
         </div>
     );
 }

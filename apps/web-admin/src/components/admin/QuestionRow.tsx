@@ -21,7 +21,6 @@ interface QuestionRowProps {
     question:   IQuestion;
     packs:      IPack[];
     number:     number;
-    isEven:     boolean;
     onEdit:     (question: IQuestion) => void;
     onDelete:   (id: string) => void;
     onSuspend:  (id: string) => void;
@@ -49,7 +48,7 @@ const STATUS_DOTS: Record<QuestionStatus, string> = {
 };
 
 export function QuestionRow({
-    question, number, isEven, onEdit, onDelete, onSuspend, onArchive, onRestore, packs,
+    question, number, onEdit, onDelete, onSuspend, onArchive, onRestore, packs,
 }: QuestionRowProps) {
     const packName = question.packId
         ? (packs.find((p) => p.id === question.packId)?.name ?? question.packId)
@@ -65,11 +64,7 @@ export function QuestionRow({
 
     return (
         <tr
-            className={`
-        border-b border-[rgba(210,122,45,0.08)] transition-colors cursor-pointer
-        hover:bg-[rgba(210,122,45,0.04)]
-        ${isEven ? 'bg-white' : 'bg-[#fafaf9]'}
-      `}
+            className="border-b border-ink-100/60 last:border-0 transition-colors cursor-pointer hover:bg-cream/60"
             onClick={() => onEdit(question)}
         >
             {/* Numéro */}

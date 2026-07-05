@@ -7,6 +7,7 @@ import { questionsService } from '../services/questions.service';
 import { CSV_MAX_SIZE_BYTES } from '../lib/csv-template';
 import { ImportReportModal, type ImportModalData } from '../components/admin/ImportReportModal';
 import { QuestionActions } from '../components/admin/QuestionActions';
+import { PageHero } from '../components/admin/PageHero';
 import { QuestionFilters } from '../components/admin/QuestionFilters';
 import { QuestionModal } from '../components/admin/QuestionModal';
 import { QuestionTable } from '../components/admin/QuestionTable';
@@ -136,13 +137,14 @@ export function AdminQuestionsPage() {
     }, [updateStatus, showToast]);
 
     return (
-        <div className="flex-1 p-8 min-h-screen bg-[#F8F5F1]">
-            <div className="mb-6">
-                <h1 className="text-[24px] font-black text-[#172E42] mb-1">Questions / Quiz</h1>
-                <p className="text-[14px] font-semibold text-[#5a7a99]">
-                    Gérez vos questions, leurs associations et leurs statuts
-                </p>
-            </div>
+        <div className="flex-1 p-8 min-h-screen bg-cream">
+            <PageHero
+                eyebrow="Contenu"
+                title="Questions / Quiz"
+                subtitle="Gérez vos questions, leurs associations et leurs statuts"
+            >
+                <QuestionActions stats={stats} onCreateNew={openCreate} onImportCsv={handleImportCsv} />
+            </PageHero>
 
             {error && (
                 <div className="mb-5 px-4 py-3 bg-[rgba(239,68,68,0.08)] border border-[rgba(239,68,68,0.2)] rounded-xl
@@ -151,14 +153,12 @@ export function AdminQuestionsPage() {
                 </div>
             )}
 
-            <QuestionActions stats={stats} onCreateNew={openCreate} onImportCsv={handleImportCsv} />
-
             <ImportReportModal data={importModal} onClose={() => setImportModal(null)} />
 
             <QuestionFilters categories={categories} filters={filters} onChange={setFilters} onReset={resetFilters} />
 
             {!isLoading && (
-                <p className="text-[12px] font-bold text-[#5a7a99] mb-3">
+                <p className="text-[12px] font-bold text-steel mb-3 px-1">
                     {total} question{total !== 1 ? 's' : ''} trouvée{total !== 1 ? 's' : ''}
                 </p>
             )}
@@ -177,21 +177,25 @@ export function AdminQuestionsPage() {
 
             {/* Pagination simple pour le moment */}
             {!isLoading && totalPages > 1 && (
-                <div className="mt-7 flex justify-center gap-2">
-                    <button 
+                <div className="mt-7 flex justify-center items-center gap-2">
+                    <button
                         onClick={() => setPage(currentPage - 1)}
                         disabled={currentPage === 1}
-                        className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold disabled:opacity-50"
+                        className="px-5 py-2.5 bg-white border border-ink-100 rounded-2xl text-sm font-bold text-text-primary
+                          shadow-soft cursor-pointer transition-colors hover:border-primary hover:text-primary
+                          disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-ink-100 disabled:hover:text-text-primary"
                     >
                         Précédent
                     </button>
-                    <span className="px-4 py-2 text-sm font-bold text-[#172E42]">
+                    <span className="px-4 py-2 text-sm font-bold text-text-primary tabular-nums">
                         Page {currentPage} sur {totalPages}
                     </span>
-                    <button 
+                    <button
                         onClick={() => setPage(currentPage + 1)}
                         disabled={currentPage === totalPages}
-                        className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold disabled:opacity-50"
+                        className="px-5 py-2.5 bg-white border border-ink-100 rounded-2xl text-sm font-bold text-text-primary
+                          shadow-soft cursor-pointer transition-colors hover:border-primary hover:text-primary
+                          disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-ink-100 disabled:hover:text-text-primary"
                     >
                         Suivant
                     </button>
