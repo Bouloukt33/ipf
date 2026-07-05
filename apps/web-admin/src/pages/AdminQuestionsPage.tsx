@@ -4,8 +4,10 @@ import { useQuestions } from '../hooks/useQuestions';
 import type { IQuestion, IQuestionFormData, IPack } from '../lib/types';
 import { packsService } from '../services/packs.service';
 import { questionsService } from '../services/questions.service';
-import type { IImportReport } from '../services/questions.service';
+import { CSV_MAX_SIZE_BYTES } from '../lib/csv-template';
+import { ImportReportModal, type ImportModalData } from '../components/admin/ImportReportModal';
 import { QuestionActions } from '../components/admin/QuestionActions';
+import { PageHero } from '../components/admin/PageHero';
 import { QuestionFilters } from '../components/admin/QuestionFilters';
 import { QuestionModal } from '../components/admin/QuestionModal';
 import { QuestionTable } from '../components/admin/QuestionTable';
@@ -57,12 +59,29 @@ export function AdminQuestionsPage() {
 
     const [modalOpen, setModalOpen] = useState(false);
     const [editingQuestion, setEditingQuestion] = useState<IQuestion | null>(null);
-    const [importReport, setImportReport] = useState<IImportReport | null>(null);
+    const [importModal, setImportModal] = useState<ImportModalData | null>(null);
     const { toast, show: showToast, hide: hideToast } = useToast();
 
     const handleImportCsv = useCallback(async (file: File) => {
+        const fail = (message: string) => setImportModal({ kind: 'failure', message });
+
+        // Validation côté client avant tout appel API
+        if (!/\.csv$/i.test(file.name) && file.type !== 'text/csv') {
+            fail(`« ${file.name} » n'est pas un fichier CSV. Exportez votre tableau au format CSV ou partez du modèle.`);
+            return;
+        }
+        if (file.size > CSV_MAX_SIZE_BYTES) {
+            fail('Fichier trop volumineux : 2 Mo maximum.');
+            return;
+        }
+        const csv = await file.text();
+        const header = (csv.split(/\r?\n/).find((l) => l.trim() !== '') ?? '').toLowerCase();
+        if (!header.includes('categorie') || !header.includes('bonnereponse')) {
+            fail("La première ligne doit être l'en-tête du modèle (categorie;niveau;question;…;bonneReponse;premium).");
+            return;
+        }
+
         try {
-            const csv = await file.text();
             const token = await getAccessTokenSilently({
                 authorizationParams: {
                     audience: ENV.auth0Audience,
@@ -70,19 +89,19 @@ export function AdminQuestionsPage() {
                 }
             });
             const report = await questionsService.importCsv(token, csv);
-            setImportReport(report.errors.length > 0 ? report : null);
-            if (report.imported > 0) {
+            if (report.errors.length > 0) {
+                setImportModal({ kind: 'report', report });
+            } else if (report.imported === 0) {
+                fail('Aucune question trouvée dans le fichier.');
+            } else {
                 showToast(
                     `${report.imported} question${report.imported > 1 ? 's' : ''} importée${report.imported > 1 ? 's' : ''} sur ${report.total}.`,
-                    report.errors.length > 0 ? 'info' : 'success'
+                    'success'
                 );
-                await refresh();
-            } else {
-                showToast('Aucune question importée — vérifiez le fichier.', 'error');
             }
+            if (report.imported > 0) await refresh();
         } catch (err) {
-            setImportReport(null);
-            showToast(err instanceof Error ? err.message : "Erreur lors de l'import CSV", 'error');
+            fail(err instanceof Error ? err.message : "Erreur lors de l'import CSV");
         }
     }, [getAccessTokenSilently, refresh, showToast]);
 
@@ -118,13 +137,14 @@ export function AdminQuestionsPage() {
     }, [updateStatus, showToast]);
 
     return (
-        <div className="flex-1 p-8 min-h-screen bg-[#F8F5F1]">
-            <div className="mb-6">
-                <h1 className="text-[24px] font-black text-[#172E42] mb-1">Questions / Quiz</h1>
-                <p className="text-[14px] font-semibold text-[#5a7a99]">
-                    Gérez vos questions, leurs associations et leurs statuts
-                </p>
-            </div>
+        <div className="flex-1 p-8 min-h-screen bg-cream">
+            <PageHero
+                eyebrow="Contenu"
+                title="Questions / Quiz"
+                subtitle="Gérez vos questions, leurs associations et leurs statuts"
+            >
+                <QuestionActions stats={stats} onCreateNew={openCreate} onImportCsv={handleImportCsv} />
+            </PageHero>
 
             {error && (
                 <div className="mb-5 px-4 py-3 bg-[rgba(239,68,68,0.08)] border border-[rgba(239,68,68,0.2)] rounded-xl
@@ -133,34 +153,12 @@ export function AdminQuestionsPage() {
                 </div>
             )}
 
-            <QuestionActions stats={stats} onCreateNew={openCreate} onImportCsv={handleImportCsv} />
-
-            {importReport && importReport.errors.length > 0 && (
-                <div className="mb-5 px-5 py-4 bg-[rgba(245,158,11,0.08)] border border-[rgba(245,158,11,0.25)] rounded-xl">
-                    <div className="flex items-center justify-between mb-2">
-                        <p className="text-[13px] font-black text-[#B45309]">
-                            Import terminé : {importReport.imported}/{importReport.total} question{importReport.total > 1 ? 's' : ''} —{' '}
-                            {importReport.errors.length} ligne{importReport.errors.length > 1 ? 's' : ''} ignorée{importReport.errors.length > 1 ? 's' : ''}
-                        </p>
-                        <button
-                            onClick={() => setImportReport(null)}
-                            className="text-[12px] font-bold text-[#B45309] underline hover:no-underline"
-                        >
-                            Fermer
-                        </button>
-                    </div>
-                    <ul className="text-[12px] font-semibold text-[#92400E] space-y-0.5 max-h-40 overflow-y-auto">
-                        {importReport.errors.map((e) => (
-                            <li key={`${e.line}-${e.message}`}>Ligne {e.line} : {e.message}</li>
-                        ))}
-                    </ul>
-                </div>
-            )}
+            <ImportReportModal data={importModal} onClose={() => setImportModal(null)} />
 
             <QuestionFilters categories={categories} filters={filters} onChange={setFilters} onReset={resetFilters} />
 
             {!isLoading && (
-                <p className="text-[12px] font-bold text-[#5a7a99] mb-3">
+                <p className="text-[12px] font-bold text-steel mb-3 px-1">
                     {total} question{total !== 1 ? 's' : ''} trouvée{total !== 1 ? 's' : ''}
                 </p>
             )}
@@ -178,21 +176,25 @@ export function AdminQuestionsPage() {
             />
 
             {!isLoading && totalPages > 1 && (
-                <div className="mt-7 flex justify-center gap-2">
+                <div className="mt-7 flex justify-center items-center gap-2">
                     <button
                         onClick={() => setPage(currentPage - 1)}
                         disabled={currentPage === 1}
-                        className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold disabled:opacity-50"
+                        className="px-5 py-2.5 bg-white border border-ink-100 rounded-2xl text-sm font-bold text-text-primary
+                          shadow-soft cursor-pointer transition-colors hover:border-primary hover:text-primary
+                          disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-ink-100 disabled:hover:text-text-primary"
                     >
                         Précédent
                     </button>
-                    <span className="px-4 py-2 text-sm font-bold text-[#172E42]">
+                    <span className="px-4 py-2 text-sm font-bold text-text-primary tabular-nums">
                         Page {currentPage} sur {totalPages}
                     </span>
                     <button
                         onClick={() => setPage(currentPage + 1)}
                         disabled={currentPage === totalPages}
-                        className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold disabled:opacity-50"
+                        className="px-5 py-2.5 bg-white border border-ink-100 rounded-2xl text-sm font-bold text-text-primary
+                          shadow-soft cursor-pointer transition-colors hover:border-primary hover:text-primary
+                          disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-ink-100 disabled:hover:text-text-primary"
                     >
                         Suivant
                     </button>

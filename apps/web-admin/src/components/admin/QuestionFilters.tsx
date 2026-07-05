@@ -1,12 +1,7 @@
-import type {
-    IQuestionFilters,
-    QuestionStatus,
-    ICategory,
-} from '../../lib/types';
-import {
-    DIFFICULTY_LABELS,
-    STATUS_LABELS,
-} from '../../lib/types';
+import { Search, X, SlidersHorizontal } from 'lucide-react';
+import type { IQuestionFilters, QuestionStatus, ICategory } from '../../lib/types';
+import { DIFFICULTY_LABELS, STATUS_LABELS } from '../../lib/types';
+import { enterAt } from '../../lib/utils';
 
 interface QuestionFiltersProps {
     filters: IQuestionFilters;
@@ -14,6 +9,10 @@ interface QuestionFiltersProps {
     onChange: (filters: Partial<IQuestionFilters>) => void;
     onReset: () => void;
 }
+
+const FIELD_CLASSES = `h-[44px] rounded-2xl border-2 border-transparent bg-cream
+    font-bold text-[13px] text-text-primary outline-none cursor-pointer
+    focus:border-primary focus:bg-white transition-colors font-nunito`;
 
 export function QuestionFilters({ filters, categories, onChange, onReset }: QuestionFiltersProps) {
     const hasActiveFilters =
@@ -23,56 +22,50 @@ export function QuestionFilters({ filters, categories, onChange, onReset }: Ques
         filters.categoryId;
 
     return (
-        <div className="flex flex-wrap items-center gap-3 mb-6">
-            {/* Search */}
+        <div
+            className="flex flex-wrap items-center gap-3 mb-6 bg-white rounded-[24px] shadow-soft border border-ink-100 p-3
+              motion-safe:animate-fade-in-up"
+            style={enterAt(120)}
+        >
+            <span aria-hidden className="hidden sm:flex items-center justify-center w-9 h-9 rounded-xl bg-cream text-primary flex-shrink-0">
+                <SlidersHorizontal size={16} />
+            </span>
+
             <div className="relative flex-1 min-w-[220px] max-w-[380px]">
-                <svg
-                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#5a7a99] pointer-events-none"
-                    width="16"
-                    height="16"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    strokeWidth="2.5"
-                >
-                    <circle cx="11" cy="11" r="8" />
-                    <path strokeLinecap="round" d="M21 21l-4.35-4.35" />
-                </svg>
+                <Search
+                    size={16}
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-steel pointer-events-none"
+                    aria-hidden
+                />
                 <input
                     type="text"
                     value={filters.search}
-                    onChange={(e) => onChange({ search: e.target.value })}
+                    onChange={(event) => onChange({ search: event.target.value })}
                     placeholder="Rechercher une question ou un code…"
-                    className="w-full h-[42px] pl-10 pr-4 border-2 border-[rgba(210,122,45,0.18)] rounded-xl
-            font-semibold text-sm text-[#172E42] bg-white outline-none
-            focus:border-[#D27A2D] transition-colors placeholder:text-[#5a7a99]
-            font-nunito"
+                    aria-label="Rechercher une question"
+                    className={`${FIELD_CLASSES} w-full pl-10 pr-4 font-semibold text-sm cursor-text placeholder:text-steel`}
                 />
             </div>
 
-            {/* Category */}
             <select
                 value={filters.categoryId}
-                onChange={(e) => onChange({ categoryId: e.target.value })}
-                className="h-[42px] px-3.5 border-2 border-[rgba(210,122,45,0.18)] rounded-xl
-          font-bold text-[13px] text-[#172E42] bg-white cursor-pointer outline-none
-          focus:border-[#D27A2D] transition-colors font-nunito"
+                onChange={(event) => onChange({ categoryId: event.target.value })}
+                aria-label="Filtrer par type de bail"
+                className={`${FIELD_CLASSES} px-3.5`}
             >
                 <option value="">Tous les types</option>
-                {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                        {cat.name}
+                {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                        {category.name}
                     </option>
                 ))}
             </select>
 
-            {/* Level */}
             <select
                 value={filters.level}
-                onChange={(e) => onChange({ level: e.target.value ? Number(e.target.value) : '' })}
-                className="h-[42px] px-3.5 border-2 border-[rgba(210,122,45,0.18)] rounded-xl
-          font-bold text-[13px] text-[#172E42] bg-white cursor-pointer outline-none
-          focus:border-[#D27A2D] transition-colors font-nunito"
+                onChange={(event) => onChange({ level: event.target.value ? Number(event.target.value) : '' })}
+                aria-label="Filtrer par difficulté"
+                className={`${FIELD_CLASSES} px-3.5`}
             >
                 <option value="">Toutes les difficultés</option>
                 {Object.entries(DIFFICULTY_LABELS).map(([key, label]) => (
@@ -82,13 +75,11 @@ export function QuestionFilters({ filters, categories, onChange, onReset }: Ques
                 ))}
             </select>
 
-            {/* Status */}
             <select
                 value={filters.status}
-                onChange={(e) => onChange({ status: e.target.value as QuestionStatus | '' })}
-                className="h-[42px] px-3.5 border-2 border-[rgba(210,122,45,0.18)] rounded-xl
-          font-bold text-[13px] text-[#172E42] bg-white cursor-pointer outline-none
-          focus:border-[#D27A2D] transition-colors font-nunito"
+                onChange={(event) => onChange({ status: event.target.value as QuestionStatus | '' })}
+                aria-label="Filtrer par statut"
+                className={`${FIELD_CLASSES} px-3.5`}
             >
                 <option value="">Tous les statuts</option>
                 {Object.entries(STATUS_LABELS).map(([key, label]) => (
@@ -98,18 +89,14 @@ export function QuestionFilters({ filters, categories, onChange, onReset }: Ques
                 ))}
             </select>
 
-            {/* Reset */}
             {hasActiveFilters && (
                 <button
                     onClick={onReset}
-                    className="h-[42px] px-4 border-2 border-[rgba(210,122,45,0.18)] rounded-xl
-            font-bold text-[13px] text-[#5a7a99] bg-white hover:border-[#D27A2D]
-            hover:text-[#D27A2D] transition-all cursor-pointer font-nunito
-            flex items-center gap-2"
+                    className="h-[44px] px-4 rounded-2xl border-2 border-transparent bg-cream
+                      font-bold text-[13px] text-steel hover:text-primary hover:border-primary
+                      transition-colors cursor-pointer font-nunito flex items-center gap-2"
                 >
-                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                    <X size={14} aria-hidden />
                     Réinitialiser
                 </button>
             )}

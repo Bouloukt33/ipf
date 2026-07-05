@@ -27,19 +27,19 @@ export default function AnswerGrid({
         const isWrong = isRevealed && isSelected && !isCorrectOption;
 
         let stateClasses =
-          'border-primary/20 bg-white/95 hover:border-primary hover:bg-primary/10 hover:-translate-y-0.5';
+          'border-white/15 bg-white/10 hover:border-primary hover:bg-white/[0.18] motion-safe:hover:-translate-y-0.5';
 
         if (isSelected && !isRevealed) {
           stateClasses =
-            'border-primary bg-primary/10 translate-y-1 shadow-[0_2px_0_#D27A2D]';
+            'border-primary bg-primary/25 shadow-[0_0_0_4px_rgba(210,122,45,0.2)]';
         } else if (isRevealed && isCorrectOption) {
           stateClasses =
-            'border-emerald-500 bg-emerald-500/15 -translate-y-0.5 shadow-[0_2px_0_#10B981]';
+            'border-emerald-400 bg-emerald-500/25 scale-[1.02] shadow-[0_0_0_4px_rgba(16,185,129,0.2)]';
         } else if (isWrong) {
           stateClasses =
-            'border-red-600 bg-gradient-to-br from-red-600/15 to-red-500/15 shadow-[0_0_0_4px_rgba(220,38,38,0.15)]';
+            'border-red-500 bg-red-500/20 shadow-[0_0_0_4px_rgba(239,68,68,0.18)] motion-safe:animate-wiggle-once';
         } else if (isRevealed) {
-          stateClasses = 'border-primary/10 bg-white/60 opacity-60';
+          stateClasses = 'border-white/10 bg-white/5 opacity-40';
         }
 
         return (
@@ -48,11 +48,11 @@ export default function AnswerGrid({
             onClick={() => !disabled && onSelect(opt.key)}
             disabled={disabled}
             className={`
-              relative flex items-center gap-4 p-5 min-h-[80px]
-              border-[3px] rounded-2xl cursor-pointer
-              transition-all duration-300 ease-out
-              backdrop-blur-[10px]
-              shadow-[0_4px_12px_rgba(23,46,66,0.06)]
+              relative flex items-center gap-3 sm:gap-4 p-4 sm:p-5 min-h-[64px] sm:min-h-[80px]
+              border-2 rounded-2xl cursor-pointer
+              transition-all duration-200 ease-out
+              backdrop-blur
+              motion-safe:active:scale-[0.98]
               disabled:cursor-default
               ${stateClasses}
             `}
@@ -60,26 +60,26 @@ export default function AnswerGrid({
           >
             <span
               className={`
-                flex-none w-9 h-9 rounded-xl flex items-center justify-center
-                font-extrabold text-sm
+                flex-none w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center
+                font-extrabold text-sm transition-colors
                 ${
                   isRevealed && isCorrectOption
                     ? 'bg-emerald-500 text-white'
                     : isWrong
-                      ? 'bg-red-600 text-white'
+                      ? 'bg-red-500 text-white'
                       : isSelected
                         ? 'bg-primary text-white'
-                        : 'bg-primary/10 text-primary'
+                        : 'bg-white/15 text-white'
                 }
               `}
             >
               {OPTION_LABELS[idx]}
             </span>
-            <span className="text-base font-bold text-navy text-left flex-1">
+            <span className="text-sm sm:text-base font-bold text-white text-left flex-1">
               {opt.text}
             </span>
             {isRevealed && isCorrectOption && (
-              <svg className="w-6 h-6 text-emerald-500 flex-none" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-6 h-6 text-emerald-400 flex-none" fill="currentColor" viewBox="0 0 20 20">
                 <path
                   fillRule="evenodd"
                   d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -88,7 +88,7 @@ export default function AnswerGrid({
               </svg>
             )}
             {isWrong && (
-              <svg className="w-6 h-6 text-red-600 flex-none" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-6 h-6 text-red-400 flex-none" fill="currentColor" viewBox="0 0 20 20">
                 <path
                   fillRule="evenodd"
                   d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"

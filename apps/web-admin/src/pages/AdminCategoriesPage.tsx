@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { BookOpen, Plus, Pencil, Trash2, MoreVertical, Power } from 'lucide-react';
 import { useAdminCategories } from '../hooks/useAdminCategories';
 import { Toast, useToast } from '../components/admin/Toast';
+import { PageHero } from '../components/admin/PageHero';
+import { enterAt } from '../lib/utils';
 import type { ICategory } from '../lib/types';
 import type { ICategoryFormData } from '../services/categories.service';
 
@@ -27,39 +29,57 @@ interface CategoryModalProps {
 
 function CategoryModal({ isOpen, category, onClose, onSave }: CategoryModalProps) {
     const [form, setForm] = useState<ICategoryFormData>({
-        name: '', slug: '', description: '', color: '#D27A2D',
-        isPremium: false, isActive: true, order: 0,
+        name: '',
+        slug: '',
+        description: '',
+        color: '#D27A2D',
+        isPremium: false,
+        isActive: true,
+        order: 0,
     });
     const [saving, setSaving] = useState(false);
     const [slugTouched, setSlugTouched] = useState(false);
 
     useEffect(() => {
-        if (isOpen) {
-            if (category) {
-                setForm({
-                    name: category.name,
-                    slug: category.slug,
-                    description: category.description || '',
-                    color: category.color || '#D27A2D',
-                    isPremium: category.isPremium,
-                    isActive: category.isActive,
-                    order: category.order,
-                });
-                setSlugTouched(true);
-            } else {
-                setForm({ name: '', slug: '', description: '', color: '#D27A2D', isPremium: false, isActive: true, order: 0 });
-                setSlugTouched(false);
-            }
+        if (!isOpen) return;
+
+        if (category) {
+            setForm({
+                name: category.name,
+                slug: category.slug,
+                description: category.description || '',
+                color: category.color || '#D27A2D',
+                isPremium: category.isPremium,
+                isActive: category.isActive,
+                order: category.order,
+            });
+            setSlugTouched(true);
+        } else {
+            setForm({
+                name: '',
+                slug: '',
+                description: '',
+                color: '#D27A2D',
+                isPremium: false,
+                isActive: true,
+                order: 0,
+            });
+            setSlugTouched(false);
         }
     }, [isOpen, category]);
 
     function updateName(name: string) {
-        setForm(f => ({ ...f, name, slug: slugTouched ? f.slug : slugify(name) }));
+        setForm((previousForm) => ({
+            ...previousForm,
+            name,
+            slug: slugTouched ? previousForm.slug : slugify(name),
+        }));
     }
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         setSaving(true);
+
         try {
             await onSave(form);
             onClose();
@@ -82,7 +102,7 @@ function CategoryModal({ isOpen, category, onClose, onSave }: CategoryModalProps
                         <input
                             required
                             value={form.name}
-                            onChange={e => updateName(e.target.value)}
+                            onChange={(event) => updateName(event.target.value)}
                             className="w-full h-11 px-4 rounded-[12px] border border-gray-200 text-[14px] font-semibold text-[#172E42] outline-none focus:border-[#D27A2D]"
                             placeholder="ex: Bail commercial"
                         />
@@ -92,7 +112,10 @@ function CategoryModal({ isOpen, category, onClose, onSave }: CategoryModalProps
                         <input
                             required
                             value={form.slug}
-                            onChange={e => { setSlugTouched(true); setForm(f => ({ ...f, slug: e.target.value })); }}
+                            onChange={(event) => {
+                                setSlugTouched(true);
+                                setForm((previousForm) => ({ ...previousForm, slug: event.target.value }));
+                            }}
                             className="w-full h-11 px-4 rounded-[12px] border border-gray-200 text-[14px] font-semibold text-[#172E42] outline-none focus:border-[#D27A2D]"
                             placeholder="ex: bail-commercial"
                         />
@@ -101,7 +124,7 @@ function CategoryModal({ isOpen, category, onClose, onSave }: CategoryModalProps
                         <label className="block text-[12px] font-black text-[#5a7a99] uppercase tracking-wider mb-1.5">Description</label>
                         <textarea
                             value={form.description}
-                            onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+                            onChange={(event) => setForm((previousForm) => ({ ...previousForm, description: event.target.value }))}
                             rows={2}
                             className="w-full px-4 py-3 rounded-[12px] border border-gray-200 text-[14px] font-semibold text-[#172E42] outline-none focus:border-[#D27A2D] resize-none"
                             placeholder="Description courte..."
@@ -110,22 +133,23 @@ function CategoryModal({ isOpen, category, onClose, onSave }: CategoryModalProps
                     <div>
                         <label className="block text-[12px] font-black text-[#5a7a99] uppercase tracking-wider mb-1.5">Couleur</label>
                         <div className="flex items-center gap-2 flex-wrap">
-                            {PRESET_COLORS.map(c => (
+                            {PRESET_COLORS.map((color) => (
                                 <button
-                                    key={c} type="button"
-                                    onClick={() => setForm(f => ({ ...f, color: c }))}
+                                    key={color}
+                                    type="button"
+                                    onClick={() => setForm((previousForm) => ({ ...previousForm, color }))}
                                     className="w-8 h-8 rounded-full border-2 transition-all"
                                     style={{
-                                        backgroundColor: c,
-                                        borderColor: form.color === c ? '#172E42' : 'transparent',
-                                        transform: form.color === c ? 'scale(1.2)' : 'scale(1)',
+                                        backgroundColor: color,
+                                        borderColor: form.color === color ? '#172E42' : 'transparent',
+                                        transform: form.color === color ? 'scale(1.2)' : 'scale(1)',
                                     }}
                                 />
                             ))}
                             <input
                                 type="color"
                                 value={form.color}
-                                onChange={e => setForm(f => ({ ...f, color: e.target.value }))}
+                                onChange={(event) => setForm((previousForm) => ({ ...previousForm, color: event.target.value }))}
                                 className="w-8 h-8 rounded-full cursor-pointer border border-gray-200"
                                 title="Couleur personnalisée"
                             />
@@ -137,18 +161,18 @@ function CategoryModal({ isOpen, category, onClose, onSave }: CategoryModalProps
                             <input
                                 type="number"
                                 value={form.order}
-                                onChange={e => setForm(f => ({ ...f, order: parseInt(e.target.value) || 0 }))}
+                                onChange={(event) => setForm((previousForm) => ({ ...previousForm, order: parseInt(event.target.value) || 0 }))}
                                 className="w-full h-11 px-4 rounded-[12px] border border-gray-200 text-[14px] font-semibold text-[#172E42] outline-none focus:border-[#D27A2D]"
                             />
                         </div>
                         <div className="flex flex-col gap-2 pt-5">
                             <label className="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" checked={form.isPremium} onChange={e => setForm(f => ({ ...f, isPremium: e.target.checked }))} className="w-4 h-4 accent-[#7C3AED]" />
+                                <input type="checkbox" checked={form.isPremium} onChange={(event) => setForm((previousForm) => ({ ...previousForm, isPremium: event.target.checked }))} className="w-4 h-4 accent-[#7C3AED]" />
                                 <span className="text-[13px] font-bold text-[#172E42]">Premium</span>
                             </label>
                             {category && (
                                 <label className="flex items-center gap-2 cursor-pointer">
-                                    <input type="checkbox" checked={form.isActive} onChange={e => setForm(f => ({ ...f, isActive: e.target.checked }))} className="w-4 h-4 accent-[#10B981]" />
+                                    <input type="checkbox" checked={form.isActive} onChange={(event) => setForm((previousForm) => ({ ...previousForm, isActive: event.target.checked }))} className="w-4 h-4 accent-[#10B981]" />
                                     <span className="text-[13px] font-bold text-[#172E42]">Actif</span>
                                 </label>
                             )}
@@ -158,8 +182,12 @@ function CategoryModal({ isOpen, category, onClose, onSave }: CategoryModalProps
                         <button type="button" onClick={onClose} className="flex-1 h-11 rounded-[12px] border border-gray-200 font-extrabold text-[14px] text-[#172E42] bg-white hover:bg-gray-50 transition-colors cursor-pointer">
                             Annuler
                         </button>
-                        <button type="submit" disabled={saving} className="flex-1 h-11 rounded-[12px] border-none font-extrabold text-[14px] text-white cursor-pointer transition-all hover:scale-[1.02] disabled:opacity-60"
-                            style={{ background: 'linear-gradient(135deg, #D27A2D, #F59E0B)' }}>
+                        <button
+                            type="submit"
+                            disabled={saving}
+                            className="flex-1 h-11 rounded-[12px] border-none font-extrabold text-[14px] text-white cursor-pointer transition-all hover:scale-[1.02] disabled:opacity-60"
+                            style={{ background: 'linear-gradient(135deg, #D27A2D, #F59E0B)' }}
+                        >
                             {saving ? 'Enregistrement...' : category ? 'Modifier' : 'Créer'}
                         </button>
                     </div>
@@ -179,16 +207,19 @@ function CategoryMenu({ category, onEdit, onDelete, onToggle }: {
     const ref = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        function handleClick(e: MouseEvent) {
-            if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+        function handleClick(event: MouseEvent) {
+            if (ref.current && !ref.current.contains(event.target as Node)) {
+                setOpen(false);
+            }
         }
+
         document.addEventListener('mousedown', handleClick);
         return () => document.removeEventListener('mousedown', handleClick);
     }, []);
 
     return (
         <div ref={ref} className="relative">
-            <button onClick={() => setOpen(o => !o)} className="p-2 text-[#5a7a99] hover:bg-gray-100 rounded-xl transition-all cursor-pointer">
+            <button onClick={() => setOpen((previousOpen) => !previousOpen)} className="p-2 text-[#5a7a99] hover:bg-gray-100 rounded-xl transition-all cursor-pointer">
                 <MoreVertical size={20} />
             </button>
             {open && (
@@ -216,8 +247,15 @@ export function AdminCategoriesPage() {
     const [modalOpen, setModalOpen] = useState(false);
     const [editing, setEditing] = useState<ICategory | null>(null);
 
-    function openCreate() { setEditing(null); setModalOpen(true); }
-    function openEdit(cat: ICategory) { setEditing(cat); setModalOpen(true); }
+    function openCreate() {
+        setEditing(null);
+        setModalOpen(true);
+    }
+
+    function openEdit(category: ICategory) {
+        setEditing(category);
+        setModalOpen(true);
+    }
 
     async function handleSave(data: ICategoryFormData) {
         try {
@@ -228,96 +266,106 @@ export function AdminCategoriesPage() {
                 await createCategory(data);
                 show('Bail créé avec succès', 'success');
             }
-        } catch (err: any) {
-            show(err.message || 'Une erreur est survenue', 'error');
-            throw err;
+        } catch (error) {
+            show(error instanceof Error ? error.message : 'Une erreur est survenue', 'error');
+            throw error;
         }
     }
 
-    async function handleDelete(cat: ICategory) {
-        if (!window.confirm(`Supprimer "${cat.name}" ? Cette action est irréversible.`)) return;
+    async function handleDelete(category: ICategory) {
+        if (!window.confirm(`Supprimer "${category.name}" ? Cette action est irréversible.`)) return;
+
         try {
-            await deleteCategory(cat.id);
+            await deleteCategory(category.id);
             show('Bail supprimé', 'info');
-        } catch (err: any) {
-            show(err.message || 'Impossible de supprimer ce bail', 'error');
+        } catch (error) {
+            show(error instanceof Error ? error.message : 'Impossible de supprimer ce bail', 'error');
         }
     }
 
-    async function handleToggle(cat: ICategory) {
+    async function handleToggle(category: ICategory) {
         try {
-            await toggleActive(cat.id);
-            show(`Bail ${cat.isActive ? 'désactivé' : 'activé'}`, 'info');
-        } catch (err: any) {
-            show(err.message || 'Erreur', 'error');
+            await toggleActive(category.id);
+            show(`Bail ${category.isActive ? 'désactivé' : 'activé'}`, 'info');
+        } catch (error) {
+            show(error instanceof Error ? error.message : 'Erreur', 'error');
         }
     }
 
     return (
-        <div className="flex-1 p-8 bg-[#F8F5F1] min-h-screen">
-            <div className="flex justify-between items-center mb-8">
-                <div>
-                    <h1 className="text-[28px] font-black text-[#172E42] mb-1">Types de baux</h1>
-                    <p className="text-[14px] font-semibold text-[#5a7a99]">
-                        {categories.length} bail{categories.length !== 1 ? 's' : ''} configuré{categories.length !== 1 ? 's' : ''}
-                    </p>
-                </div>
-                <button
-                    onClick={openCreate}
-                    className="h-[48px] px-6 rounded-[16px] text-white font-black text-[14px] flex items-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] border-none cursor-pointer"
-                    style={{ background: 'linear-gradient(135deg, #D27A2D, #F59E0B)' }}
-                >
-                    <Plus size={18} /> Nouveau bail
-                </button>
-            </div>
+        <div className="flex-1 p-8 bg-cream min-h-screen">
+            <PageHero
+                eyebrow="Contenu"
+                title="Types de baux"
+                subtitle="Gestion des catégories de questions et thématiques"
+                actions={
+                    <button
+                        onClick={openCreate}
+                        className="h-[48px] px-6 rounded-2xl border-none bg-gradient-primary text-white font-black text-[14px]
+                          flex items-center gap-2 cursor-pointer shadow-primary transition-transform
+                          motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.97]"
+                    >
+                        <Plus size={18} aria-hidden /> Nouveau bail
+                    </button>
+                }
+            />
 
-            {isLoading && (
+            {isLoading ? (
                 <div className="flex justify-center py-20">
-                    <div className="w-10 h-10 border-4 border-[#D27A2D] border-t-transparent rounded-full animate-spin" />
+                    <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
                 </div>
-            )}
-
-            {!isLoading && categories.length === 0 && (
+            ) : categories.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-24 text-center">
                     <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6" style={{ background: 'rgba(210,122,45,0.1)' }}>
                         <BookOpen size={32} color="#D27A2D" />
                     </div>
                     <h2 className="text-[20px] font-black text-[#172E42] mb-2">Aucun bail configuré</h2>
-                    <button onClick={openCreate} className="flex items-center gap-2 h-11 px-6 rounded-[14px] border-none font-extrabold text-[14px] text-white cursor-pointer mt-4"
-                        style={{ background: 'linear-gradient(135deg, #D27A2D, #F59E0B)' }}>
+                    <p className="text-[14px] font-semibold text-[#5a7a99] mb-8 max-w-md">
+                        Créez votre premier type de bail pour organiser les questions et les thématiques.
+                    </p>
+                    <button
+                        onClick={openCreate}
+                        className="flex items-center gap-2 h-11 px-6 rounded-[14px] border-none font-extrabold text-[14px] text-white cursor-pointer mt-4"
+                        style={{ background: 'linear-gradient(135deg, #D27A2D, #F59E0B)' }}
+                    >
                         <Plus size={16} /> Créer un bail
                     </button>
                 </div>
-            )}
-
-            {!isLoading && categories.length > 0 && (
+            ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {categories.map((cat) => (
-                        <div key={cat.id} className="bg-white p-6 rounded-[32px] shadow-soft border border-ink-100 flex flex-col hover:shadow-card hover:-translate-y-0.5 transition-all">
+                    {categories.map((category, index) => (
+                        <div
+                            key={category.id}
+                            className="bg-white p-6 rounded-[32px] shadow-soft border border-ink-100 flex flex-col
+                              transition-transform duration-200 motion-safe:hover:-translate-y-1 motion-safe:animate-fade-in-up"
+                            style={enterAt(120 + Math.min(index, 8) * 70)}
+                        >
                             <div className="flex justify-between items-start mb-6">
-                                <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-white" style={{ backgroundColor: cat.color || '#D27A2D' }}>
+                                <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-white" style={{ backgroundColor: category.color || '#D27A2D' }}>
                                     <BookOpen size={28} />
                                 </div>
                                 <CategoryMenu
-                                    category={cat}
-                                    onEdit={() => openEdit(cat)}
-                                    onDelete={() => handleDelete(cat)}
-                                    onToggle={() => handleToggle(cat)}
+                                    category={category}
+                                    onEdit={() => openEdit(category)}
+                                    onDelete={() => handleDelete(category)}
+                                    onToggle={() => handleToggle(category)}
                                 />
                             </div>
 
-                            <h3 className="text-[18px] font-black text-[#172E42] mb-2">{cat.name}</h3>
-                            <p className="text-[13px] font-semibold text-[#5a7a99] mb-6 line-clamp-2">{cat.description}</p>
+                            <h3 className="text-[18px] font-black text-[#172E42] mb-2">{category.name}</h3>
+                            <p className="text-[13px] font-semibold text-[#5a7a99] mb-6 line-clamp-2">{category.description}</p>
 
                             <div className="mt-auto pt-6 border-t border-gray-50 flex items-center justify-between">
                                 <div className="flex items-center gap-2">
-                                    <span className={`w-2 h-2 rounded-full ${cat.isActive ? 'bg-[#10B981]' : 'bg-red-500'}`} />
+                                    <span className={`w-2 h-2 rounded-full ${category.isActive ? 'bg-[#10B981]' : 'bg-red-500'}`} />
                                     <span className="text-[11px] font-black uppercase tracking-wider text-[#5a7a99]">
-                                        {cat.isActive ? 'Actif' : 'Désactivé'}
+                                        {category.isActive ? 'Actif' : 'Désactivé'}
                                     </span>
                                 </div>
-                                {cat.isPremium && (
-                                    <div className="px-2.5 py-1 rounded-lg bg-purple-50 text-[#7C3AED] text-[10px] font-black uppercase">Premium</div>
+                                {category.isPremium && (
+                                    <div className="px-2.5 py-1 rounded-lg bg-purple-50 text-[#7C3AED] text-[10px] font-black uppercase">
+                                        Premium
+                                    </div>
                                 )}
                             </div>
                         </div>

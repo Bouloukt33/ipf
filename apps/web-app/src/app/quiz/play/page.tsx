@@ -20,8 +20,6 @@ function QuizPlayContent() {
   const categoryId = searchParams.get('categoryId') ?? undefined;
   const packId = searchParams.get('packId') ?? undefined;
 
-  console.log('[QuizPlay] Render params:', { categoryId, packId });
-
   const {
     state,
     startSession,
@@ -152,98 +150,134 @@ function QuizPlayContent() {
       : undefined;
 
   return (
-    <main className="min-h-screen px-4 py-6 max-w-3xl mx-auto font-nunito">
-      {/* Header: Close + Progress + Lives */}
-      <div className="flex items-center gap-4 mb-6">
-        <button
-          onClick={() => router.push('/quiz')}
-          className="p-2 rounded-xl hover:bg-navy/5 transition-colors"
-          aria-label="Quitter le quiz"
-        >
-          <svg className="w-6 h-6 text-navy" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-        <ProgressBar
-          current={state.question.questionNumber}
-          total={state.totalQuestions}
-          className="flex-1"
-        />
-        <LivesDisplay lives={state.lives} />
-      </div>
+    <main className="min-h-screen px-3 py-4 sm:px-6 sm:py-8 pb-24 md:pb-8 max-w-3xl mx-auto font-nunito flex flex-col">
+      {/* Arène de jeu — carte navy inspirée du mock de la landing */}
+      <div
+        className="relative flex-1 flex flex-col overflow-hidden rounded-[28px] sm:rounded-[36px]
+          bg-gradient-hero shadow-card px-4 py-5 sm:px-8 sm:py-8 animate-fade-in-up"
+      >
+        <div aria-hidden className="absolute -top-24 -right-20 w-72 h-72 rounded-full bg-primary/15 blur-3xl pointer-events-none" />
+        <div aria-hidden className="absolute -bottom-28 -left-16 w-80 h-80 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
 
-      {/* Timer */}
-      <div className="mb-6">
-        <Timer 
-          key={state.question.id}
-          duration={state.durationOverride || 5} 
-          isRunning={isTimerRunning} 
-          onTimeout={handleTimeout} 
-        />
-      </div>
-
-      {/* Category Badge */}
-      <div className="text-center mb-3">
-        <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary text-sm font-bold rounded-full">
-          {state.categoryName}
-        </span>
-      </div>
-
-      {/* Question */}
-      <div className="text-center mb-8">
-        <p className="text-xl md:text-2xl font-extrabold text-navy leading-relaxed">
-          {state.question.text}
-        </p>
-      </div>
-
-      {/* Answer Grid */}
-      <AnswerGrid
-        options={options}
-        selected={state.selectedAnswer}
-        correctAnswer={showFeedback ? state.correctAnswer : null}
-        disabled={isAnswerDisabled}
-        onSelect={selectAnswer}
-      />
-
-      {/* Inline Feedback */}
-      {showFeedback && state.isCorrect !== null && (
-        <FeedbackInline
-          isCorrect={state.isCorrect}
-          correctAnswer={options.find(o => o.key === state.correctAnswer)?.text ?? state.correctAnswer ?? ''}
-          feedback={state.feedback}
-        />
-      )}
-
-      {/* Action Buttons */}
-      <div className="flex justify-center gap-4 mt-6">
-        {state.phase === 'playing' && (
-          <>
+        <div className="relative flex-1 flex flex-col">
+          {/* Header : Quitter + Catégorie + Vies */}
+          <div className="flex items-center justify-between gap-2 sm:gap-4 mb-5">
             <button
-              onClick={skipQuestion}
-              className="px-6 py-3 border-2 border-navy/20 text-navy/60 font-bold rounded-xl hover:bg-navy/5 transition-all"
+              onClick={() => router.push('/quiz')}
+              className="p-2.5 rounded-xl bg-white/10 border border-white/15 text-white/70
+                hover:bg-white/20 hover:text-white transition-colors flex-shrink-0"
+              aria-label="Quitter le quiz"
             >
-              Passer
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
             </button>
-            <button
-              onClick={submitAnswer}
-              disabled={!state.selectedAnswer}
-              className="px-10 py-3 bg-gradient-primary text-white font-extrabold rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-primary-lg disabled:opacity-40 disabled:cursor-not-allowed disabled:translate-y-0"
-            >
-              Valider
-            </button>
-          </>
-        )}
-        {state.phase === 'feedback' && (
-          <button
-            onClick={() => {
-              setOverlayVisible(false);
-              proceedToNext();
-            }}
-            className="px-10 py-3 bg-gradient-primary text-white font-extrabold rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-primary-lg animate-fade-in-up"
-          >
-            Continuer →
-          </button>
-        )}
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="px-3 sm:px-4 py-1.5 bg-primary/15 text-primary-light text-xs sm:text-sm
+                font-black uppercase tracking-wider rounded-full truncate">
+                {state.categoryName}
+              </span>
+              <span className="hidden sm:flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-primary motion-safe:animate-pulse" aria-hidden />
+                <span className="text-xs text-white/40 font-bold">Live</span>
+              </span>
+            </div>
+            <LivesDisplay lives={state.lives} />
+          </div>
+
+          {/* Progression */}
+          <div className="flex items-center gap-3 mb-6">
+            <ProgressBar
+              current={state.question.questionNumber}
+              total={state.totalQuestions}
+              className="flex-1"
+            />
+            <span className="text-[12px] font-black text-white/50 tabular-nums whitespace-nowrap">
+              {state.question.questionNumber}/{state.totalQuestions}
+            </span>
+          </div>
+
+          {/* Timer + combo */}
+          <div className="relative flex items-center justify-center mb-5 sm:mb-6">
+            <Timer
+              key={state.question.id}
+              duration={state.durationOverride || 5}
+              isRunning={isTimerRunning}
+              onTimeout={handleTimeout}
+            />
+            {state.comboCount >= 2 && (
+              <span
+                className="absolute right-0 top-1/2 -translate-y-1/2 inline-flex items-center gap-1
+                  px-2.5 sm:px-3 py-1.5 rounded-full bg-amber-400/15 border border-amber-300/25
+                  text-amber-300 text-[11px] sm:text-xs font-black animate-scale-in"
+              >
+                🔥 x{state.comboCount}
+              </span>
+            )}
+          </div>
+
+          {/* Question */}
+          <div className="text-center mb-6 sm:mb-8">
+            <p className="text-lg sm:text-2xl font-extrabold text-white leading-relaxed">
+              {state.question.text}
+            </p>
+          </div>
+
+          {/* Answer Grid */}
+          <AnswerGrid
+            options={options}
+            selected={state.selectedAnswer}
+            correctAnswer={showFeedback ? state.correctAnswer : null}
+            disabled={isAnswerDisabled}
+            onSelect={selectAnswer}
+          />
+
+          {/* Inline Feedback */}
+          {showFeedback && state.isCorrect !== null && (
+            <FeedbackInline
+              isCorrect={state.isCorrect}
+              correctAnswer={options.find(o => o.key === state.correctAnswer)?.text ?? state.correctAnswer ?? ''}
+              feedback={state.feedback}
+            />
+          )}
+
+          {/* Action Buttons */}
+          <div className="mt-auto pt-6 flex justify-center gap-3 sm:gap-4">
+            {state.phase === 'playing' && (
+              <>
+                <button
+                  onClick={skipQuestion}
+                  className="px-5 sm:px-6 py-3 rounded-2xl border border-white/20 bg-white/5 text-white/70
+                    font-bold hover:bg-white/15 hover:text-white transition-colors"
+                >
+                  Passer
+                </button>
+                <button
+                  onClick={submitAnswer}
+                  disabled={!state.selectedAnswer}
+                  className="flex-1 sm:flex-none sm:px-12 py-3 bg-gradient-primary text-white font-extrabold rounded-2xl
+                    shadow-primary transition-transform motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.97]
+                    disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
+                >
+                  Valider
+                </button>
+              </>
+            )}
+            {state.phase === 'feedback' && (
+              <button
+                onClick={() => {
+                  setOverlayVisible(false);
+                  proceedToNext();
+                }}
+                className="flex-1 sm:flex-none sm:px-12 py-3 bg-gradient-primary text-white font-extrabold rounded-2xl
+                  shadow-primary transition-transform motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.97]
+                  animate-fade-in-up"
+              >
+                Continuer →
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Side Mascot (desktop only) */}

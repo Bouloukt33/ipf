@@ -63,6 +63,7 @@ const config: Config = {
                 'rotate-slow': 'rotate-slow 20s linear infinite',
                 'bounce-soft': 'bounce-soft 2s ease-in-out infinite',
                 'wiggle': 'wiggle 1s ease-in-out infinite',
+                'wiggle-once': 'shake-x 0.2s ease-in-out',
             },
             keyframes: {
                 'float-around': {
@@ -129,6 +130,12 @@ const config: Config = {
                 'wiggle': {
                     '0%, 100%': { transform: 'rotate(-3deg)' },
                     '50%': { transform: 'rotate(3deg)' },
+                },
+                // Shake bref sur mauvaise réponse (≤ 200 ms, transform uniquement)
+                'shake-x': {
+                    '0%, 100%': { transform: 'translateX(0)' },
+                    '25%': { transform: 'translateX(-4px)' },
+                    '75%': { transform: 'translateX(4px)' },
                 },
             },
         },
