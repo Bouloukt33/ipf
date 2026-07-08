@@ -2,6 +2,12 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma';
 import { CreatePackDto, UpdatePackDto } from './dto/packs.dto';
 
+/** Contexte du demandeur pour appliquer la visibilité des packs privés. */
+export interface PackViewer {
+  auth0Id?: string;
+  isAdmin: boolean;
+}
+
 @Injectable()
 export class PacksService {
   constructor(private prisma: PrismaService) {}
@@ -17,6 +23,8 @@ export class PacksService {
     const where: Record<string, any> = {};
     if (!filters?.includeInactive) where.isActive = true;
     if (filters?.categoryId) where.categoryId = filters.categoryId;
+    if (filters?.type) where.type = filters.type;
+    if (filters?.isFree !== undefined) where.isFree = filters.isFree;
 
     // Logique de visibilité
     if (!filters?.isAdmin) {
@@ -71,7 +79,25 @@ export class PacksService {
     });
   }
 
-  async findOne(id: string) {
+  /**
+   * Un pack PRIVATE n'existe pas pour un demandeur qui n'est ni admin ni
+   * l'utilisateur assigné — 404 (et pas 403) pour ne pas révéler son existence.
+   */
+  private async assertVisibleTo(
+    pack: { visibility: string; assignedUserId: string | null },
+    viewer: PackViewer,
+  ): Promise<void> {
+    if (pack.visibility !== 'PRIVATE' || viewer.isAdmin) return;
+    if (viewer.auth0Id && pack.assignedUserId) {
+      const user = await this.prisma.user.findUnique({
+        where: { auth0Id: viewer.auth0Id },
+      });
+      if (user && user.id === pack.assignedUserId) return;
+    }
+    throw new NotFoundException('Pack non trouvé');
+  }
+
+  async findOne(id: string, viewer?: PackViewer) {
     const pack = await this.prisma.pack.findUnique({
       where: { id },
       select: {
@@ -109,10 +135,15 @@ export class PacksService {
     });
 
     if (!pack) throw new NotFoundException('Pack non trouvé');
+    if (viewer) await this.assertVisibleTo(pack, viewer);
     return pack;
   }
 
-  async findBySlug(categorySlug: string, packSlug: string) {
+  async findBySlug(
+    categorySlug: string,
+    packSlug: string,
+    viewer?: PackViewer,
+  ) {
     const category = await this.prisma.category.findUnique({
       where: { slug: categorySlug },
     });
@@ -149,6 +180,7 @@ export class PacksService {
     });
 
     if (!pack) throw new NotFoundException('Pack non trouvé');
+    if (viewer) await this.assertVisibleTo(pack, viewer);
     return pack;
   }
 

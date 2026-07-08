@@ -41,6 +41,137 @@ describe('PacksService', () => {
     jest.clearAllMocks();
   });
 
+  describe('findAll — visibilité', () => {
+    beforeEach(() => {
+      mockPrismaService.pack.findMany.mockResolvedValue([]);
+    });
+
+    it('should only return PUBLIC packs for an anonymous request', async () => {
+      await service.findAll({});
+
+      expect(prisma.pack.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({ visibility: 'PUBLIC' }),
+        }),
+      );
+    });
+
+    it('should return PUBLIC packs + packs assigned to the user', async () => {
+      mockPrismaService.user.findUnique.mockResolvedValue({ id: 'user-1' });
+
+      await service.findAll({ auth0Id: 'auth0|abc' });
+
+      expect(prisma.pack.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            OR: [
+              { visibility: 'PUBLIC' },
+              { visibility: 'PRIVATE', assignedUserId: 'user-1' },
+            ],
+          }),
+        }),
+      );
+    });
+
+    it('should fall back to PUBLIC only when the auth0 user has no DB row', async () => {
+      mockPrismaService.user.findUnique.mockResolvedValue(null);
+
+      await service.findAll({ auth0Id: 'auth0|inconnu' });
+
+      expect(prisma.pack.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({ visibility: 'PUBLIC' }),
+        }),
+      );
+    });
+
+    it('should not restrict visibility for an admin view', async () => {
+      await service.findAll({ isAdmin: true, includeInactive: true });
+
+      const where = mockPrismaService.pack.findMany.mock.calls[0][0].where;
+      expect(where.visibility).toBeUndefined();
+      expect(where.OR).toBeUndefined();
+      expect(where.isActive).toBeUndefined();
+    });
+
+    it('should apply type and isFree filters', async () => {
+      await service.findAll({ type: 'VISITEUR', isFree: true });
+
+      expect(prisma.pack.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({ type: 'VISITEUR', isFree: true }),
+        }),
+      );
+    });
+  });
+
+  describe('findOne — accès aux packs privés', () => {
+    const privatePack = {
+      id: 'pack-1',
+      visibility: 'PRIVATE',
+      assignedUserId: 'user-assigned',
+    };
+
+    beforeEach(() => {
+      mockPrismaService.pack.findUnique.mockResolvedValue(privatePack);
+    });
+
+    it('should throw NotFound for a viewer who is not the assigned user', async () => {
+      mockPrismaService.user.findUnique.mockResolvedValue({ id: 'user-other' });
+
+      await expect(
+        service.findOne('pack-1', { auth0Id: 'auth0|other', isAdmin: false }),
+      ).rejects.toThrow('Pack non trouvé');
+    });
+
+    it('should throw NotFound for an anonymous viewer', async () => {
+      await expect(
+        service.findOne('pack-1', { isAdmin: false }),
+      ).rejects.toThrow('Pack non trouvé');
+    });
+
+    it('should return the pack to the assigned user', async () => {
+      mockPrismaService.user.findUnique.mockResolvedValue({
+        id: 'user-assigned',
+      });
+
+      const result = await service.findOne('pack-1', {
+        auth0Id: 'auth0|assigned',
+        isAdmin: false,
+      });
+
+      expect(result).toEqual(privatePack);
+    });
+
+    it('should return the pack to an admin viewer', async () => {
+      const result = await service.findOne('pack-1', {
+        auth0Id: 'auth0|admin',
+        isAdmin: true,
+      });
+
+      expect(result).toEqual(privatePack);
+    });
+
+    it('should return a PUBLIC pack to any viewer', async () => {
+      const publicPack = {
+        id: 'pack-2',
+        visibility: 'PUBLIC',
+        assignedUserId: null,
+      };
+      mockPrismaService.pack.findUnique.mockResolvedValue(publicPack);
+
+      const result = await service.findOne('pack-2', { isAdmin: false });
+
+      expect(result).toEqual(publicPack);
+    });
+
+    it('should keep internal calls (no viewer) unrestricted', async () => {
+      const result = await service.findOne('pack-1');
+
+      expect(result).toEqual(privatePack);
+    });
+  });
+
   describe('create', () => {
     const baseDto = {
       categoryId: 'cat-1',
