@@ -85,6 +85,40 @@ NEXTAUTH_URL=https://app.ipf.com           # URL publique Next.js
 - Callback : `https://app.ipf.com/api/auth/callback`
 - Logout : `https://app.ipf.com`
 
+### Modèle d'autorisation (RBAC)
+
+Un **nouvel inscrit n'a aucun rôle Auth0** → son access token sort avec
+`permissions: []`. Le code est conçu en conséquence :
+
+- Endpoints **utilisateur** (quiz, profile, progression, leaderboard,
+  subscription) : authentification seule (`AuthGuard`). Les tiers
+  Visiteur/Apprenti/Compagnon/Réussite sont appliqués **en base** via
+  `Subscription` (checks `isPremium` dans les services), pas via Auth0.
+- Endpoints **admin/écriture** : `PermissionsGuard` + `@Permissions(...)`
+  (`read:admin`, `manage:users`, `write:questions`). Ces permissions viennent
+  des rôles Auth0 → **assigner manuellement le rôle Admin** aux comptes admin
+  dans Auth0 Dashboard (User Management → Users → Roles).
+
+**Optionnel (défense en profondeur)** : attribuer automatiquement un rôle par
+défaut à l'inscription via une Auth0 **Post-Login Action** (Actions → Flows →
+Login) avec un client M2M autorisé sur la Management API :
+
+```js
+exports.onExecutePostLogin = async (event, api) => {
+  if (event.authorization?.roles?.length) return; // déjà un rôle
+  const ManagementClient = require('auth0').ManagementClient;
+  const mgmt = new ManagementClient({
+    domain: event.secrets.DOMAIN,
+    clientId: event.secrets.M2M_CLIENT_ID,
+    clientSecret: event.secrets.M2M_CLIENT_SECRET,
+  });
+  await mgmt.users.assignRoles(
+    { id: event.user.user_id },
+    { roles: [event.secrets.DEFAULT_ROLE_ID] }, // rôle "User" avec read:quiz
+  );
+};
+```
+
 ---
 
 ## 🗄️ Base de données / Redis

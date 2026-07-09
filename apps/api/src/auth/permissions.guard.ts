@@ -1,4 +1,9 @@
-import { CanActivate, ExecutionContext, Injectable, ForbiddenException } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  ForbiddenException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PERMISSIONS_KEY } from './permissions.decorator';
 
@@ -20,7 +25,9 @@ export class PermissionsGuard implements CanActivate {
     const user = request.user;
 
     if (!user || !user.permissions) {
-      throw new ForbiddenException('Permissions insuffisantes — pas de user ou permissions dans le token');
+      throw new ForbiddenException(
+        'Permissions insuffisantes — pas de user ou permissions dans le token',
+      );
     }
 
     const hasPermission = requiredPermissions.every((permission) =>
@@ -29,7 +36,7 @@ export class PermissionsGuard implements CanActivate {
 
     if (!hasPermission) {
       throw new ForbiddenException(
-        `Permissions insuffisantes — requis: [${requiredPermissions}], reçu: [${user.permissions}]`,
+        `Permissions insuffisantes — requis: [${requiredPermissions.join(', ')}]`,
       );
     }
 

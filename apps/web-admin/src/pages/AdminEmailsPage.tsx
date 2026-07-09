@@ -1,18 +1,21 @@
 import { useAdminEmails } from '../hooks/useAdminMarketing';
 import { Mail, Send, Eye, Users } from 'lucide-react';
+import { PageHero } from '../components/admin/PageHero';
+import { enterAt } from '../lib/utils';
 
 export function AdminEmailsPage() {
   const { templates, isLoading } = useAdminEmails();
 
   return (
-    <div className="flex-1 p-8 bg-[#F8F5F1] min-h-screen">
-      <div className="mb-8">
-        <h1 className="text-[28px] font-black text-[#172E42] mb-1">Campagnes Email</h1>
-        <p className="text-[14px] font-semibold text-[#5a7a99]">Communication et marketing direct</p>
-      </div>
+    <div className="flex-1 p-8 bg-cream min-h-screen">
+      <PageHero
+        eyebrow="Marketing"
+        title="Campagnes Email"
+        subtitle="Communication et marketing direct"
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-white p-8 rounded-[32px] shadow-soft border border-ink-100">
+        <div className="bg-white p-8 rounded-[32px] shadow-soft border border-ink-100 motion-safe:animate-fade-in-up" style={enterAt(120)}>
           <h3 className="text-[18px] font-black text-[#172E42] mb-6 flex items-center gap-2">
             <Mail size={20} className="text-[#D27A2D]" /> Templates disponibles
           </h3>
@@ -39,9 +42,14 @@ export function AdminEmailsPage() {
           </div>
         </div>
 
-        <div className="bg-navy p-8 rounded-[32px] text-white shadow-card">
-          <h3 className="text-[18px] font-black mb-6 flex items-center gap-2">
-            <Users size={20} className="text-[#D27A2D]" /> Envoi par segment
+        <div
+          className="relative overflow-hidden bg-gradient-hero p-8 rounded-[32px] text-white shadow-card
+            motion-safe:animate-fade-in-up"
+          style={enterAt(200)}
+        >
+          <div aria-hidden className="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
+          <h3 className="relative text-[18px] font-black mb-6 flex items-center gap-2">
+            <Users size={20} className="text-primary-light" /> Envoi par segment
           </h3>
           <p className="text-[14px] font-semibold text-white/70 mb-8 leading-relaxed">
             Envoyez une campagne de communication à un groupe ciblé d'utilisateurs en un clic.

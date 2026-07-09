@@ -3,10 +3,13 @@ import { useAuth0 } from '@auth0/auth0-react';
 import { useAdminPacks } from '../hooks/useAdminPacks';
 import { Package, Plus, Edit2, Trash2, Globe, Lock, User, Clock } from 'lucide-react';
 import { PackModal } from '../components/admin/PackModal';
+import { PageHero } from '../components/admin/PageHero';
+import { enterAt } from '../lib/utils';
 import { packsService } from '../services/packs.service';
 import { ENV } from '../lib/env';
 import { AUTH0_SCOPE } from '../lib/auth0';
 import type { IPack, IPackFormData } from '../lib/types';
+import { PACK_STATUS_LABELS } from '../lib/types';
 
 export function AdminPacksPage() {
   const { getAccessTokenSilently } = useAuth0();
@@ -51,24 +54,30 @@ export function AdminPacksPage() {
   };
 
   return (
-    <div className="flex-1 p-8 bg-[#F8F5F1] min-h-screen">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-[28px] font-black text-[#172E42] mb-1">Catalogue des Packs</h1>
-          <p className="text-[14px] font-semibold text-[#5a7a99]">Créez des parcours publics ou du coaching sur mesure</p>
-        </div>
-        <button 
-          onClick={handleCreate}
-          className="h-[52px] px-8 rounded-[20px] bg-navy text-white font-black text-[15px] flex items-center gap-3 hover:bg-black shadow-lg shadow-navy/20 transition-all active:scale-95"
-        >
-          <Plus size={20} /> Nouveau pack custom
-        </button>
-      </div>
+    <div className="flex-1 p-8 bg-cream min-h-screen">
+      <PageHero
+        eyebrow="Catalogue"
+        title="Catalogue des Packs"
+        subtitle="Créez des parcours publics ou du coaching sur mesure"
+        actions={
+          <button
+            onClick={handleCreate}
+            className="h-[52px] px-8 rounded-[20px] border-none bg-gradient-primary text-white font-black text-[15px]
+              flex items-center gap-3 cursor-pointer shadow-primary transition-transform
+              motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.97]"
+          >
+            <Plus size={20} aria-hidden /> Nouveau pack custom
+          </button>
+        }
+      />
 
-      <div className="bg-white rounded-[32px] shadow-soft border border-ink-100 overflow-hidden">
+      <div
+        className="bg-white rounded-[32px] shadow-soft border border-ink-100 overflow-hidden motion-safe:animate-fade-in-up"
+        style={enterAt(120)}
+      >
         <table className="w-full border-collapse">
           <thead>
-            <tr className="bg-gray-50/50 border-b border-gray-100">
+            <tr className="border-b border-ink-100">
               <th className="px-6 py-5 text-left text-[11px] font-black uppercase tracking-wider text-[#5a7a99]">Identité du Pack</th>
               <th className="px-6 py-5 text-left text-[11px] font-black uppercase tracking-wider text-[#5a7a99]">Ciblage / Visibilité</th>
               <th className="px-6 py-5 text-left text-[11px] font-black uppercase tracking-wider text-[#5a7a99]">Config Quiz</th>
@@ -129,10 +138,18 @@ export function AdminPacksPage() {
                   </div>
                 </td>
                 <td className="px-6 py-5">
-                  <div className="flex items-center gap-2">
-                    <span className={`w-2.5 h-2.5 rounded-full ${pack.isActive ? 'bg-[#10B981] shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'bg-red-400'}`} />
-                    <span className="text-[12px] font-black text-navy uppercase tracking-wider">{pack.isActive ? 'Actif' : 'Masqué'}</span>
-                  </div>
+                  {(() => {
+                    const status = pack.status || (pack.isActive ? 'ACTIVE' : 'DISABLED');
+                    const dotClass = status === 'ACTIVE'
+                      ? 'bg-[#10B981] shadow-[0_0_10px_rgba(16,185,129,0.5)]'
+                      : status === 'SUSPENDED' ? 'bg-orange-400' : 'bg-red-400';
+                    return (
+                      <div className="flex items-center gap-2">
+                        <span className={`w-2.5 h-2.5 rounded-full ${dotClass}`} />
+                        <span className="text-[12px] font-black text-navy uppercase tracking-wider">{PACK_STATUS_LABELS[status]}</span>
+                      </div>
+                    );
+                  })()}
                 </td>
                 <td className="px-6 py-5 text-right">
                   <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">

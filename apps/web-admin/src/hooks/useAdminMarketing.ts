@@ -4,35 +4,89 @@ import { apiRequest } from '../lib/api';
 import { ENV } from '../lib/env';
 import { AUTH0_SCOPE } from '../lib/auth0';
 
-export function useAdminPlans() {
-  const { getAccessTokenSilently, isAuthenticated } = useAuth0();
-  const [plans, setPlans] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+export interface IPlan {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  price: number;
+  currency: string;
+  intervalMonths: number;
+  features: string[] | null;
+  isActive: boolean;
+  order: number;
+  _count: { subscriptions: number };
+}
 
-  const loadPlans = useCallback(async () => {
-    if (!isAuthenticated) return;
+export interface IPlanFormData {
+  name: string;
+  slug: string;
+  description?: string;
+  price: number;
+  intervalMonths: number;
+  features: string[];
+  isActive: boolean;
+  order: number;
+}
+
+export function useAdminPlans() {
+  const { getAccessTokenSilently } = useAuth0();
+  const [plans, setPlans] = useState<IPlan[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const getToken = useCallback(async () => {
+    return getAccessTokenSilently({
+      authorizationParams: {
+        audience: ENV.auth0Audience,
+        scope: AUTH0_SCOPE,
+      },
+    });
+  }, [getAccessTokenSilently]);
+
+  const refresh = useCallback(async () => {
     setIsLoading(true);
     try {
-      const token = await getAccessTokenSilently({
-        authorizationParams: {
-          audience: ENV.auth0Audience,
-          scope: AUTH0_SCOPE,
-        },
-      });
-      const data = await apiRequest<any[]>('/admin/plans', token);
+      const token = await getToken();
+      const data = await apiRequest<IPlan[]>('/admin/plans', token);
       setPlans(data);
     } catch (err) {
-      console.error(err);
+      console.error('[useAdminPlans] Failed to load plans:', err);
     } finally {
       setIsLoading(false);
     }
-  }, [isAuthenticated, getAccessTokenSilently]);
+  }, [getToken]);
 
   useEffect(() => {
-    loadPlans();
-  }, [loadPlans]);
+    refresh();
+  }, [refresh]);
 
-  return { plans, isLoading, refresh: loadPlans };
+  const createPlan = useCallback(async (data: IPlanFormData) => {
+    const token = await getToken();
+    await apiRequest('/admin/plans', token, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+    await refresh();
+  }, [getToken, refresh]);
+
+  const updatePlan = useCallback(async (id: string, data: Partial<IPlanFormData>) => {
+    const token = await getToken();
+    await apiRequest(`/admin/plans/${id}`, token, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+    await refresh();
+  }, [getToken, refresh]);
+
+  const deletePlan = useCallback(async (id: string) => {
+    const token = await getToken();
+    await apiRequest(`/admin/plans/${id}`, token, {
+      method: 'DELETE',
+    });
+    await refresh();
+  }, [getToken, refresh]);
+
+  return { plans, isLoading, refresh, createPlan, updatePlan, deletePlan };
 }
 
 export function useAdminEmails() {

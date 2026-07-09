@@ -12,13 +12,16 @@ export class DashboardController {
   constructor(private dashboardService: DashboardService) {}
 
   @Get('stats')
-  @ApiOperation({ summary: 'Statistiques globales de l\'utilisateur (sessions, réussite, XP, streak)' })
+  @ApiOperation({
+    summary:
+      "Statistiques globales de l'utilisateur (sessions, réussite, XP, streak)",
+  })
   getStats(@CurrentUser() user: any) {
     return this.dashboardService.getStats(user.userId);
   }
 
   @Get('achievements')
-  @ApiOperation({ summary: 'Achievements avec progression de l\'utilisateur' })
+  @ApiOperation({ summary: "Achievements avec progression de l'utilisateur" })
   getAchievements(@CurrentUser() user: any) {
     return this.dashboardService.getAchievements(user.userId);
   }

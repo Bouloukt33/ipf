@@ -51,18 +51,16 @@ export default function Timer({ duration, isRunning, onTimeout }: TimerProps) {
   const displayTime = Math.ceil(timeLeft);
 
   const colorClass =
-    timeLeft <= 1 ? 'stroke-red-600' : timeLeft <= 2 ? 'stroke-amber-500' : 'stroke-primary';
-  const pulseClass = timeLeft <= 1 ? 'animate-countdown-pulse' : '';
+    timeLeft <= 1 ? 'stroke-red-500' : timeLeft <= 2 ? 'stroke-amber-400' : 'stroke-primary';
+  const pulseClass = timeLeft <= 1 ? 'motion-safe:animate-countdown-pulse' : '';
 
   return (
     <div
-      className="relative w-[120px] h-[120px] mx-auto"
-      style={{ filter: 'drop-shadow(0 4px 12px rgba(210,122,45,0.25))' }}
+      className="relative w-[96px] h-[96px] sm:w-[120px] sm:h-[120px] mx-auto"
+      style={{ filter: 'drop-shadow(0 4px 14px rgba(210,122,45,0.35))' }}
     >
       <svg
-        className="-rotate-90"
-        width="120"
-        height="120"
+        className="-rotate-90 w-full h-full"
         viewBox="0 0 120 120"
       >
         <circle
@@ -70,7 +68,7 @@ export default function Timer({ duration, isRunning, onTimeout }: TimerProps) {
           cy="60"
           r={radius}
           fill="none"
-          stroke="rgba(210,122,45,0.15)"
+          stroke="rgba(255,255,255,0.1)"
           strokeWidth="8"
         />
         <circle
@@ -83,13 +81,13 @@ export default function Timer({ duration, isRunning, onTimeout }: TimerProps) {
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={offset}
-          style={{ transition: 'stroke-dashoffset 0.1s linear' }}
+          style={{ transition: 'stroke-dashoffset 0.1s linear, stroke 0.3s' }}
         />
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">
         <span
-          className={`text-4xl font-black ${
-            timeLeft <= 1 ? 'text-red-600' : timeLeft <= 2 ? 'text-amber-500' : 'text-navy'
+          className={`text-3xl sm:text-4xl font-black tabular-nums ${
+            timeLeft <= 1 ? 'text-red-400' : timeLeft <= 2 ? 'text-amber-300' : 'text-white'
           }`}
         >
           {displayTime}

@@ -22,7 +22,9 @@ export class CreatePackDto {
   @IsString()
   name: string;
 
-  @ApiProperty({ description: 'Slug URL-friendly (ex: decouverte-bail-commercial)' })
+  @ApiProperty({
+    description: 'Slug URL-friendly (ex: decouverte-bail-commercial)',
+  })
   @IsString()
   slug: string;
 
@@ -34,13 +36,17 @@ export class CreatePackDto {
   @ApiPropertyOptional({
     enum: ['STANDARD', 'VISITEUR', 'PREMIUM'],
     default: 'STANDARD',
-    description: 'VISITEUR = onboarding gratuit, STANDARD = pack normal, PREMIUM = pack payant',
+    description:
+      'VISITEUR = onboarding gratuit, STANDARD = pack normal, PREMIUM = pack payant',
   })
   @IsOptional()
   @IsEnum(['STANDARD', 'VISITEUR', 'PREMIUM'])
   type?: 'STANDARD' | 'VISITEUR' | 'PREMIUM';
 
-  @ApiPropertyOptional({ description: 'Pack accessible gratuitement', default: false })
+  @ApiPropertyOptional({
+    description: 'Pack accessible gratuitement',
+    default: false,
+  })
   @IsOptional()
   @IsBoolean()
   isFree?: boolean;
@@ -64,31 +70,50 @@ export class CreatePackDto {
   @IsBoolean()
   isActive?: boolean;
 
+  @ApiPropertyOptional({
+    enum: ['ACTIVE', 'SUSPENDED', 'DISABLED'],
+    default: 'ACTIVE',
+    description:
+      'Statut du pack : ACTIVE = visible et jouable, SUSPENDED = suspendu temporairement, DISABLED = désactivé',
+  })
+  @IsOptional()
+  @IsEnum(['ACTIVE', 'SUSPENDED', 'DISABLED'])
+  status?: 'ACTIVE' | 'SUSPENDED' | 'DISABLED';
+
   @ApiPropertyOptional({ enum: ['PUBLIC', 'PRIVATE'], default: 'PUBLIC' })
   @IsOptional()
   @IsEnum(['PUBLIC', 'PRIVATE'])
   visibility?: 'PUBLIC' | 'PRIVATE';
 
-  @ApiPropertyOptional({ description: 'ID de l\'utilisateur assigné (pour packs privés)' })
+  @ApiPropertyOptional({
+    description: "ID de l'utilisateur assigné (pour packs privés)",
+  })
   @IsOptional()
   @IsString()
   assignedUserId?: string;
 
-  @ApiPropertyOptional({ description: 'Temps imposé par question (en secondes)' })
+  @ApiPropertyOptional({
+    description: 'Temps imposé par question (en secondes)',
+  })
   @IsOptional()
   @IsNumber()
   @Min(5)
   @Type(() => Number)
   durationOverride?: number;
 
-  @ApiPropertyOptional({ description: 'Nombre de questions à jouer dans une session' })
+  @ApiPropertyOptional({
+    description: 'Nombre de questions à jouer dans une session',
+  })
   @IsOptional()
   @IsNumber()
   @Min(1)
   @Type(() => Number)
   targetQuestionCount?: number;
 
-  @ApiPropertyOptional({ description: 'IDs des questions à associer', type: [String] })
+  @ApiPropertyOptional({
+    description: 'IDs des questions à associer',
+    type: [String],
+  })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
@@ -147,6 +172,15 @@ export class UpdatePackDto {
   @IsBoolean()
   isActive?: boolean;
 
+  @ApiPropertyOptional({
+    enum: ['ACTIVE', 'SUSPENDED', 'DISABLED'],
+    description:
+      'Statut du pack : ACTIVE = visible et jouable, SUSPENDED = suspendu temporairement, DISABLED = désactivé',
+  })
+  @IsOptional()
+  @IsEnum(['ACTIVE', 'SUSPENDED', 'DISABLED'])
+  status?: 'ACTIVE' | 'SUSPENDED' | 'DISABLED';
+
   @ApiPropertyOptional({ enum: ['PUBLIC', 'PRIVATE'] })
   @IsOptional()
   @IsEnum(['PUBLIC', 'PRIVATE'])
@@ -171,7 +205,10 @@ export class UpdatePackDto {
   @Type(() => Number)
   targetQuestionCount?: number;
 
-  @ApiPropertyOptional({ description: 'IDs des questions à associer', type: [String] })
+  @ApiPropertyOptional({
+    description: 'IDs des questions à associer',
+    type: [String],
+  })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
@@ -181,7 +218,10 @@ export class UpdatePackDto {
 // ── Add Questions ────────────────────────────────────────────────────────────
 
 export class AddQuestionsDto {
-  @ApiProperty({ description: 'IDs des questions à associer au pack', type: [String] })
+  @ApiProperty({
+    description: 'IDs des questions à associer au pack',
+    type: [String],
+  })
   @IsArray()
   @IsString({ each: true })
   questionIds: string[];

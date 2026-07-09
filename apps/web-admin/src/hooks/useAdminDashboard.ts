@@ -1,14 +1,17 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { adminService } from '../services/admin.service';
-import type { DashboardStats } from '../services/admin.service';
+import type { DashboardStats, RecentSession } from '../services/admin.service';
 import { ENV } from '../lib/env';
 import { AUTH0_SCOPE } from '../lib/auth0';
 
 export function useAdminDashboard() {
   const { getAccessTokenSilently, isAuthenticated } = useAuth0();
   const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [activity, setActivity] = useState<any>(null);
+  const [activity, setActivity] = useState<{
+    recentSessions: RecentSession[];
+    recentUsers: unknown[];
+  } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

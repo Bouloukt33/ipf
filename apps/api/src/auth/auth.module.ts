@@ -7,10 +7,7 @@ import { AuthService } from './auth.service';
 import { PrismaModule } from '../prisma';
 
 @Module({
-  imports: [
-    PassportModule.register({ defaultStrategy: 'jwt' }),
-    PrismaModule,
-  ],
+  imports: [PassportModule.register({ defaultStrategy: 'jwt' }), PrismaModule],
   controllers: [AuthController],
   providers: [JwtStrategy, AuthGuard, AuthService],
   exports: [PassportModule, AuthGuard, AuthService],

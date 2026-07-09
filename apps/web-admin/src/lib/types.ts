@@ -1,6 +1,7 @@
-export type QuestionStatus = 'ACTIVE' | 'SUSPENDED' | 'ARCHIVED';
-
-export type DifficultyLevel = 1 | 2 | 3 | 4;
+// Types canoniques partagés — définis dans packages/shared (@ipf/shared),
+// ré-exportés ici pour ne pas casser les imports existants.
+export type { QuestionStatus, DifficultyLevel, PackStatus } from '@ipf/shared';
+import type { QuestionStatus, DifficultyLevel, PackStatus } from '@ipf/shared';
 
 export type LeaseType =
     | 'COM'
@@ -41,6 +42,7 @@ export interface IPack {
     slug: string;
     description?: string | null;
     isActive: boolean;
+    status: PackStatus;
     categoryId: string;
     category?: ICategory | null;
     visibility: 'PUBLIC' | 'PRIVATE';
@@ -62,6 +64,7 @@ export interface IPackFormData {
     description?: string;
     categoryId: string;
     isActive: boolean;
+    status: PackStatus;
     visibility: 'PUBLIC' | 'PRIVATE';
     assignedUserId?: string | null;
     durationOverride?: number | null;
@@ -91,7 +94,7 @@ export interface IQuestion {
     themeId?: string | null;
     packId?: string | null;
     videoId?: string | null;
-    level: number;
+    level: DifficultyLevel;
     timeToRead?: number | null;
     isPremium: boolean;
     isActive: boolean;
@@ -137,15 +140,4 @@ export interface IQuestionStats {
     premium: number;
 }
 
-export const DIFFICULTY_LABELS: Record<number, string> = {
-    1: 'Facile',
-    2: 'Moyen',
-    3: 'Difficile',
-    4: 'Étude de cas',
-};
-
-export const STATUS_LABELS: Record<QuestionStatus, string> = {
-    ACTIVE: 'Actif',
-    SUSPENDED: 'Suspendu',
-    ARCHIVED: 'Archivé',
-};
+export { DIFFICULTY_LABELS, STATUS_LABELS, PACK_STATUS_LABELS } from '@ipf/shared';
