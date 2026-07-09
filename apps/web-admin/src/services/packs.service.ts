@@ -10,6 +10,9 @@ export interface IPackFilters {
 export const packsService = {
     getAll: (token: string, filters?: Partial<IPackFilters>): Promise<IPack[]> => {
         const params = new URLSearchParams();
+        // Catalogue complet (packs privés de tous les users, inactifs inclus)
+        // — exige la permission write:questions côté API.
+        params.set('scope', 'admin');
         if (filters?.categoryId) params.set('categoryId', filters.categoryId);
         if (filters?.includeInactive) params.set('includeInactive', 'true');
         return apiRequest(`/packs?${params.toString()}`, token);

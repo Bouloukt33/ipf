@@ -18,7 +18,7 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
-import { PacksService } from './packs.service';
+import { PacksService, PackViewer } from './packs.service';
 import { CreatePackDto, UpdatePackDto, AddQuestionsDto } from './dto/packs.dto';
 import { AuthGuard, PermissionsGuard, Permissions } from '../auth';
 
@@ -29,11 +29,25 @@ import { AuthGuard, PermissionsGuard, Permissions } from '../auth';
 export class PacksController {
   constructor(private packsService: PacksService) {}
 
+  /**
+   * L'élévation admin s'appuie sur la permission Auth0 vérifiée côté serveur
+   * (la même que les routes d'écriture packs), jamais sur le claim de rôle.
+   */
+  private getViewer(req: any): PackViewer {
+    const permissions: string[] = req.user?.permissions || [];
+    return {
+      auth0Id: req.user?.userId,
+      isAdmin: permissions.includes('write:questions'),
+    };
+  }
+
   @Get()
   @ApiOperation({
     summary: 'Lister les packs',
     description:
-      'Filtres par catégorie, type, gratuité. Admin voit tout, User voit public + assigné.',
+      'Filtres par catégorie, type, gratuité. User voit public + assigné. ' +
+      'Le catalogue complet (packs privés de tous, inactifs inclus) exige ' +
+      'scope=admin ET la permission write:questions.',
   })
   @ApiQuery({ name: 'categoryId', required: false })
   @ApiQuery({
@@ -43,6 +57,7 @@ export class PacksController {
   })
   @ApiQuery({ name: 'isFree', required: false, type: Boolean })
   @ApiQuery({ name: 'includeInactive', required: false, type: Boolean })
+  @ApiQuery({ name: 'scope', required: false, enum: ['admin'] })
   @ApiResponse({ status: 200, description: 'Liste des packs' })
   async findAll(
     @Request() req: any,
@@ -50,18 +65,18 @@ export class PacksController {
     @Query('type') type?: string,
     @Query('isFree') isFree?: string,
     @Query('includeInactive') includeInactive?: string,
+    @Query('scope') scope?: string,
   ) {
-    const user = req.user;
-    const roles = (user?.roles || []).map((r: string) => r.toLowerCase());
-    const isAdmin = roles.includes('admin');
+    const viewer = this.getViewer(req);
+    const adminView = scope === 'admin' && viewer.isAdmin;
 
     return this.packsService.findAll({
       categoryId,
       type,
       isFree: isFree !== undefined ? isFree === 'true' : undefined,
-      includeInactive: includeInactive === 'true',
-      auth0Id: user?.userId,
-      isAdmin,
+      includeInactive: adminView && includeInactive === 'true',
+      auth0Id: viewer.auth0Id,
+      isAdmin: adminView,
     });
   }
 
@@ -75,10 +90,15 @@ export class PacksController {
   @ApiResponse({ status: 200, description: 'Pack trouvé avec ses questions' })
   @ApiResponse({ status: 404, description: 'Pack non trouvé' })
   async findBySlug(
+    @Request() req: any,
     @Param('categorySlug') categorySlug: string,
     @Param('packSlug') packSlug: string,
   ) {
-    return this.packsService.findBySlug(categorySlug, packSlug);
+    return this.packsService.findBySlug(
+      categorySlug,
+      packSlug,
+      this.getViewer(req),
+    );
   }
 
   @Get(':id')
@@ -86,8 +106,8 @@ export class PacksController {
   @ApiParam({ name: 'id', description: 'ID du pack' })
   @ApiResponse({ status: 200, description: 'Pack trouvé avec ses questions' })
   @ApiResponse({ status: 404, description: 'Pack non trouvé' })
-  async findOne(@Param('id') id: string) {
-    return this.packsService.findOne(id);
+  async findOne(@Request() req: any, @Param('id') id: string) {
+    return this.packsService.findOne(id, this.getViewer(req));
   }
 
   @Post()
