@@ -1,0 +1,42 @@
+# =============================================================================
+# Render Blueprint — API NestJS (IPF - 5 Secondes Chrono)
+# =============================================================================
+# Déploie l'API sur le plan gratuit Render en réutilisant le Dockerfile du
+# monorepo (contexte racine, migrations Prisma fail-fast au démarrage).
+#
+# La base Postgres vit sur Neon (le Postgres gratuit de Render expire après
+# 30 jours) : DATABASE_URL pointe vers la connection string Neon DIRECTE
+# (non poolée), requise pour `prisma migrate deploy`.
+#
+# Les variables `sync: false` sont à saisir dans le dashboard Render au
+# premier déploiement — voir docs/DEPLOYMENT.md.
+# =============================================================================
+
+services:
+  - type: web
+    name: ipf-api
+    plan: free
+    runtime: docker
+    dockerfilePath: ./apps/api/Dockerfile
+    dockerContext: .
+    autoDeploy: true
+    # Route publique (AppController.getHello) — évite de compter les 404
+    # comme des échecs de santé.
+    healthCheckPath: /api
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3000"
+      - key: DATABASE_URL # connection string Neon (directe, sslmode=require)
+        sync: false
+      - key: AUTH0_DOMAIN
+        sync: false
+      - key: AUTH0_AUDIENCE
+        sync: false
+      - key: AUTH0_CLIENT_ID
+        sync: false
+      - key: AUTH0_CONNECTION
+        value: Username-Password-Authentication
+      - key: CORS_ORIGINS # origines Vercel, séparées par des virgules
+        sync: false
