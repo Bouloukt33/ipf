@@ -15,13 +15,20 @@ async function bootstrap() {
   // Corps JSON jusqu'à 2 Mo : nécessaire pour l'import CSV de questions
   app.useBodyParser('json', { limit: '2mb' });
 
-  // Configuration CORS pour autoriser les requêtes depuis les frontends
+  // Configuration CORS pour autoriser les requêtes depuis les frontends.
+  // En déploiement, CORS_ORIGINS liste les origines autorisées (séparées
+  // par des virgules) ; sans elle, on retombe sur les origines locales.
+  const corsOrigins = process.env.CORS_ORIGINS
+    ? process.env.CORS_ORIGINS.split(',')
+        .map((origin) => origin.trim())
+        .filter(Boolean)
+    : [
+        'http://localhost:3001', // web-app (Next.js)
+        'http://localhost:3002', // web-admin (Docker)
+        'http://localhost:5173', // web-admin (Vite local)
+      ];
   app.enableCors({
-    origin: [
-      'http://localhost:3001', // web-app (Next.js)
-      'http://localhost:3002', // web-admin (Docker)
-      'http://localhost:5173', // web-admin (Vite local)
-    ],
+    origin: corsOrigins,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
     credentials: true,
