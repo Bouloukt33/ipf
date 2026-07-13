@@ -6,6 +6,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    rawBody: true, // Nécessaire pour vérifier la signature des webhooks Stripe
     logger:
       process.env.NODE_ENV === 'production'
         ? ['error', 'warn']

@@ -93,12 +93,15 @@ export default function SubscriptionPage() {
         setError(null)
 
         try {
-            // Simulate payment processing delay
-            await new Promise(resolve => setTimeout(resolve, 1500))
+            const result = await api.payment.checkout(selectedPlan.slug)
 
-            // Call backend to activate subscription
-            await api.subscription.subscribe(selectedPlan.slug)
+            // Mode Stripe réel : rediriger vers Stripe Checkout
+            if (!result.simulationMode && result.checkoutUrl) {
+                window.location.href = result.checkoutUrl
+                return
+            }
 
+            // Mode simulation : abonnement activé directement
             setStep('success')
         } catch (err: any) {
             logger.error('Subscription failed', err)
@@ -189,6 +192,16 @@ export default function SubscriptionPage() {
                     {/* Payment form */}
                     <form onSubmit={handleSubmitPayment} className="space-y-6">
                         <h2 className="text-2xl font-extrabold text-navy mb-6">Informations de paiement</h2>
+
+                        {/* Bannière mode simulation */}
+                        <div className="flex items-center gap-3 p-4 bg-amber-50 border-2 border-amber-200 rounded-xl">
+                            <svg className="w-5 h-5 text-amber-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                            </svg>
+                            <p className="text-sm font-semibold text-amber-700">
+                                <span className="font-black">Mode démonstration</span> — Aucun paiement réel ne sera effectué.
+                            </p>
+                        </div>
 
                         {error && (
                             <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm font-semibold">

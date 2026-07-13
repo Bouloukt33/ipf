@@ -237,12 +237,6 @@ export interface SubscriptionStatus {
   } | null;
 }
 
-export interface SubscribeResponse {
-  success: boolean;
-  plan: { name: string; slug: string };
-  subscription: { startDate: string; endDate: string; status: string };
-}
-
 export const api = {
   quiz: {
     start: (payload: StartSessionPayload) =>
@@ -294,11 +288,26 @@ export const api = {
   subscription: {
     getPlans: () => request<SubscriptionPlan[]>('/subscription/plans'),
     getStatus: () => request<SubscriptionStatus>('/subscription/status'),
-    subscribe: (planSlug: string) =>
-      request<SubscribeResponse>('/subscription/subscribe', {
+  },
+
+  payment: {
+    checkout: (planSlug: string) =>
+      request<{
+        simulationMode: boolean;
+        success?: boolean;
+        checkoutUrl?: string;
+        plan?: { name: string; slug: string };
+        subscription?: { startDate: string; endDate: string; status: string };
+      }>('/payment/checkout', {
         method: 'POST',
         body: JSON.stringify({ planSlug }),
       }),
+    cancel: () =>
+      request<{ success: boolean; message: string }>('/payment/cancel', {
+        method: 'POST',
+      }),
+    getMode: () =>
+      request<{ simulationMode: boolean }>('/payment/mode'),
   },
 
   reference: {

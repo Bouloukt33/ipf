@@ -1,81 +1,9 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma';
-
-// Plan slugs matching the seed data
-const VALID_PLAN_SLUGS = ['apprenti', 'compagnon', 'reussite'];
 
 @Injectable()
 export class SubscriptionService {
   constructor(private prisma: PrismaService) {}
-
-  /**
-   * Subscribe user to a plan (simulated payment)
-   * In production, this would integrate with Stripe/PayPal
-   */
-  async subscribe(auth0Id: string, planSlug: string) {
-    if (!VALID_PLAN_SLUGS.includes(planSlug)) {
-      throw new BadRequestException('Plan invalide');
-    }
-
-    const user = await this.prisma.user.findUnique({
-      where: { auth0Id },
-      include: { subscription: true },
-    });
-
-    if (!user) {
-      throw new NotFoundException('Utilisateur non trouvé');
-    }
-
-    const plan = await this.prisma.plan.findUnique({
-      where: { slug: planSlug },
-    });
-
-    if (!plan || !plan.isActive) {
-      throw new NotFoundException('Plan non disponible');
-    }
-
-    // Calculate subscription period
-    const now = new Date();
-    const periodEnd = new Date(now);
-    periodEnd.setMonth(periodEnd.getMonth() + plan.intervalMonths);
-
-    // Create or update subscription (upsert based on userId)
-    await this.prisma.subscription.upsert({
-      where: { userId: user.id },
-      update: {
-        planId: plan.id,
-        status: 'ACTIVE',
-        currentPeriodStart: now,
-        currentPeriodEnd: periodEnd,
-        cancelAtPeriodEnd: false,
-        canceledAt: null,
-      },
-      create: {
-        userId: user.id,
-        planId: plan.id,
-        status: 'ACTIVE',
-        currentPeriodStart: now,
-        currentPeriodEnd: periodEnd,
-      },
-    });
-
-    return {
-      success: true,
-      plan: {
-        name: plan.name,
-        slug: plan.slug,
-      },
-      subscription: {
-        startDate: now,
-        endDate: periodEnd,
-        status: 'ACTIVE',
-      },
-    };
-  }
 
   /**
    * Get available subscription plans

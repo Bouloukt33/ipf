@@ -15,6 +15,7 @@ import { LeaderboardModule } from './leaderboard';
 import { ProgressionModule } from './progression';
 import { PacksModule } from './packs';
 import { SubscriptionModule } from './subscription';
+import { PaymentModule } from './payment';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { SubscriptionModule } from './subscription';
     ProgressionModule,
     PacksModule,
     SubscriptionModule,
+    PaymentModule,
   ],
   controllers: [AppController],
   providers: [AppService],
