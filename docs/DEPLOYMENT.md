@@ -85,6 +85,7 @@ dans `apps/web-admin/vercel.json`).
 | Variable | Valeur |
 |---|---|
 | `NEXT_PUBLIC_APP_URL` | `https://ipf-web-app.vercel.app` |
+| `NEXT_PUBLIC_API_URL` | `https://<api>.onrender.com` (sans `/api` final) — utilisé côté serveur pour récupérer les plans d'abonnement affichés sur la landing |
 
 ## 4. Auth0 — URLs à ajouter (application existante)
 

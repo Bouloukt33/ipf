@@ -10,12 +10,11 @@ import { SubscriptionService } from './subscription.service';
 import { AuthGuard, CurrentUser } from '../auth';
 
 @ApiTags('Subscription')
-@ApiBearerAuth()
 @Controller('subscription')
-@UseGuards(AuthGuard)
 export class SubscriptionController {
   constructor(private subscriptionService: SubscriptionService) {}
 
+  // Endpoint public - pas d'AuthGuard (consommé par la landing)
   @Get('plans')
   @ApiOperation({
     summary: 'Liste des plans',
@@ -27,6 +26,8 @@ export class SubscriptionController {
   }
 
   @Get('status')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   @ApiOperation({
     summary: 'Statut abonnement',
     description: "Retourne le statut d'abonnement de l'utilisateur connecté",
@@ -37,6 +38,8 @@ export class SubscriptionController {
   }
 
   @Post('subscribe')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   @ApiOperation({
     summary: 'Souscrire à un plan',
     description: "Souscrit l'utilisateur au plan spécifié (paiement simulé)",

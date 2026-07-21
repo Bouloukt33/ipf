@@ -5,15 +5,18 @@ import Features from '@/components/Features';
 import Pricing from '@/components/Pricing';
 import CtaBanner from '@/components/CtaBanner';
 import Footer from '@/components/Footer';
+import { getPlans } from '@/lib/plans';
 
-export default function Home() {
+export default async function Home() {
+    const plans = await getPlans();
+
     return (
         <div className="min-h-screen font-nunito overflow-x-hidden">
             <Navbar />
             <Hero />
             <Stats />
             <Features />
-            <Pricing />
+            <Pricing plans={plans} />
             <CtaBanner />
             <Footer />
         </div>
