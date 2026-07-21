@@ -110,6 +110,7 @@ services:
     environment:
       NODE_ENV: production
       NEXT_PUBLIC_APP_URL: ${APP_BASE_URL}
+      API_INTERNAL_URL: http://api:3000
     networks:
       - ipf-network
 

@@ -8,6 +8,18 @@ import { PrismaService } from '../prisma';
 // Plan slugs matching the seed data
 const VALID_PLAN_SLUGS = ['apprenti', 'compagnon', 'reussite'];
 
+// `features` est stocké en base comme une chaîne JSON (JSON.stringify d'un tableau)
+function parseFeatures(features: unknown): string[] {
+  if (!features) return [];
+  if (Array.isArray(features)) return features as string[];
+  try {
+    const parsed: unknown = JSON.parse(features as string);
+    return Array.isArray(parsed) ? (parsed as string[]) : [];
+  } catch {
+    return [];
+  }
+}
+
 @Injectable()
 export class SubscriptionService {
   constructor(private prisma: PrismaService) {}
@@ -81,17 +93,24 @@ export class SubscriptionService {
    * Get available subscription plans
    */
   async getPlans() {
-    return this.prisma.plan.findMany({
+    const plans = await this.prisma.plan.findMany({
       where: { isActive: true },
       orderBy: { order: 'asc' },
       select: {
         id: true,
         name: true,
         slug: true,
+        description: true,
         price: true,
         features: true,
       },
     });
+
+    return plans.map((plan) => ({
+      ...plan,
+      price: Number(plan.price),
+      features: parseFeatures(plan.features),
+    }));
   }
 
   /**
